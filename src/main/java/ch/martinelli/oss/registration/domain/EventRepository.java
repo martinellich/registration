@@ -2,9 +2,7 @@ package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.jooqspring.JooqDAO;
 import ch.martinelli.oss.registration.db.tables.Event;
-import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
-import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 

@@ -1,10 +1,7 @@
 package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.jooqspring.JooqDAO;
-import ch.martinelli.oss.registration.db.tables.Event;
 import ch.martinelli.oss.registration.db.tables.Registration;
-import ch.martinelli.oss.registration.db.tables.RegistrationView;
-import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
 import org.jooq.Condition;
