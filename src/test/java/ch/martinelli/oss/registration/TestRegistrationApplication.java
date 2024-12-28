@@ -1,6 +1,5 @@
-package ch.maritnelli.oss.registration;
+package ch.martinelli.oss.registration;
 
-import ch.martinelli.oss.registration.RegistrationApplication;
 import org.springframework.boot.SpringApplication;
 
 public class TestRegistrationApplication {
