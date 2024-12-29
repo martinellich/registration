@@ -46,8 +46,8 @@ import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION
 @RolesAllowed("ADMIN")
 public class RegistrationView extends Div implements BeforeEnterObserver {
 
-    private final String REGISTRATION_ID = "registrationID";
-    private final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
+    private static final String REGISTRATION_ID = "registrationID";
+    private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
 
     private final Grid<RegistrationRecord> grid = new Grid<>(RegistrationRecord.class, false);
 

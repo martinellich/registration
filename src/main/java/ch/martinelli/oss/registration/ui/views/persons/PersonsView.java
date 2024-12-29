@@ -34,8 +34,8 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 @RolesAllowed("ADMIN")
 public class PersonsView extends Div implements BeforeEnterObserver {
 
-    private final String PERSON_ID = "personID";
-    private final String PERSON_EDIT_ROUTE_TEMPLATE = "persons/%s/edit";
+    private static final String PERSON_ID = "personID";
+    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "persons/%s/edit";
 
     private final Grid<PersonRecord> grid = new Grid<>(PersonRecord.class, false);
 

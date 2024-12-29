@@ -33,8 +33,8 @@ import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 @RolesAllowed("ADMIN")
 public class EventsView extends Div implements BeforeEnterObserver {
 
-    private final String EVENT_ID = "eventID";
-    private final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
+    private static final String EVENT_ID = "eventID";
+    private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
 
     private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
 
