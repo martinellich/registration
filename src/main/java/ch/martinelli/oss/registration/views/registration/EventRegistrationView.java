@@ -45,7 +45,7 @@ public class EventRegistrationView extends Div {
         this.registrationRepository = registrationRepository;
 
         setSizeFull();
-        addClassNames("anmeldungen-view");
+        addClassNames("event-registrations-view");
 
         filters = new Filters(this::refreshGrid);
         VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());

@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.views.persons;
 
-import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
@@ -25,6 +24,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
+
+import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 
 @PageTitle("Jugeler")
 @Route("persons/:personID?/:action?(edit)")
@@ -63,21 +64,21 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(PersonRecord::getLastName)
-                .setSortable(true).setSortProperty(Person.PERSON.LAST_NAME.getName())
+                .setSortable(true).setSortProperty(PERSON.LAST_NAME.getName())
                 .setHeader("Nachname").setAutoWidth(true);
         grid.addColumn(PersonRecord::getFirstName)
-                .setSortable(true).setSortProperty(Person.PERSON.FIRST_NAME.getName())
+                .setSortable(true).setSortProperty(PERSON.FIRST_NAME.getName())
                 .setHeader("Vornamen").setAutoWidth(true);
         grid.addColumn(PersonRecord::getEmail)
-                .setSortable(true).setSortProperty(Person.PERSON.EMAIL.getName())
+                .setSortable(true).setSortProperty(PERSON.EMAIL.getName())
                 .setHeader("Email").setAutoWidth(true);
         grid.addColumn(PersonRecord::getDateOfBirth)
-                .setSortable(true).setSortProperty(Person.PERSON.DATE_OF_BIRTH.getName())
+                .setSortable(true).setSortProperty(PERSON.DATE_OF_BIRTH.getName())
                 .setHeader("Geburtsdatum").setAutoWidth(true);
 
         grid.setItems(query -> personRepository.findAll(
                         query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(Person.PERSON, query))
+                        VaadinJooqUtil.orderFields(PERSON, query))
                 .stream());
 
         // when a row is selected or deselected, populate form

@@ -1,8 +1,10 @@
 package ch.martinelli.oss.registration.views.registration;
 
-import ch.martinelli.oss.registration.db.tables.Event;
-import ch.martinelli.oss.registration.db.tables.Registration;
+import ch.martinelli.oss.registration.db.tables.records.EventRecord;
+import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import ch.martinelli.oss.registration.domain.EventRepository;
+import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
@@ -13,17 +15,27 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.RolesAllowed;
+import org.jooq.impl.DSL;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
+import java.util.List;
 import java.util.Optional;
+
+import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
+import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 
 @PageTitle("Tätigkeitsprogramm")
 @Route("registrations/:registrationID?/:action?(edit)")
@@ -44,11 +56,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private RegistrationRecord registration;
 
     private final RegistrationRepository registrationRepository;
+    private final EventRepository eventRepository;
+    private final PersonRepository personRepository;
 
-    public RegistrationView(RegistrationRepository registrationRepository) {
+    public RegistrationView(RegistrationRepository registrationRepository, EventRepository eventRepository,
+                            PersonRepository personRepository) {
         this.registrationRepository = registrationRepository;
+        this.eventRepository = eventRepository;
+        this.personRepository = personRepository;
 
-        addClassNames("events-view");
+        addClassNames("registrations-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -64,18 +81,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(RegistrationRecord::getId)
-                .setSortable(true).setSortProperty(Registration.REGISTRATION.ID.getName())
+                .setSortable(true).setSortProperty(REGISTRATION.ID.getName())
                 .setHeader("ID").setAutoWidth(true);
         grid.addColumn(RegistrationRecord::getOpenFrom)
-                .setSortable(true).setSortProperty(Registration.REGISTRATION.OPEN_FROM.getName())
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
                 .setHeader("Offen von").setAutoWidth(true);
         grid.addColumn(RegistrationRecord::getOpenFrom)
-                .setSortable(true).setSortProperty(Registration.REGISTRATION.OPEN_UNTIL.getName())
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
                 .setHeader("Offen bis").setAutoWidth(true);
 
         grid.setItems(query -> registrationRepository.findAll(
                         query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(Event.EVENT, query))
+                        VaadinJooqUtil.orderFields(EVENT, query))
                 .stream());
 
         // when a row is selected or deselected, populate form
@@ -133,7 +150,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
-        editorLayoutDiv.setWidthFull();
         editorLayoutDiv.setClassName("editor-layout");
 
         Div editorDiv = new Div();
@@ -153,8 +169,33 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
 
         formLayout.add(openFromDatePicker, openUntilDatePicker);
-
         editorDiv.add(formLayout);
+
+        editorDiv.add(new Hr());
+
+        FormLayout listBoxFormLayout = new FormLayout();
+        listBoxFormLayout.add(new H3("Anlässe"), new H3("Jugeler"));
+
+        MultiSelectListBox<EventRecord> eventListBox = new MultiSelectListBox<>();
+        eventListBox.setItemLabelGenerator(EventRecord::getTitle);
+        eventListBox.setItems(eventRepository.findAll(DSL.noCondition(), List.of(EVENT.TITLE)));
+
+        Scroller eventListBoxScroller = new Scroller(eventListBox);
+        eventListBoxScroller.addClassName("scroller");
+        eventListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+
+        MultiSelectListBox<PersonRecord> personListBox = new MultiSelectListBox<>();
+        personListBox.setItemLabelGenerator(p-> "%s %s".formatted(p.getLastName(), p.getFirstName()));
+        personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
+
+        Scroller personListBoxScroller = new Scroller(personListBox);
+        personListBoxScroller.addClassName("scroller");
+        personListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+
+        listBoxFormLayout.add(eventListBoxScroller, personListBoxScroller);
+
+        editorDiv.add(listBoxFormLayout);
+
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);

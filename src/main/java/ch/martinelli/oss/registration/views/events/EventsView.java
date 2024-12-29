@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.views.events;
 
-import ch.martinelli.oss.registration.db.tables.Event;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
@@ -25,6 +24,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
+
+import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 
 @PageTitle("Anlässe")
 @Route("events/:eventID?/:action?(edit)")
@@ -63,24 +64,24 @@ public class EventsView extends Div implements BeforeEnterObserver {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(EventRecord::getTitle)
-                .setSortable(true).setSortProperty(Event.EVENT.TITLE.getName())
+                .setSortable(true).setSortProperty(EVENT.TITLE.getName())
                 .setHeader("Titel").setAutoWidth(true);
         grid.addColumn(EventRecord::getDescription)
-                .setSortable(true).setSortProperty(Event.EVENT.DESCRIPTION.getName())
+                .setSortable(true).setSortProperty(EVENT.DESCRIPTION.getName())
                 .setHeader("Beschreibung").setAutoWidth(true);
         grid.addColumn(EventRecord::getLocation)
-                .setSortable(true).setSortProperty(Event.EVENT.LOCATION.getName())
+                .setSortable(true).setSortProperty(EVENT.LOCATION.getName())
                 .setHeader("Ort").setAutoWidth(true);
         grid.addColumn(EventRecord::getFromDate)
-                .setSortable(true).setSortProperty(Event.EVENT.FROM_DATE.getName())
+                .setSortable(true).setSortProperty(EVENT.FROM_DATE.getName())
                 .setHeader("von").setAutoWidth(true);
         grid.addColumn(EventRecord::getToDate)
-                .setSortable(true).setSortProperty(Event.EVENT.TO_DATE.getName())
+                .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
                 .setHeader("bis").setAutoWidth(true);
 
         grid.setItems(query -> eventRepository.findAll(
                         query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(Event.EVENT, query))
+                        VaadinJooqUtil.orderFields(EVENT, query))
                 .stream());
 
         // when a row is selected or deselected, populate form
