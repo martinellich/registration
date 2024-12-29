@@ -32,6 +32,7 @@ import org.jooq.impl.DSL;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -169,6 +170,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         binder.forField(yearIntegerField)
                 .asRequired()
                 .bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
+        yearIntegerField.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                loadEvents(yearIntegerField.getValue());
+                eventListBox.clear();
+            }
+        });
 
         DatePicker openFromDatePicker = new DatePicker("Offen von");
         binder.forField(openFromDatePicker)
@@ -246,11 +253,21 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             personListBox.setItems();
             personListBox.clear();
         } else {
-            eventListBox.setItems(eventRepository.findAll(DSL.noCondition(), List.of(EVENT.TITLE)));
+            loadEvents(this.registration.getYear());
             eventListBox.setValue(registrationService.findEventsByRegistration(this.registration.getId()));
 
             personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
             personListBox.setValue(registrationService.findPersonsByRegistration(this.registration.getId()));
         }
     }
+
+    private void loadEvents(Integer year) {
+        LocalDate fromDate = LocalDate.of(year, 1, 1);
+        LocalDate toDate = LocalDate.of(year, 12, 31);
+
+        eventListBox.setItems(eventRepository.findAll(
+                EVENT.FROM_DATE.between(fromDate, toDate),
+                List.of(EVENT.TITLE)));
+    }
+
 }

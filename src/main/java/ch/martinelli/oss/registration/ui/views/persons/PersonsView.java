@@ -7,6 +7,7 @@ import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -75,6 +76,9 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         grid.addColumn(PersonRecord::getDateOfBirth)
                 .setSortable(true).setSortProperty(PERSON.DATE_OF_BIRTH.getName())
                 .setHeader("Geburtsdatum").setAutoWidth(true);
+        grid.addColumn(PersonRecord::getActive)
+                .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
+                .setHeader("Aktiv?").setAutoWidth(true);
 
         grid.setItems(query -> personRepository.findAll(
                         query.getOffset(), query.getLimit(),
@@ -164,7 +168,11 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 .asRequired()
                 .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
 
-        formLayout.add(lastNameTextField, firstNameTextField, emailTextField, dateOfBirthDatePicker);
+        Checkbox active = new Checkbox("Aktiv");
+        binder.forField(active)
+                .bind(PersonRecord::getActive, PersonRecord::setActive);
+
+        formLayout.add(lastNameTextField, firstNameTextField, emailTextField, dateOfBirthDatePicker, active);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);

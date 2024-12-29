@@ -36,7 +36,8 @@ create table person
     last_name     varchar not null,
     first_name    varchar not null,
     email         varchar not null,
-    date_of_birth date    not null
+    date_of_birth date    not null,
+    active        boolean not null             default true
 );
 
 create sequence event_seq start with 1000;
@@ -55,10 +56,10 @@ create sequence registration_seq start with 1000;
 
 create table registration
 (
-    id         bigint not null primary key default nextval('registration_seq'),
+    id         bigint  not null primary key default nextval('registration_seq'),
     year       integer not null,
-    open_from  date   not null,
-    open_until date   not null
+    open_from  date    not null,
+    open_until date    not null
 );
 
 create sequence registration_email_seq start with 1000;
