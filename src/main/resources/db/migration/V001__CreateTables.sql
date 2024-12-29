@@ -51,14 +51,56 @@ create table event
     to_date     date
 );
 
+create sequence registration_seq start with 1000;
+
 create table registration
+(
+    id         bigint not null primary key default nextval('registration_seq'),
+    open_from  date   not null,
+    open_until date   not null
+);
+
+create sequence registration_email_seq start with 1000;
+
+create table registration_email
+(
+    id              bigint    not null primary key default nextval('registration_email_seq'),
+    registration_id bigint    not null,
+    email           varchar   not null,
+    link            varchar   not null,
+    sent_at         timestamp not null,
+
+    foreign key (registration_id) references registration (id)
+);
+
+create table registration_person
+(
+    registration_id bigint not null,
+    person_id       bigint not null,
+
+    primary key (registration_id, person_id),
+    foreign key (registration_id) references registration (id),
+    foreign key (person_id) references person (id)
+);
+
+create table registration_event
+(
+    registration_id bigint not null,
+    event_id        bigint not null,
+
+    primary key (registration_id, event_id),
+    foreign key (registration_id) references registration (id),
+    foreign key (event_id) references event (id)
+);
+
+create table event_registration
 (
     event_id   bigint  not null,
     person_id  bigint  not null,
 
     registered boolean not null default false,
 
-    constraint pk_registration primary key (event_id, person_id),
+    constraint pk_event_registration primary key (event_id, person_id),
     constraint fk_event foreign key (event_id) references event (id),
     constraint fk_person foreign key (person_id) references person (id)
 );
@@ -77,6 +119,6 @@ select e.id as event_id,
        p.date_of_birth,
        r.registered
 from event e
-         join registration r on e.id = r.event_id
+         join event_registration r on e.id = r.event_id
          join person p on r.person_id = p.id;
 

@@ -25,7 +25,7 @@ import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
+import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 
 @PageTitle("Anmeldungen")
 @Route("")
@@ -111,8 +111,8 @@ public class AnmeldungenView extends Div {
             Condition condition = DSL.noCondition();
 
             if (!name.isEmpty()) {
-                condition.and(REGISTRATION.person().FIRST_NAME.likeIgnoreCase(name.getValue())
-                        .or(REGISTRATION.person().LAST_NAME.likeIgnoreCase(name.getValue())));
+                condition.and(EVENT_REGISTRATION.person().FIRST_NAME.likeIgnoreCase(name.getValue())
+                        .or(EVENT_REGISTRATION.person().LAST_NAME.likeIgnoreCase(name.getValue())));
             }
             return condition;
         }

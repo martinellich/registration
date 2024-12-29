@@ -17,7 +17,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.RolesAllowed;
@@ -25,7 +25,7 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
 
-@PageTitle("Persons")
+@PageTitle("Jugeler")
 @Route("persons/:personID?/:action?(edit)")
 @Menu(order = 3, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
@@ -36,15 +36,10 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
     private final Grid<PersonRecord> grid = new Grid<>(PersonRecord.class, false);
 
-    private TextField lastName;
-    private TextField firstName;
-    private EmailField email;
-    private DatePicker dateOfBirth;
-
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
 
-    private final BeanValidationBinder<PersonRecord> binder;
+    private final Binder<PersonRecord> binder = new Binder<>(PersonRecord.class);
 
     private PersonRecord person;
 
@@ -63,15 +58,17 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
         grid.addColumn(PersonRecord::getLastName).setHeader("Nachname").setAutoWidth(true);
         grid.addColumn(PersonRecord::getFirstName).setHeader("Vornamen").setAutoWidth(true);
         grid.addColumn(PersonRecord::getEmail).setHeader("Email").setAutoWidth(true);
         grid.addColumn(PersonRecord::getDateOfBirth).setHeader("Geburtsdatum").setAutoWidth(true);
+
         grid.setItems(query -> personRepository.findAll(
                         query.getOffset(), query.getLimit(),
                         VaadinJooqUtil.orderFields(Person.PERSON, query))
                 .stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
@@ -82,13 +79,6 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(PersonsView.class);
             }
         });
-
-        // Configure Form
-        binder = new BeanValidationBinder<>(PersonRecord.class);
-
-        // Bind fields. This is where you'd define e.g. validation rules
-
-        binder.bindInstanceFields(this);
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -139,11 +129,28 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        lastName = new TextField("Nachname");
-        firstName = new TextField("Vorname");
-        email = new EmailField("Email");
-        dateOfBirth = new DatePicker("Geburtsdatum");
-        formLayout.add(lastName, firstName, email, dateOfBirth);
+
+        TextField lastNameTextField = new TextField("Nachname");
+        binder.forField(lastNameTextField)
+                .asRequired()
+                .bind(PersonRecord::getLastName, PersonRecord::setLastName);
+
+        TextField firstNameTextField = new TextField("Vorname");
+        binder.forField(firstNameTextField)
+                .asRequired()
+                .bind(PersonRecord::getFirstName, PersonRecord::setFirstName);
+
+        EmailField emailTextField = new EmailField("Email");
+        binder.forField(emailTextField)
+                .asRequired()
+                .bind(PersonRecord::getEmail, PersonRecord::setEmail);
+
+        DatePicker dateOfBirthDatePicker = new DatePicker("Geburtsdatum");
+        binder.forField(dateOfBirthDatePicker)
+                .asRequired()
+                .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
+
+        formLayout.add(lastNameTextField, firstNameTextField, emailTextField, dateOfBirthDatePicker);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);

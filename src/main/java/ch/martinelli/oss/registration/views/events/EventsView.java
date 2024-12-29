@@ -15,8 +15,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.RolesAllowed;
@@ -24,7 +25,7 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
 
-@PageTitle("Events")
+@PageTitle("Anlässe")
 @Route("events/:eventID?/:action?(edit)")
 @Menu(order = 2, icon = LineAwesomeIconUrl.CALENDAR_SOLID)
 @RolesAllowed("ADMIN")
@@ -35,16 +36,10 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
     private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
 
-    private TextField title;
-    private TextField description;
-    private TextField location;
-    private DatePicker fromDate;
-    private DatePicker toDate;
-
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
 
-    private final BeanValidationBinder<EventRecord> binder;
+    private final Binder<EventRecord> binder = new Binder<>(EventRecord.class);
 
     private EventRecord event;
 
@@ -63,16 +58,18 @@ public class EventsView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
         grid.addColumn(EventRecord::getTitle).setHeader("Titel").setAutoWidth(true);
         grid.addColumn(EventRecord::getDescription).setHeader("Beschreibung").setAutoWidth(true);
         grid.addColumn(EventRecord::getLocation).setHeader("Ort").setAutoWidth(true);
         grid.addColumn(EventRecord::getFromDate).setHeader("von").setAutoWidth(true);
         grid.addColumn(EventRecord::getToDate).setHeader("bis").setAutoWidth(true);
+
         grid.setItems(query -> eventRepository.findAll(
                         query.getOffset(), query.getLimit(),
                         VaadinJooqUtil.orderFields(Event.EVENT, query))
                 .stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
@@ -83,13 +80,6 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(EventsView.class);
             }
         });
-
-        // Configure Form
-        binder = new BeanValidationBinder<>(EventRecord.class);
-
-        // Bind fields. This is where you'd define e.g. validation rules
-
-        binder.bindInstanceFields(this);
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -140,11 +130,26 @@ public class EventsView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        title = new TextField("Title");
-        description = new TextField("Description");
-        fromDate = new DatePicker("From_date");
-        toDate = new DatePicker("To_date");
-        formLayout.add(title, description, fromDate, toDate);
+
+        TextField titleTextField = new TextField("Bezeichnung");
+        binder.forField(titleTextField)
+                .asRequired()
+                .bind(EventRecord::getTitle, EventRecord::setTitle);
+
+        TextArea descriptionTextArea = new TextArea("Bechreibung");
+        binder.forField(descriptionTextArea)
+                .bind(EventRecord::getDescription, EventRecord::setDescription);
+
+        DatePicker fromDatePicker = new DatePicker("von");
+        binder.forField(fromDatePicker)
+                .asRequired()
+                .bind(EventRecord::getFromDate, EventRecord::setFromDate);
+
+        DatePicker toDatePicker = new DatePicker("bis");
+        binder.forField(toDatePicker)
+                .bind(EventRecord::getToDate, EventRecord::setToDate);
+
+        formLayout.add(titleTextField, descriptionTextArea, fromDatePicker, toDatePicker);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
