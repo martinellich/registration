@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -11,7 +12,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -108,11 +108,11 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                     clearForm();
                     refreshGrid();
                  
-                    Notification.show("Die Daten wurden gespeichert");
+                    Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(PersonsView.class);
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.show("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
             }
         });
     }
@@ -125,8 +125,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
             } else {
-                Notification.show(String.format("Die angeforderte Person wurde nicht gefunden, ID = %s", personId.get()), 3000,
-                        Notification.Position.BOTTOM_START);
+                Notification.error(String.format("Die angeforderte Person wurde nicht gefunden, ID = %s", personId.get()));
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();

@@ -129,11 +129,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                     clearForm();
                     refreshGrid();
 
-                    Notification.show("Die Daten wurden gespeichert");
+                    Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(RegistrationView.class);
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.show("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
             }
         });
     }
@@ -146,8 +146,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             if (registrationFromBackend.isPresent()) {
                 populateForm(registrationFromBackend.get());
             } else {
-                Notification.show(String.format("Die angeforderte Registrierung wurde nicht gefunden, ID = %s", eventId.get()), 3000,
-                        Notification.Position.BOTTOM_START);
+                Notification.error(String.format("Die angeforderte Registrierung wurde nicht gefunden, ID = %s", eventId.get()));
                 // when a row is selected but the data is no longer available, refresh grid
                 refreshGrid();
                 event.forwardTo(RegistrationView.class);
