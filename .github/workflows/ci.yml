@@ -40,5 +40,7 @@ jobs:
                     restore-keys: |
                         ${{ runner.os }}-maven-
 
-            -   name: Maven Build, Test
-                run: mvn -B verify
+            -   name: Maven Build, Test, and Sonar
+                run: mvn -B verify sonar:sonar -Pcoverage -Dsonar.projectKey=martinellich_registration
+                env:
+                    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
