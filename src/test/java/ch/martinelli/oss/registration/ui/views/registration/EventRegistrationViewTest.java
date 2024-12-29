@@ -37,7 +37,7 @@ class EventRegistrationViewTest extends KaribuTest {
         _click(_get(Button.class, spec -> spec.withText("Suchen")));
 
         // Check the content of grid
-        assertThat(GridKt._size(grid)).isEqualTo(0);
+        assertThat(GridKt._size(grid)).isZero();
 
         // Filter
         _setValue(_get(TextField.class, spec -> spec.withPlaceholder("Vor- oder Nachname")), "Eula");

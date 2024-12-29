@@ -36,7 +36,7 @@ import static ch.martinelli.oss.registration.db.tables.EventRegistrationView.EVE
 @Uses(Icon.class)
 public class EventRegistrationView extends VerticalLayout {
 
-    private final RegistrationRepository registrationRepository;
+    private final transient RegistrationRepository registrationRepository;
 
     private final Grid<EventRegistrationViewRecord> grid = new Grid<>(EventRegistrationViewRecord.class, false);
 
@@ -60,9 +60,7 @@ public class EventRegistrationView extends VerticalLayout {
 
         Button searchButton = new Button("Suchen");
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        searchButton.addClickListener(e -> {
-            grid.getDataProvider().refreshAll();
-        });
+        searchButton.addClickListener(e -> grid.getDataProvider().refreshAll());
 
         Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);

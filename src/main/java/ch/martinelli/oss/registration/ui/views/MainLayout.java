@@ -28,7 +28,7 @@ public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
 
-    private final SecurityContext securityContext;
+    private final transient SecurityContext securityContext;
 
     public MainLayout(SecurityContext securityContext) {
         this.securityContext = securityContext;

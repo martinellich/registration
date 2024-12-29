@@ -45,7 +45,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
     private EventRecord event;
 
-    private final EventRepository eventRepository;
+    private final transient EventRepository eventRepository;
 
     public EventsView(EventRepository eventRepository) {
         this.eventRepository = eventRepository;

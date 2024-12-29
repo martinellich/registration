@@ -46,7 +46,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
     private PersonRecord person;
 
-    private final PersonRepository personRepository;
+    private final transient PersonRepository personRepository;
 
     public PersonsView(PersonRepository personRepository) {
         this.personRepository = personRepository;

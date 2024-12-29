@@ -6,10 +6,11 @@ import org.springframework.context.annotation.Import;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
-public class RegistrationApplicationTest {
+class RegistrationApplicationTest {
 
     @Test
     void contextLoads() {
+        // Just test if the context loads
     }
 
 }

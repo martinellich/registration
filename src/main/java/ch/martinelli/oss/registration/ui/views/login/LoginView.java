@@ -16,7 +16,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "login")
 public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
-    private final SecurityContext securityContext;
+    private final transient SecurityContext securityContext;
 
     public LoginView(SecurityContext securityContext) {
         this.securityContext = securityContext;

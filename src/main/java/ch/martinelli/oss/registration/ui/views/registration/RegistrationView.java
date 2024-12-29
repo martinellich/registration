@@ -58,10 +58,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     private RegistrationRecord registration;
 
-    private final RegistrationService registrationService;
-    private final RegistrationRepository registrationRepository;
-    private final EventRepository eventRepository;
-    private final PersonRepository personRepository;
+    private final transient RegistrationService registrationService;
+    private final transient RegistrationRepository registrationRepository;
+    private final transient EventRepository eventRepository;
+    private final transient PersonRepository personRepository;
+
     private MultiSelectListBox<EventRecord> eventListBox;
     private MultiSelectListBox<PersonRecord> personListBox;
 
