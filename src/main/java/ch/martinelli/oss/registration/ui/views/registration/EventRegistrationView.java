@@ -8,13 +8,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -26,7 +26,7 @@ import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
+import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
 @PageTitle("Anmeldungen")
 @Route("event-registrations")
@@ -34,102 +34,68 @@ import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_R
 @Menu(order = 1, icon = LineAwesomeIconUrl.FILTER_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class EventRegistrationView extends Div {
+public class EventRegistrationView extends VerticalLayout {
 
-    private Grid<RegistrationViewRecord> grid;
-
-    private final Filters filters;
     private final RegistrationRepository registrationRepository;
+
+    private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
+
+    private TextField nameTextField;
+    private IntegerField yearIntegerField;
 
     public EventRegistrationView(RegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
 
         setSizeFull();
-        addClassNames("event-registrations-view");
 
-        filters = new Filters(this::refreshGrid);
-        VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());
-        layout.setSizeFull();
-        layout.setPadding(false);
-        layout.setSpacing(false);
-        add(layout);
+        add(createFilters(), createGrid());
     }
 
-    private HorizontalLayout createMobileFilters() {
-        // Mobile version
-        HorizontalLayout mobileFilters = new HorizontalLayout();
-        mobileFilters.setWidthFull();
-        mobileFilters.addClassNames(LumoUtility.Padding.MEDIUM, LumoUtility.BoxSizing.BORDER,
-                LumoUtility.AlignItems.CENTER);
-        mobileFilters.addClassName("mobile-filters");
+    public FormLayout createFilters() {
+        nameTextField = new TextField();
+        nameTextField.setPlaceholder("Vor- oder Nachname");
 
-        Icon mobileIcon = new Icon("lumo", "plus");
-        Span filtersHeading = new Span("Filters");
-        mobileFilters.add(mobileIcon, filtersHeading);
-        mobileFilters.setFlexGrow(1, filtersHeading);
-        mobileFilters.addClickListener(e -> {
-            if (filters.getClassNames().contains("visible")) {
-                filters.removeClassName("visible");
-                mobileIcon.getElement().setAttribute("icon", "lumo:plus");
-            } else {
-                filters.addClassName("visible");
-                mobileIcon.getElement().setAttribute("icon", "lumo:minus");
-            }
+        yearIntegerField = new IntegerField();
+        yearIntegerField.setPlaceholder("Jahr");
+
+        // Action buttons
+        Button resetButton = new Button("Reset");
+        resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        resetButton.addClickListener(e -> {
+            nameTextField.clear();
+            yearIntegerField.clear();
         });
-        return mobileFilters;
-    }
+        Button searchButton = new Button("Search");
+        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        searchButton.addClickListener(e -> {
+            grid.getDataProvider().refreshAll();
+        });
 
-    public static class Filters extends Div {
+        FormLayout formLayout = new FormLayout(nameTextField, yearIntegerField, new Div(searchButton, resetButton));
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
 
-        private final TextField name = new TextField("Name");
-
-        public Filters(Runnable onSearch) {
-
-            setWidthFull();
-            addClassName("filter-layout");
-            addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
-                    LumoUtility.BoxSizing.BORDER);
-            name.setPlaceholder("First or last name");
-
-            // Action buttons
-            Button resetBtn = new Button("Reset");
-            resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            resetBtn.addClickListener(e -> {
-                name.clear();
-                onSearch.run();
-            });
-            Button searchBtn = new Button("Search");
-            searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            searchBtn.addClickListener(e -> onSearch.run());
-
-            Div actions = new Div(resetBtn, searchBtn);
-            actions.addClassName(LumoUtility.Gap.SMALL);
-            actions.addClassName("actions");
-
-            add(name, actions);
-        }
-
-        public Condition toCondition() {
-            Condition condition = DSL.noCondition();
-
-            if (!name.isEmpty()) {
-                condition.and(EVENT_REGISTRATION.person().FIRST_NAME.likeIgnoreCase(name.getValue())
-                        .or(EVENT_REGISTRATION.person().LAST_NAME.likeIgnoreCase(name.getValue())));
-            }
-            return condition;
-        }
+        return formLayout;
     }
 
     private Component createGrid() {
-        grid = new Grid<>(RegistrationViewRecord.class, false);
-        grid.addColumn(RegistrationViewRecord::getTitle).setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getLocation).setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getFromDate).setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getLastName).setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getFirstName).setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getTitle)
+                .setSortable(true).setSortProperty(REGISTRATION_VIEW.TITLE.getName())
+                .setHeader("Bezeichnung").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getLocation)
+                .setSortable(true).setSortProperty(REGISTRATION_VIEW.LOCATION.getName())
+                .setHeader("Beschreibung").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getFromDate)
+                .setSortable(true).setSortProperty(REGISTRATION_VIEW.FROM_DATE.getName())
+                .setHeader("Datum").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getLastName)
+                .setSortable(true).setSortProperty(REGISTRATION_VIEW.LAST_NAME.getName())
+                .setHeader("Nachname").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getFirstName)
+                .setSortable(true).setSortProperty(REGISTRATION_VIEW.FIRST_NAME.getName())
+                .setHeader("Vorname").setAutoWidth(true);
 
         grid.setItems(query -> registrationRepository.findAllFromView(
-                filters.toCondition(),
+                getFilter(),
                 query.getOffset(), query.getLimit(),
                 VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)
         ).stream());
@@ -139,8 +105,17 @@ public class EventRegistrationView extends Div {
         return grid;
     }
 
-    private void refreshGrid() {
-        grid.getDataProvider().refreshAll();
+    private Condition getFilter() {
+        Condition condition = DSL.noCondition();
+
+        if (!nameTextField.isEmpty()) {
+            condition = condition.and(REGISTRATION_VIEW.FIRST_NAME.likeIgnoreCase(nameTextField.getValue())
+                    .or(REGISTRATION_VIEW.LAST_NAME.likeIgnoreCase(nameTextField.getValue())));
+        }
+        if (!yearIntegerField.isEmpty()) {
+            condition = condition.and(DSL.year(REGISTRATION_VIEW.FROM_DATE).eq(yearIntegerField.getValue()));
+        }
+        return condition;
     }
 
 }

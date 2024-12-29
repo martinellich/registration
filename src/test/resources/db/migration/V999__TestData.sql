@@ -22,3 +22,13 @@ insert into person(id,last_name,first_name,email,date_of_birth, active) values (
 insert into event(id,title,description,location,from_date,to_date) values ( 1,'CIS 2024','Concours Inter Section','Erlach', '2024-05-24',null);
 insert into event(id,title,description,location,from_date,to_date) values ( 2,'CIS 2025','Concours Inter Section','Twann', '2025-05-12',null);
 insert into event(id,title,description,location,from_date,to_date) values ( 3,'Jugendmeisterschaft 2025','','Erlach', '2025-08-31',null);
+
+insert into registration(id,year,open_from,open_until) values (1,2025,'2025-01-01','2025-02-28');
+
+insert into registration_person (registration_id, person_id) values (1,1);
+insert into registration_person (registration_id, person_id) values (1,5);
+
+insert into registration_event (registration_id, event_id) values (1,2);
+insert into registration_event (registration_id, event_id) values (1,3);
+
+insert into event_registration (event_id, person_id) values (2,1);
