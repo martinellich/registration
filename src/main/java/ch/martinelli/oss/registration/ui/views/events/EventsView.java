@@ -156,7 +156,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 .asRequired()
                 .bind(EventRecord::getLocation, EventRecord::setLocation);
 
-        TextArea descriptionTextArea = new TextArea("Bechreibung");
+        TextArea descriptionTextArea = new TextArea("Beschreibung");
         binder.forField(descriptionTextArea)
                 .bind(EventRecord::getDescription, EventRecord::setDescription);
 
