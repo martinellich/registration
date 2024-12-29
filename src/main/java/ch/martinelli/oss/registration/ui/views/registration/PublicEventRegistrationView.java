@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.registration;
+package ch.martinelli.oss.registration.ui.views.registration;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;

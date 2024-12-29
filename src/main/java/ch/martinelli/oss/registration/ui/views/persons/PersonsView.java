@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.persons;
+package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;

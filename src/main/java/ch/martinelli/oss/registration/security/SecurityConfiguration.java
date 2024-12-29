@@ -1,6 +1,6 @@
 package ch.martinelli.oss.registration.security;
 
-import ch.martinelli.oss.registration.views.login.LoginView;
+import ch.martinelli.oss.registration.ui.views.login.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

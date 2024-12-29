@@ -56,6 +56,7 @@ create sequence registration_seq start with 1000;
 create table registration
 (
     id         bigint not null primary key default nextval('registration_seq'),
+    year       integer not null,
     open_from  date   not null,
     open_until date   not null
 );

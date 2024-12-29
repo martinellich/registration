@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.registration;
+package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -19,10 +20,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
@@ -85,13 +86,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         // Configure Grid
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        grid.addColumn(RegistrationRecord::getId)
-                .setSortable(true).setSortProperty(REGISTRATION.ID.getName())
-                .setHeader("ID").setAutoWidth(true);
+        grid.addColumn(RegistrationRecord::getYear)
+                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
+                .setHeader("Jahr").setAutoWidth(true);
         grid.addColumn(RegistrationRecord::getOpenFrom)
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
                 .setHeader("Offen von").setAutoWidth(true);
-        grid.addColumn(RegistrationRecord::getOpenFrom)
+        grid.addColumn(RegistrationRecord::getOpenUntil)
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
                 .setHeader("Offen bis").setAutoWidth(true);
 
@@ -163,6 +164,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
+
+        IntegerField yearIntegerField = new IntegerField("Jahr");
+        binder.forField(yearIntegerField)
+                .asRequired()
+                .bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
 
         DatePicker openFromDatePicker = new DatePicker("Offen von");
         binder.forField(openFromDatePicker)
@@ -174,7 +181,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .asRequired()
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
 
-        formLayout.add(openFromDatePicker, openUntilDatePicker);
+        formLayout.add(yearIntegerField, openFromDatePicker, openUntilDatePicker);
         editorDiv.add(formLayout);
 
         editorDiv.add(new Hr());

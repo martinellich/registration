@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views;
+package ch.martinelli.oss.registration.ui.views;
 
 import ch.martinelli.oss.registration.security.SecurityContext;
 import com.vaadin.flow.component.applayout.AppLayout;

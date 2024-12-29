@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.registration;
+package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;

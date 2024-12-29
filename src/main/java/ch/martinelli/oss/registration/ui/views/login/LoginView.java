@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.login;
+package ch.martinelli.oss.registration.ui.views.login;
 
 import ch.martinelli.oss.registration.security.SecurityContext;
 import com.vaadin.flow.component.login.LoginI18n;
