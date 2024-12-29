@@ -45,8 +45,8 @@ create table event
 (
     id          bigint  not null primary key default nextval('event_seq'),
     title       varchar not null,
-    description varchar not null,
-    location    varchar not null,
+    description varchar,
+    location    varchar,
     from_date   date    not null,
     to_date     date
 );

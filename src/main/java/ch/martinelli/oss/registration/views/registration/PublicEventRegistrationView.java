@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.anmeldung;
+package ch.martinelli.oss.registration.views.registration;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -12,12 +12,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 @PageTitle("Anmeldung")
-@Route("anmeldung")
+@Route("public")
 @Menu(order = 0, icon = LineAwesomeIconUrl.FILE)
 @AnonymousAllowed
-public class AnmeldungView extends VerticalLayout {
+public class PublicEventRegistrationView extends VerticalLayout {
 
-    public AnmeldungView() {
+    public PublicEventRegistrationView() {
         setSpacing(false);
 
         Image img = new Image("images/empty-plant.png", "placeholder plant");

@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.views.anmeldungen;
+package ch.martinelli.oss.registration.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
@@ -19,6 +19,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
@@ -28,18 +29,19 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 
 @PageTitle("Anmeldungen")
-@Route("")
+@Route("event-registrations")
+@RouteAlias("")
 @Menu(order = 1, icon = LineAwesomeIconUrl.FILTER_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class AnmeldungenView extends Div {
+public class EventRegistrationView extends Div {
 
     private Grid<RegistrationViewRecord> grid;
 
     private final Filters filters;
     private final RegistrationRepository registrationRepository;
 
-    public AnmeldungenView(RegistrationRepository registrationRepository) {
+    public EventRegistrationView(RegistrationRepository registrationRepository) {
         this.registrationRepository = registrationRepository;
 
         setSizeFull();

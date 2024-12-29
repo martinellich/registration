@@ -21,13 +21,14 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.RolesAllowed;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
 
 @PageTitle("Jugeler")
 @Route("persons/:personID?/:action?(edit)")
-@Menu(order = 3, icon = LineAwesomeIconUrl.USERS_SOLID)
+@Menu(order = 4, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
 public class PersonsView extends Div implements BeforeEnterObserver {
 
@@ -47,6 +48,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
     public PersonsView(PersonRepository personRepository) {
         this.personRepository = personRepository;
+
         addClassNames("persons-view");
 
         // Create UI
@@ -60,10 +62,18 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         // Configure Grid
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        grid.addColumn(PersonRecord::getLastName).setHeader("Nachname").setAutoWidth(true);
-        grid.addColumn(PersonRecord::getFirstName).setHeader("Vornamen").setAutoWidth(true);
-        grid.addColumn(PersonRecord::getEmail).setHeader("Email").setAutoWidth(true);
-        grid.addColumn(PersonRecord::getDateOfBirth).setHeader("Geburtsdatum").setAutoWidth(true);
+        grid.addColumn(PersonRecord::getLastName)
+                .setSortable(true).setSortProperty(Person.PERSON.LAST_NAME.getName())
+                .setHeader("Nachname").setAutoWidth(true);
+        grid.addColumn(PersonRecord::getFirstName)
+                .setSortable(true).setSortProperty(Person.PERSON.FIRST_NAME.getName())
+                .setHeader("Vornamen").setAutoWidth(true);
+        grid.addColumn(PersonRecord::getEmail)
+                .setSortable(true).setSortProperty(Person.PERSON.EMAIL.getName())
+                .setHeader("Email").setAutoWidth(true);
+        grid.addColumn(PersonRecord::getDateOfBirth)
+                .setSortable(true).setSortProperty(Person.PERSON.DATE_OF_BIRTH.getName())
+                .setHeader("Geburtsdatum").setAutoWidth(true);
 
         grid.setItems(query -> personRepository.findAll(
                         query.getOffset(), query.getLimit(),
@@ -90,14 +100,18 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 if (this.person == null) {
                     this.person = new PersonRecord();
                 }
-                binder.writeBean(this.person);
-                personRepository.save(this.person);
-                clearForm();
-                refreshGrid();
-                Notification.show("Data updated");
-                UI.getCurrent().navigate(PersonsView.class);
-            } catch (ValidationException validationException) {
-                Notification.show("Failed to update the data. Check again that all values are valid");
+                if (binder.validate().isOk()) {
+                    binder.writeBean(this.person);
+                    personRepository.save(this.person);
+                 
+                    clearForm();
+                    refreshGrid();
+                 
+                    Notification.show("Die Daten wurden gespeichert");
+                    UI.getCurrent().navigate(PersonsView.class);
+                }
+            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
+                Notification.show("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
             }
         });
     }
@@ -110,7 +124,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
             } else {
-                Notification.show(String.format("The requested person was not found, ID = %s", personId.get()), 3000,
+                Notification.show(String.format("Die angeforderte Person wurde nicht gefunden, ID = %s", personId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
