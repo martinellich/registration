@@ -6,6 +6,7 @@ import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
+import ch.martinelli.oss.registration.domain.RegistrationService;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -55,12 +56,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     private RegistrationRecord registration;
 
+    private final RegistrationService registrationService;
     private final RegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
     private final PersonRepository personRepository;
+    private MultiSelectListBox<EventRecord> eventListBox;
+    private MultiSelectListBox<PersonRecord> personListBox;
 
-    public RegistrationView(RegistrationRepository registrationRepository, EventRepository eventRepository,
-                            PersonRepository personRepository) {
+    public RegistrationView(RegistrationService registrationService, RegistrationRepository registrationRepository,
+                            EventRepository eventRepository, PersonRepository personRepository) {
+        this.registrationService = registrationService;
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
         this.personRepository = personRepository;
@@ -117,7 +122,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 }
                 if (binder.validate().isOk()) {
                     binder.writeBean(this.registration);
-                    registrationRepository.save(this.registration);
+                    registrationService.save(this.registration,
+                            this.eventListBox.getSelectedItems(), this.personListBox.getSelectedItems());
 
                     clearForm();
                     refreshGrid();
@@ -176,17 +182,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         FormLayout listBoxFormLayout = new FormLayout();
         listBoxFormLayout.add(new H3("Anlässe"), new H3("Jugeler"));
 
-        MultiSelectListBox<EventRecord> eventListBox = new MultiSelectListBox<>();
+        eventListBox = new MultiSelectListBox<>();
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
-        eventListBox.setItems(eventRepository.findAll(DSL.noCondition(), List.of(EVENT.TITLE)));
 
         Scroller eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
         eventListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 
-        MultiSelectListBox<PersonRecord> personListBox = new MultiSelectListBox<>();
-        personListBox.setItemLabelGenerator(p-> "%s %s".formatted(p.getLastName(), p.getFirstName()));
-        personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
+        personListBox = new MultiSelectListBox<>();
+        personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
 
         Scroller personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
@@ -230,5 +234,17 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         this.registration = value;
         binder.readBean(this.registration);
 
+        if (value == null) {
+            eventListBox.setItems();
+            eventListBox.clear();
+            personListBox.setItems();
+            personListBox.clear();
+        } else {
+            eventListBox.setItems(eventRepository.findAll(DSL.noCondition(), List.of(EVENT.TITLE)));
+            eventListBox.setValue(registrationService.findEventsByRegistration(this.registration.getId()));
+
+            personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
+            personListBox.setValue(registrationService.findPersonsByRegistration(this.registration.getId()));
+        }
     }
 }
