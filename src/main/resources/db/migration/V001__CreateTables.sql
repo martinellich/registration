@@ -107,7 +107,7 @@ create table event_registration
     constraint fk_person foreign key (person_id) references person (id)
 );
 
-create view registration_view as
+create view event_registration_view as
 select e.id as event_id,
        e.title,
        e.description,

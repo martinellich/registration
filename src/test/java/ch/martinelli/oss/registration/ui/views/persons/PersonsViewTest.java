@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PersonsViewTest extends KaribuTest {
 
     @BeforeEach
-    public void login() {
+    void login() {
         login("simon@martinelli.ch", "", List.of("ADMIN"));
         UI.getCurrent().getPage().reload();
 
@@ -51,4 +51,5 @@ class PersonsViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
         assertThat(GridKt._size(grid)).isEqualTo(13);
     }
+
 }

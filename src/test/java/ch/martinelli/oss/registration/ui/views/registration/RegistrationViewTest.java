@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegistrationViewTest extends KaribuTest {
 
     @BeforeEach
-    public void login() {
+    void login() {
         login("simon@martinelli.ch", "", List.of("ADMIN"));
         UI.getCurrent().getPage().reload();
 

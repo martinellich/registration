@@ -1,7 +1,7 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.Registration;
-import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
+import ch.martinelli.oss.registration.db.tables.records.EventRegistrationViewRecord;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
@@ -26,7 +26,7 @@ import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
+import static ch.martinelli.oss.registration.db.tables.EventRegistrationView.EVENT_REGISTRATION_VIEW;
 
 @PageTitle("Anmeldungen")
 @Route("event-registrations")
@@ -38,7 +38,7 @@ public class EventRegistrationView extends VerticalLayout {
 
     private final RegistrationRepository registrationRepository;
 
-    private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
+    private final Grid<EventRegistrationViewRecord> grid = new Grid<>(EventRegistrationViewRecord.class, false);
 
     private TextField nameTextField;
     private IntegerField yearIntegerField;
@@ -58,17 +58,17 @@ public class EventRegistrationView extends VerticalLayout {
         yearIntegerField = new IntegerField();
         yearIntegerField.setPlaceholder("Jahr");
 
-        // Action buttons
+        Button searchButton = new Button("Suchen");
+        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        searchButton.addClickListener(e -> {
+            grid.getDataProvider().refreshAll();
+        });
+
         Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetButton.addClickListener(e -> {
             nameTextField.clear();
             yearIntegerField.clear();
-        });
-        Button searchButton = new Button("Search");
-        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        searchButton.addClickListener(e -> {
-            grid.getDataProvider().refreshAll();
         });
 
         FormLayout formLayout = new FormLayout(nameTextField, yearIntegerField, new Div(searchButton, resetButton));
@@ -78,20 +78,20 @@ public class EventRegistrationView extends VerticalLayout {
     }
 
     private Component createGrid() {
-        grid.addColumn(RegistrationViewRecord::getTitle)
-                .setSortable(true).setSortProperty(REGISTRATION_VIEW.TITLE.getName())
+        grid.addColumn(EventRegistrationViewRecord::getTitle)
+                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.TITLE.getName())
                 .setHeader("Bezeichnung").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getLocation)
-                .setSortable(true).setSortProperty(REGISTRATION_VIEW.LOCATION.getName())
+        grid.addColumn(EventRegistrationViewRecord::getLocation)
+                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.LOCATION.getName())
                 .setHeader("Beschreibung").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getFromDate)
-                .setSortable(true).setSortProperty(REGISTRATION_VIEW.FROM_DATE.getName())
+        grid.addColumn(EventRegistrationViewRecord::getFromDate)
+                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.FROM_DATE.getName())
                 .setHeader("Datum").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getLastName)
-                .setSortable(true).setSortProperty(REGISTRATION_VIEW.LAST_NAME.getName())
+        grid.addColumn(EventRegistrationViewRecord::getLastName)
+                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.LAST_NAME.getName())
                 .setHeader("Nachname").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getFirstName)
-                .setSortable(true).setSortProperty(REGISTRATION_VIEW.FIRST_NAME.getName())
+        grid.addColumn(EventRegistrationViewRecord::getFirstName)
+                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.FIRST_NAME.getName())
                 .setHeader("Vorname").setAutoWidth(true);
 
         grid.setItems(query -> registrationRepository.findAllFromView(
@@ -109,11 +109,11 @@ public class EventRegistrationView extends VerticalLayout {
         Condition condition = DSL.noCondition();
 
         if (!nameTextField.isEmpty()) {
-            condition = condition.and(REGISTRATION_VIEW.FIRST_NAME.likeIgnoreCase(nameTextField.getValue())
-                    .or(REGISTRATION_VIEW.LAST_NAME.likeIgnoreCase(nameTextField.getValue())));
+            condition = condition.and(EVENT_REGISTRATION_VIEW.FIRST_NAME.likeIgnoreCase(nameTextField.getValue())
+                    .or(EVENT_REGISTRATION_VIEW.LAST_NAME.likeIgnoreCase(nameTextField.getValue())));
         }
         if (!yearIntegerField.isEmpty()) {
-            condition = condition.and(DSL.year(REGISTRATION_VIEW.FROM_DATE).eq(yearIntegerField.getValue()));
+            condition = condition.and(DSL.year(EVENT_REGISTRATION_VIEW.FROM_DATE).eq(yearIntegerField.getValue()));
         }
         return condition;
     }
