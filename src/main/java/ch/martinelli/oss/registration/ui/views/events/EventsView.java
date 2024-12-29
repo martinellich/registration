@@ -38,8 +38,8 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
     private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
 
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Abbrechen");
+    private final Button save = new Button("Speichern");
 
     private final Binder<EventRecord> binder = new Binder<>(EventRecord.class);
 

@@ -51,8 +51,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     private final Grid<RegistrationRecord> grid = new Grid<>(RegistrationRecord.class, false);
 
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Abbrechen");
+    private final Button save = new Button("Speichern");
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
 

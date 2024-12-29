@@ -39,8 +39,8 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
     private final Grid<PersonRecord> grid = new Grid<>(PersonRecord.class, false);
 
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Abbrechen");
+    private final Button save = new Button("Speichern");
 
     private final Binder<PersonRecord> binder = new Binder<>(PersonRecord.class);
 
