@@ -11,8 +11,8 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -69,7 +69,7 @@ public class EventRegistrationView extends VerticalLayout {
             yearIntegerField.clear();
         });
 
-        FormLayout formLayout = new FormLayout(nameTextField, yearIntegerField, new Div(searchButton, resetButton));
+        FormLayout formLayout = new FormLayout(nameTextField, yearIntegerField, new HorizontalLayout(searchButton, resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
 
         return formLayout;

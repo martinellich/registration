@@ -66,10 +66,10 @@ create sequence registration_email_seq start with 1000;
 
 create table registration_email
 (
-    id              bigint    not null primary key default nextval('registration_email_seq'),
-    registration_id bigint    not null,
-    email           varchar   not null,
-    link            varchar   not null,
+    id              bigint  not null primary key default nextval('registration_email_seq'),
+    registration_id bigint  not null,
+    email           varchar not null,
+    link            varchar not null,
     sent_at         timestamp,
 
     foreign key (registration_id) references registration (id)
@@ -134,3 +134,10 @@ from event e
          join event_registration r on e.id = r.event_id
          join person p on r.person_id = p.id;
 
+create view registration_email_view as
+select r.year,
+       re.email,
+       re.link,
+       re.sent_at
+from registration_email re
+         join registration r on re.registration_id = r.id

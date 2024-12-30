@@ -43,5 +43,5 @@
 }
 
 .registrations-view .scroller {
-    height: 350px;
+    flex-grow: 1;
 }
