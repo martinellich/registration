@@ -56,7 +56,6 @@ class RegistrationViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
 
         assertThat(GridKt._size(grid)).isEqualTo(3);
-        RegistrationViewRecord createdRegistration = GridKt._get(grid, 2);
 
         // Select newly created record
         GridKt._clickItem(grid, 2);

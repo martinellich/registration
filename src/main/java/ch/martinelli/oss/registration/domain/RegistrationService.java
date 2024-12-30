@@ -3,8 +3,6 @@ package ch.martinelli.oss.registration.domain;
 import ch.martinelli.oss.registration.db.tables.records.*;
 import ch.martinelli.oss.registration.mail.EmailSender;
 import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +20,6 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGIST
 @Service
 public class RegistrationService {
 
-    private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
     private final RegistrationRepository registrationRepository;
     private final DSLContext dslContext;
     private final EmailSender emailSender;
