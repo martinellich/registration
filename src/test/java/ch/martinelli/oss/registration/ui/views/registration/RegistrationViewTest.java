@@ -32,8 +32,9 @@ class RegistrationViewTest extends KaribuTest {
     void add_registration() {
         // Check the content of grid
         Grid<RegistrationRecord> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(1);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
+        assertThat(GridKt._size(grid)).isEqualTo(2);
+        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
+        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
 
         // Add new person
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2026);
@@ -44,7 +45,7 @@ class RegistrationViewTest extends KaribuTest {
 
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
 
-        assertThat(GridKt._size(grid)).isEqualTo(2);
+        assertThat(GridKt._size(grid)).isEqualTo(3);
     }
 
 }
