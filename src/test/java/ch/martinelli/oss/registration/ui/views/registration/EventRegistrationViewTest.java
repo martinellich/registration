@@ -10,8 +10,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +17,7 @@ class EventRegistrationViewTest extends KaribuTest {
 
     @BeforeEach
     void login() {
-        login("simon@martinelli.ch", "", List.of("ADMIN"));
+        login("simon@martinelli.ch");
         UI.getCurrent().getPage().reload();
 
         UI.getCurrent().navigate(EventRegistrationView.class);

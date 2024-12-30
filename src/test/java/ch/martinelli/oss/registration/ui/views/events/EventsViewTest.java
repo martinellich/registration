@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +22,7 @@ class EventsViewTest extends KaribuTest {
 
     @BeforeEach
     void login() {
-        login("simon@martinelli.ch", "", List.of("ADMIN"));
+        login("simon@martinelli.ch");
         UI.getCurrent().getPage().reload();
 
         UI.getCurrent().navigate(EventsView.class);
