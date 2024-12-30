@@ -57,9 +57,7 @@ public class RegistrationEmailView extends VerticalLayout {
 
         Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        resetButton.addClickListener(e -> {
-            yearIntegerField.clear();
-        });
+        resetButton.addClickListener(e -> yearIntegerField.clear());
 
         FormLayout formLayout = new FormLayout(yearIntegerField, new HorizontalLayout(searchButton, resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));

@@ -2,6 +2,10 @@ package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.db.tables.records.*;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +19,18 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.R
 import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
 import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 
-
 @Service
 public class RegistrationService {
 
+    private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
     private final RegistrationRepository registrationRepository;
     private final DSLContext dslContext;
+    private final JavaMailSender mailSender;
 
-    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext) {
+    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext, JavaMailSender mailSender) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
+        this.mailSender = mailSender;
     }
 
     @Transactional
@@ -93,6 +99,17 @@ public class RegistrationService {
             registrationEmailPerson.store();
         }
         return true;
+    }
+
+    public void sendMails() {
+        var message = new SimpleMailMessage();
+        message.setFrom("jugi@tverlach.ch");
+        message.setTo("simon@martinelli.ch");
+        message.setSubject("Test Subject");
+        message.setText("Test Text");
+        log.info("Start sending");
+        mailSender.send(message);
+        log.info("Message sent");
     }
 
     private List<PersonRecord> findPersonRByRegistrationIdOrderByEmail(Long registrationId) {
