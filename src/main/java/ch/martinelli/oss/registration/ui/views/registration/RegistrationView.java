@@ -86,36 +86,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         add(splitLayout);
 
-        // Configure Grid
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        configureGrid();
+        configureButtons(registrationService);
+    }
 
-        grid.addColumn(RegistrationRecord::getYear)
-                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
-                .setHeader("Jahr").setAutoWidth(true);
-        grid.addColumn(RegistrationRecord::getOpenFrom)
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
-                .setHeader("Offen von").setAutoWidth(true);
-        grid.addColumn(RegistrationRecord::getOpenUntil)
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
-                .setHeader("Offen bis").setAutoWidth(true);
-
-        grid.setItems(query -> registrationRepository.findAll(
-                        query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(EVENT, query))
-                .stream());
-
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                createMailingButton.setEnabled(true);
-                UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                createMailingButton.setEnabled(false);
-                clearForm();
-                UI.getCurrent().navigate(RegistrationView.class);
-            }
-        });
-
+    private void configureButtons(RegistrationService registrationService) {
         saveButton.addClickListener(e -> {
             try {
                 if (this.registration == null) {
@@ -157,6 +132,38 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         "Abbrechen",
                         cancelEvent -> {
                         }).open();
+            }
+        });
+    }
+
+    private void configureGrid() {
+        // Configure Grid
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        grid.addColumn(RegistrationRecord::getYear)
+                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
+                .setHeader("Jahr").setAutoWidth(true);
+        grid.addColumn(RegistrationRecord::getOpenFrom)
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
+                .setHeader("Offen von").setAutoWidth(true);
+        grid.addColumn(RegistrationRecord::getOpenUntil)
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
+                .setHeader("Offen bis").setAutoWidth(true);
+
+        grid.setItems(query -> registrationRepository.findAll(
+                        query.getOffset(), query.getLimit(),
+                        VaadinJooqUtil.orderFields(EVENT, query))
+                .stream());
+
+        // when a row is selected or deselected, populate form
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                createMailingButton.setEnabled(true);
+                UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            } else {
+                createMailingButton.setEnabled(false);
+                clearForm();
+                UI.getCurrent().navigate(RegistrationView.class);
             }
         });
     }
