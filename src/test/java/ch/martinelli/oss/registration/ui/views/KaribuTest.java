@@ -41,6 +41,8 @@ public abstract class KaribuTest {
 
     @BeforeAll
     public static void discoverRoutes() {
+        System.setProperty("logging.level.org.jooq", "debug");
+
         Locale.setDefault(Locale.GERMAN);
         routes = new Routes().autoDiscoverViews(packageName);
     }

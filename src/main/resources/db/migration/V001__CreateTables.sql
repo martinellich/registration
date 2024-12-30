@@ -135,9 +135,24 @@ from event e
          join person p on r.person_id = p.id;
 
 create view registration_email_view as
-select r.year,
+select r.id as registration_id,
+       r.year,
        re.email,
        re.link,
        re.sent_at
 from registration_email re
-         join registration r on re.registration_id = r.id
+         join registration r on re.registration_id = r.id;
+
+create view registration_view as
+select r.id,
+       r.year,
+       r.open_from,
+       r.open_until,
+       (select count(*)
+        from registration_email
+        where registration_id = r.id) as email_created_count,
+       (select count(*)
+        from registration_email
+        where registration_id = r.id
+          and sent_at is not null)    as email_sent_count
+from registration r;

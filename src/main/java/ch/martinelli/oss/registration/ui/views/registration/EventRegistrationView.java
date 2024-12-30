@@ -92,7 +92,7 @@ public class EventRegistrationView extends VerticalLayout {
                 .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.FIRST_NAME.getName())
                 .setHeader("Vorname").setAutoWidth(true);
 
-        grid.setItems(query -> registrationRepository.findAllFromView(
+        grid.setItems(query -> registrationRepository.findAllEventRegistrationsFromView(
                 getFilter(),
                 query.getOffset(), query.getLimit(),
                 VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)

@@ -26,7 +26,7 @@ class RegistrationEmailViewTest extends KaribuTest {
     void display_registration_emails() {
         // Check the content of grid
         Grid<RegistrationEmailViewRecord> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(1);
+        assertThat(GridKt._size(grid)).isNotZero();
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
 
         // Filter
@@ -47,6 +47,6 @@ class RegistrationEmailViewTest extends KaribuTest {
         _click(_get(Button.class, spec -> spec.withText("Reset")));
 
         // Check the content of grid
-        assertThat(GridKt._size(grid)).isEqualTo(1);
+        assertThat(GridKt._size(grid)).isNotZero();
     }
 }

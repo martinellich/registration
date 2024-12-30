@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
+import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
 @PageTitle("Tätigkeitsprogramm")
 @Route("registrations/:registrationID?/:action?(edit)")
@@ -50,12 +52,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private static final String REGISTRATION_ID = "registrationID";
     private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
 
-    private final Grid<RegistrationRecord> grid = new Grid<>(RegistrationRecord.class, false);
+    private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
 
     private final Button saveButton = new Button("Speichern");
     private final Button cancelButton = new Button("Abbrechen");
     private final Button createMailingButton = new Button("Versand erstellen");
+    private final Button sendEmailsButton = new Button("Emails verschicken");
 
     private RegistrationRecord registration;
 
@@ -88,6 +91,78 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         configureGrid();
         configureButtons(registrationService);
+    }
+
+    private void configureGrid() {
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        grid.addColumn(RegistrationViewRecord::getYear)
+                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
+                .setHeader("Jahr").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getOpenFrom)
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
+                .setHeader("Offen von").setAutoWidth(true);
+        grid.addColumn(RegistrationViewRecord::getOpenUntil)
+                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
+                .setHeader("Offen bis").setAutoWidth(true);
+        grid.addColumn(r -> r.getEmailCreatedCount() > 0 ? "X" : "")
+                .setHeader("Versand erstellt").setAutoWidth(true);
+        grid.addColumn(r -> r.getEmailSentCount() > 0 ? "X" : "")
+                .setHeader("Emails verschickt").setAutoWidth(true);
+
+        loadData();
+
+        // when a row is selected or deselected, populate form
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            RegistrationViewRecord registrationViewRecord = event.getValue();
+
+            if (registrationViewRecord != null) {
+                UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, registrationViewRecord.getId()));
+            } else {
+                clearForm();
+                UI.getCurrent().navigate(RegistrationView.class);
+            }
+        });
+    }
+
+    private void loadData() {
+        grid.setItems(query -> registrationRepository.findAllFromView(
+                        DSL.noCondition(),
+                        query.getOffset(), query.getLimit(),
+                        VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
+                .stream());
+    }
+
+    private void setButtonState(RegistrationViewRecord registrationViewRecord) {
+        boolean eventListBoxEmpty = eventListBox.getSelectedItems().isEmpty();
+        boolean personListBoxEmpty = personListBox.getSelectedItems().isEmpty();
+        boolean isEmailCreatedCountZero = registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() == 0;
+        createMailingButton.setEnabled(!eventListBoxEmpty && !personListBoxEmpty && isEmailCreatedCountZero);
+        sendEmailsButton.setEnabled(registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() > 0 && registrationViewRecord.getEmailSentCount() == 0);
+    }
+
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        Optional<Long> eventId = event.getRouteParameters().get(REGISTRATION_ID).map(Long::parseLong);
+        if (eventId.isPresent()) {
+            Optional<RegistrationRecord> registrationFromBackend = registrationRepository.findById(eventId.get());
+            if (registrationFromBackend.isPresent()) {
+                populateForm(registrationFromBackend.get());
+                registrationRepository.findByIdFromView(eventId.get()).ifPresent(registrationViewRecord -> {
+                    grid.select(registrationViewRecord);
+                    setButtonState(registrationViewRecord);
+                });
+            } else {
+                Notification.error(String.format("Die angeforderte Registrierung wurde nicht gefunden, ID = %s", eventId.get()));
+                // when a row is selected but the data is no longer available, refresh grid
+                refreshGrid();
+                event.forwardTo(RegistrationView.class);
+            }
+        } else {
+            setButtonState(null);
+            clearForm();
+        }
     }
 
     private void configureButtons(RegistrationService registrationService) {
@@ -125,6 +200,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
                                 Notification.success("Der Versand wurde erstellt");
+                                refreshGrid();
                             } else {
                                 Notification.error("Es gibt bereits einen Versand");
                             }
@@ -134,54 +210,24 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         }).open();
             }
         });
-    }
 
-    private void configureGrid() {
-        // Configure Grid
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-
-        grid.addColumn(RegistrationRecord::getYear)
-                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
-                .setHeader("Jahr").setAutoWidth(true);
-        grid.addColumn(RegistrationRecord::getOpenFrom)
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
-                .setHeader("Offen von").setAutoWidth(true);
-        grid.addColumn(RegistrationRecord::getOpenUntil)
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
-                .setHeader("Offen bis").setAutoWidth(true);
-
-        grid.setItems(query -> registrationRepository.findAll(
-                        query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(EVENT, query))
-                .stream());
-
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                createMailingButton.setEnabled(true);
-                UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                createMailingButton.setEnabled(false);
-                clearForm();
-                UI.getCurrent().navigate(RegistrationView.class);
+        sendEmailsButton.addClickListener(e -> {
+            if (this.registration != null) {
+                new ConfirmDialog("Emails versenden",
+                        "Möchtest du die Emails verschicken?",
+                        "Ja",
+                        confirmEvent -> {
+                            if (registrationService.sendMails(this.registration)) {
+                                Notification.success("Die Emails werden versendet");
+                            } else {
+                                Notification.error("Die Emails wurden bereits versendet");
+                            }
+                        },
+                        "Abbrechen",
+                        cancelEvent -> {
+                        }).open();
             }
         });
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> eventId = event.getRouteParameters().get(REGISTRATION_ID).map(Long::parseLong);
-        if (eventId.isPresent()) {
-            Optional<RegistrationRecord> registrationFromBackend = registrationRepository.findById(eventId.get());
-            if (registrationFromBackend.isPresent()) {
-                populateForm(registrationFromBackend.get());
-            } else {
-                Notification.error(String.format("Die angeforderte Registrierung wurde nicht gefunden, ID = %s", eventId.get()));
-                // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
-                event.forwardTo(RegistrationView.class);
-            }
-        }
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
@@ -225,14 +271,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         listBoxFormLayout.add(new H3("Anlässe"), new H3("Jugeler"));
 
         eventListBox = new MultiSelectListBox<>();
+        eventListBox.setId("event-list-box");
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
+        eventListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
 
         Scroller eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
         eventListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
 
         personListBox = new MultiSelectListBox<>();
+        personListBox.setId("person-list-box");
         personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
+        personListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
 
         Scroller personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
@@ -252,9 +302,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         buttonLayout.setClassName("button-layout");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createMailingButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        createMailingButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         createMailingButton.setEnabled(false);
-        buttonLayout.add(saveButton, cancelButton, createMailingButton);
+        sendEmailsButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        sendEmailsButton.setEnabled(false);
+        buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton);
         editorLayoutDiv.add(buttonLayout);
     }
 
@@ -266,8 +318,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     }
 
     private void refreshGrid() {
-        grid.select(null);
-        grid.getDataProvider().refreshAll();
+        loadData();
     }
 
     private void clearForm() {
@@ -278,17 +329,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         this.registration = value;
         binder.readBean(this.registration);
 
+        personListBox.setItems(personRepository.findAll(PERSON.ACTIVE.isTrue(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
+
         if (value == null) {
-            eventListBox.setItems();
             eventListBox.clear();
-            personListBox.setItems();
             personListBox.clear();
         } else {
             loadEvents(this.registration.getYear());
-            eventListBox.setValue(registrationService.findEventsByRegistration(this.registration.getId()));
-
-            personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
             personListBox.setValue(registrationService.findPersonsByRegistrationId(this.registration.getId()));
+            eventListBox.setValue(registrationService.findEventsByRegistrationId(this.registration.getId()));
         }
     }
 
@@ -296,9 +345,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         LocalDate fromDate = LocalDate.of(year, 1, 1);
         LocalDate toDate = LocalDate.of(year, 12, 31);
 
-        eventListBox.setItems(eventRepository.findAll(
-                EVENT.FROM_DATE.between(fromDate, toDate),
-                List.of(EVENT.TITLE)));
+        eventListBox.setItems(eventRepository.findAll(EVENT.FROM_DATE.between(fromDate, toDate), List.of(EVENT.TITLE)));
     }
 
 }

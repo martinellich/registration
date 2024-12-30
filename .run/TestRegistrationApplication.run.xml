@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestRegistrationApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <additionalParameters>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="logging.level.org.jooq" />
+        <option name="value" value="debug" />
+      </param>
+    </additionalParameters>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="registrations" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ch.martinelli.oss.registration.TestRegistrationApplication" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ch.martinelli.oss.registration.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

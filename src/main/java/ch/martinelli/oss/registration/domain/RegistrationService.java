@@ -1,11 +1,11 @@
 package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.db.tables.records.*;
+import ch.martinelli.oss.registration.mail.EmailSender;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +25,14 @@ public class RegistrationService {
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
     private final RegistrationRepository registrationRepository;
     private final DSLContext dslContext;
-    private final JavaMailSender mailSender;
+    private final EmailSender emailSender;
+    private final RegistrationEmailRepository registrationEmailRepository;
 
-    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext, JavaMailSender mailSender) {
+    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext, EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
-        this.mailSender = mailSender;
+        this.emailSender = emailSender;
+        this.registrationEmailRepository = registrationEmailRepository;
     }
 
     @Transactional
@@ -59,7 +61,7 @@ public class RegistrationService {
                         .execute());
     }
 
-    public Set<EventRecord> findEventsByRegistration(Long registrationId) {
+    public Set<EventRecord> findEventsByRegistrationId(Long registrationId) {
         List<EventRecord> events = dslContext
                 .select(REGISTRATION_EVENT.event().fields())
                 .from(REGISTRATION_EVENT)
@@ -101,15 +103,30 @@ public class RegistrationService {
         return true;
     }
 
-    public void sendMails() {
-        var message = new SimpleMailMessage();
-        message.setFrom("jugi@tverlach.ch");
-        message.setTo("simon@martinelli.ch");
-        message.setSubject("Test Subject");
-        message.setText("Test Text");
-        log.info("Start sending");
-        mailSender.send(message);
-        log.info("Message sent");
+    public boolean sendMails(RegistrationRecord registration) {
+        Integer count = dslContext.selectCount()
+                .from(REGISTRATION_EMAIL)
+                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(registration.getId()))
+                .and(REGISTRATION_EMAIL.SENT_AT.isNotNull())
+                .fetchOneInto(Integer.class);
+        if (count != null && count > 0) {
+            return false;
+        }
+
+        Set<SimpleMailMessage> mails = new HashSet<>();
+
+        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationId(registration.getId());
+        for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
+            var message = new SimpleMailMessage();
+            message.setFrom("jugi@tverlach.ch");
+            message.setTo(registrationEmail.getEmail());
+            message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
+            message.setText("Test Text");
+        }
+
+        emailSender.send(mails);
+
+        return true;
     }
 
     private List<PersonRecord> findPersonRByRegistrationIdOrderByEmail(Long registrationId) {
