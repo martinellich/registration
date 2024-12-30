@@ -12,6 +12,7 @@ import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -50,11 +51,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
 
     private final Grid<RegistrationRecord> grid = new Grid<>(RegistrationRecord.class, false);
-
-    private final Button cancel = new Button("Abbrechen");
-    private final Button save = new Button("Speichern");
-
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
+
+    private final Button saveButton = new Button("Speichern");
+    private final Button cancelButton = new Button("Abbrechen");
+    private final Button createMailingButton = new Button("Versand erstellen");
 
     private RegistrationRecord registration;
 
@@ -106,19 +107,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
+                createMailingButton.setEnabled(true);
                 UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
+                createMailingButton.setEnabled(false);
                 clearForm();
                 UI.getCurrent().navigate(RegistrationView.class);
             }
         });
 
-        cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
-        });
-
-        save.addClickListener(e -> {
+        saveButton.addClickListener(e -> {
             try {
                 if (this.registration == null) {
                     this.registration = new RegistrationRecord();
@@ -136,6 +134,29 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
                 Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+            }
+        });
+
+        cancelButton.addClickListener(e -> {
+            clearForm();
+            refreshGrid();
+        });
+
+        createMailingButton.addClickListener(e -> {
+            if (this.registration != null) {
+                new ConfirmDialog("Versand erstellen",
+                        "Möchtest du den Versand für die Registrierung erstellen?",
+                        "Ja",
+                        confirmEvent -> {
+                            if (registrationService.createMailing(this.registration)) {
+                                Notification.success("Der Versand wurde erstellt");
+                            } else {
+                                Notification.error("Es gibt bereits einen Versand");
+                            }
+                        },
+                        "Abbrechen",
+                        cancelEvent -> {
+                        }).open();
             }
         });
     }
@@ -222,9 +243,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private void createButtonLayout(Div editorLayoutDiv) {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
-        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        createMailingButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        createMailingButton.setEnabled(false);
+        buttonLayout.add(saveButton, cancelButton, createMailingButton);
         editorLayoutDiv.add(buttonLayout);
     }
 
@@ -258,7 +281,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             eventListBox.setValue(registrationService.findEventsByRegistration(this.registration.getId()));
 
             personListBox.setItems(personRepository.findAll(DSL.noCondition(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
-            personListBox.setValue(registrationService.findPersonsByRegistration(this.registration.getId()));
+            personListBox.setValue(registrationService.findPersonsByRegistrationId(this.registration.getId()));
         }
     }
 

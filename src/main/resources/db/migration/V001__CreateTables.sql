@@ -70,9 +70,19 @@ create table registration_email
     registration_id bigint    not null,
     email           varchar   not null,
     link            varchar   not null,
-    sent_at         timestamp not null,
+    sent_at         timestamp,
 
     foreign key (registration_id) references registration (id)
+);
+
+create table registration_email_person
+(
+    registration_email_id bigint not null,
+    person_id             bigint not null,
+
+    primary key (registration_email_id, person_id),
+    foreign key (registration_email_id) references registration_email (id),
+    foreign key (person_id) references person (id)
 );
 
 create table registration_person
