@@ -4,8 +4,10 @@ import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -28,7 +30,7 @@ class RegistrationViewTest extends KaribuTest {
     }
 
     @Test
-    void add_registration() {
+    void add_registration_and_create_mailing() {
         // Check the content of grid
         Grid<RegistrationRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(2);
@@ -45,6 +47,18 @@ class RegistrationViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
 
         assertThat(GridKt._size(grid)).isEqualTo(3);
+
+        // Select newly created record
+        GridKt._clickItem(grid, 2);
+
+        // Create mailing
+        _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
+
+        // Confirm
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        // Check if save was successful
+        NotificationsKt.expectNotifications("Der Versand wurde erstellt");
     }
 
 }

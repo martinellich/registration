@@ -73,7 +73,7 @@ public class RegistrationService {
                 .from(REGISTRATION_EMAIL)
                 .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(registration.getId()))
                 .fetchOneInto(Integer.class);
-        if (count > 0) {
+        if (count != null && count > 0) {
             return false;
         }
 
