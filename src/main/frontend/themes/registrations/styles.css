@@ -2,3 +2,19 @@
 @import url('./views/events-view.css');
 @import url('./views/persons-view.css');
 @import url('./views/registrations-view.css');
+
+html {
+    --lumo-border-radius: 0.125em;
+    --lumo-primary-text-color: rgb(35, 87, 135);
+    --lumo-primary-color-50pct: rgba(35, 87, 135, 0.5);
+    --lumo-primary-color-10pct: rgba(35, 87, 135, 0.1);
+    --lumo-primary-color: hsl(209, 59%, 33%);
+    --lumo-success-text-color: rgb(0, 168, 149);
+    --lumo-success-color-50pct: rgba(0, 168, 149, 0.5);
+    --lumo-success-color-10pct: rgba(0, 168, 149, 0.1);
+    --lumo-success-color: hsl(173, 100%, 33%);
+    --lumo-error-text-color: rgb(238, 64, 36);
+    --lumo-error-color-50pct: rgba(238, 64, 36, 0.5);
+    --lumo-error-color-10pct: rgba(238, 64, 36, 0.1);
+    --lumo-error-color: hsl(8, 86%, 54%);
+}

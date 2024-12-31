@@ -34,4 +34,4 @@ insert into registration_event (registration_id,event_id) values (1,3);
 
 insert into event_registration (event_id,person_id) values (2,1);
 
-insert into registration_email (id,registration_id,email,link) values (1,1,'jordan.miccinesi@duod.gy','ABC');
+insert into registration_email (id,registration_id,email,link) values (1,1,'jordan.miccinesi@duod.gy','550e8400e29b41d4a716446655440000');

@@ -1,38 +1,31 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailRecord;
+import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
+
+import java.util.Optional;
 
 @PageTitle("Anmeldung")
-@Route("public")
-@Menu(order = 0, icon = LineAwesomeIconUrl.FILE)
+@Route(value = "public", autoLayout = false)
 @AnonymousAllowed
-public class PublicEventRegistrationView extends VerticalLayout {
+public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String> {
 
-    public PublicEventRegistrationView() {
-        setSpacing(false);
+    private final RegistrationEmailRepository registrationEmailRepository;
 
-        Image img = new Image("images/empty-plant.png", "placeholder plant");
-        img.setWidth("200px");
-        add(img);
-
-        H2 header = new H2("This place intentionally left empty");
-        header.addClassNames(Margin.Top.XLARGE, Margin.Bottom.MEDIUM);
-        add(header);
-        add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
-
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-        getStyle().set("text-align", "center");
+    public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository) {
+        this.registrationEmailRepository = registrationEmailRepository;
     }
 
+    @Override
+    public void setParameter(BeforeEvent event, String parameter) {
+        Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository.findByLink(parameter);
+        if (optionalRegistrationEmail.isPresent()) {
+            RegistrationEmailRecord registrationEmail = optionalRegistrationEmail.get();
+        } else {
+            event.rerouteToError(NotFoundException.class);
+        }
+    }
 }

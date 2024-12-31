@@ -134,11 +134,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     }
 
     private void setButtonState(RegistrationViewRecord registrationViewRecord) {
-        boolean eventListBoxEmpty = eventListBox.getSelectedItems().isEmpty();
-        boolean personListBoxEmpty = personListBox.getSelectedItems().isEmpty();
-        boolean isEmailCreatedCountZero = registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() == 0;
-        createMailingButton.setEnabled(!eventListBoxEmpty && !personListBoxEmpty && isEmailCreatedCountZero);
-        sendEmailsButton.setEnabled(registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() > 0 && registrationViewRecord.getEmailSentCount() == 0);
+        if (binder.hasChanges()) {
+            createMailingButton.setEnabled(false);
+            sendEmailsButton.setEnabled(false);
+        } else {
+            boolean eventListBoxEmpty = eventListBox.getSelectedItems().isEmpty();
+            boolean personListBoxEmpty = personListBox.getSelectedItems().isEmpty();
+            boolean isEmailCreatedCountZero = registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() == 0;
+            createMailingButton.setEnabled(!eventListBoxEmpty && !personListBoxEmpty && isEmailCreatedCountZero);
+            sendEmailsButton.setEnabled(registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() > 0 && registrationViewRecord.getEmailSentCount() == 0);
+        }
     }
 
 

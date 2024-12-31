@@ -10,14 +10,16 @@ import org.jooq.OrderField;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 
 @Repository
 public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, RegistrationEmailRecord, Long> {
 
     public RegistrationEmailRepository(DSLContext dslContext) {
-        super(dslContext, RegistrationEmail.REGISTRATION_EMAIL);
+        super(dslContext, REGISTRATION_EMAIL);
     }
 
     public List<RegistrationEmailViewRecord> findAllFromView(Condition filter, int offset, int limit, List<OrderField<?>> orderFields) {
@@ -35,5 +37,12 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .selectFrom(REGISTRATION_EMAIL_VIEW)
                 .where(REGISTRATION_EMAIL_VIEW.REGISTRATION_ID.eq(id))
                 .fetch();
+    }
+
+    public Optional<RegistrationEmailRecord> findByLink(String parameter) {
+        return dslContext
+                .selectFrom(REGISTRATION_EMAIL)
+                .where(REGISTRATION_EMAIL.LINK.eq(parameter))
+                .fetchOptional();
     }
 }
