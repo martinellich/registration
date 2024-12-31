@@ -127,15 +127,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private Icon createIcon(long count) {
-        Icon icon;
-        if (count > 0) {
-            icon = VaadinIcon.CHECK.create();
-            icon.getElement().getThemeList().add("badge success");
-        } else {
-            icon = VaadinIcon.CIRCLE_THIN.create();
-            icon.getElement().getThemeList().add("badge contrast");
-        }
+    private Icon createIcon(long value) {
+        return value > 0
+                ? applyTheme(VaadinIcon.CHECK.create(), "badge success")
+                : applyTheme(VaadinIcon.CIRCLE_THIN.create(), "badge contrast");
+    }
+
+    private Icon applyTheme(Icon icon, String theme) {
+        icon.getElement().getThemeList().add(theme);
         return icon;
     }
 
