@@ -11,6 +11,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,6 +50,15 @@ class PersonsViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
         assertThat(GridKt._size(grid)).isEqualTo(13);
+    }
+
+    @Test
+    void navigate_to_existing_person() {
+        // Navigate to person with id 1
+        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "1"));
+
+        // Check if the correct person is displayed
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Lane");
     }
 
 }
