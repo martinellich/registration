@@ -129,8 +129,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     private Icon createIcon(long value) {
         return value > 0
-                ? applyTheme(VaadinIcon.CHECK.create(), "badge success")
-                : applyTheme(VaadinIcon.CIRCLE_THIN.create(), "badge contrast");
+                ? applyTheme(VaadinIcon.CHECK_SQUARE.create(), "badge success")
+                : applyTheme(VaadinIcon.THIN_SQUARE.create(), "badge contrast");
     }
 
     private Icon applyTheme(Icon icon, String theme) {
