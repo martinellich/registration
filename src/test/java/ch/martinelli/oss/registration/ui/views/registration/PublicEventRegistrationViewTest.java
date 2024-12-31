@@ -7,15 +7,22 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class PublicEventRegistrationViewTest extends KaribuTest {
 
     @Test
-    void page_displayed() {
-        UI.getCurrent().navigate(PublicEventRegistrationView.class);
+    void navigation_without_parameter() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> UI.getCurrent().navigate(PublicEventRegistrationView.class))
+                .withMessage("Navigation target 'ch.martinelli.oss.registration.ui.views.registration.PublicEventRegistrationView' requires a parameter.");
+    }
 
+    @Test
+    void navgation_with_correct_parameter() {
+        UI.getCurrent().navigate("public/550e8400e29b41d4a716446655440000");
 
-        H2 title = _get(H2.class);
-        assertThat(title.getText()).isEqualTo("This place intentionally left empty");
+        H2 title = _get(H2.class, spec -> spec.withText("Anmeldung"));
+        assertThat(title).isNotNull();
     }
 }

@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -17,6 +18,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
+
+        add(new H2("Anmeldung"));
     }
 
     @Override
