@@ -50,6 +50,10 @@ class PersonsViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
         assertThat(GridKt._size(grid)).isEqualTo(13);
+
+        // Click new item and check value
+        GridKt._clickItem(grid, 12);
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Martinelli");
     }
 
     @Test

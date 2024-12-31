@@ -49,6 +49,10 @@ class EventsViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
         assertThat(GridKt._size(grid)).isEqualTo(4);
+
+        // Click new item and check value
+        GridKt._clickItem(grid, 3);
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("Jugendturntag");
     }
 
     @Test
