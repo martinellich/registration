@@ -21,6 +21,8 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -105,9 +107,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         grid.addColumn(RegistrationViewRecord::getOpenUntil)
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
                 .setHeader("Offen bis").setAutoWidth(true);
-        grid.addColumn(r -> r.getEmailCreatedCount() > 0 ? "X" : "")
+        grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount()))
                 .setHeader("Versand erstellt").setAutoWidth(true);
-        grid.addColumn(r -> r.getEmailSentCount() > 0 ? "X" : "")
+        grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
                 .setHeader("Emails verschickt").setAutoWidth(true);
 
         loadData();
@@ -123,6 +125,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(RegistrationView.class);
             }
         });
+    }
+
+    private Icon createIcon(long count) {
+        Icon icon;
+        if (count > 0) {
+            icon = VaadinIcon.CHECK.create();
+            icon.getElement().getThemeList().add("badge success");
+        } else {
+            icon = VaadinIcon.CIRCLE_THIN.create();
+            icon.getElement().getThemeList().add("badge contrast");
+        }
+        return icon;
     }
 
     private void loadData() {
