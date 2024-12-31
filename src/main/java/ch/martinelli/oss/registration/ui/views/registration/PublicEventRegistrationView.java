@@ -14,7 +14,7 @@ import java.util.Optional;
 @AnonymousAllowed
 public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String> {
 
-    private final RegistrationEmailRepository registrationEmailRepository;
+    private final transient RegistrationEmailRepository registrationEmailRepository;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
@@ -27,6 +27,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository.findByLink(parameter);
         if (optionalRegistrationEmail.isPresent()) {
             RegistrationEmailRecord registrationEmail = optionalRegistrationEmail.get();
+            System.out.println(registrationEmail);
         } else {
             event.rerouteToError(NotFoundException.class);
         }

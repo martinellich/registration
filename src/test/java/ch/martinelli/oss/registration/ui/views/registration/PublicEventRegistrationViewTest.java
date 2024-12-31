@@ -13,8 +13,9 @@ class PublicEventRegistrationViewTest extends KaribuTest {
 
     @Test
     void navigation_without_parameter() {
+        UI ui = UI.getCurrent();
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> UI.getCurrent().navigate(PublicEventRegistrationView.class))
+                .isThrownBy(() -> ui.navigate(PublicEventRegistrationView.class))
                 .withMessage("Navigation target 'ch.martinelli.oss.registration.ui.views.registration.PublicEventRegistrationView' requires a parameter.");
     }
 
