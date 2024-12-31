@@ -21,6 +21,7 @@
         <jooq-spring.version>0.4.0</jooq-spring.version>
         <jooq-utilities.version>1.1.2</jooq-utilities.version>
         <vaadin-jooq.version>2.1.1</vaadin-jooq.version>
+        <line-awesome.version>2.1.0</line-awesome.version>
 
         <testcontainers.version>1.20.4</testcontainers.version>
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
@@ -103,7 +104,7 @@
         <dependency>
             <groupId>org.parttio</groupId>
             <artifactId>line-awesome</artifactId>
-            <version>2.1.0</version>
+            <version>${line-awesome.version}</version>
         </dependency>
 
         <dependency>
