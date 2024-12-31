@@ -7,6 +7,8 @@ import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -45,7 +47,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private void showRegistrationForm() {
         removeAll();
 
-        add(new H1("Anmeldung"));
+        add(new H1("Jugi TV Erlach - Anmeldung"));
 
         List<PersonRecord> persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmail.getId());
         for (PersonRecord person : persons) {
@@ -55,7 +57,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         List<EventRecord> events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
         for (EventRecord event : events) {
-            add(new H2(event.getTitle() + event.getFromDate()));
+            add(new HorizontalLayout(new Span(event.getTitle()), new Span(event.getFromDate().toString())));
         }
     }
 }

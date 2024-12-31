@@ -23,7 +23,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
     void navgation_with_correct_parameter() {
         UI.getCurrent().navigate("public/550e8400e29b41d4a716446655440000");
 
-        H2 title = _get(H2.class, spec -> spec.withText("Anmeldung"));
+        H2 title = _get(H2.class, spec -> spec.withText("Lane Eula"));
         assertThat(title).isNotNull();
     }
 }
