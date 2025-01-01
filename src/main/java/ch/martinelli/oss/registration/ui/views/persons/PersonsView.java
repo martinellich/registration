@@ -108,10 +108,10 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 if (binder.validate().isOk()) {
                     binder.writeBean(this.person);
                     personRepository.save(this.person);
-                 
+
                     clearForm();
                     refreshGrid();
-                 
+
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(PersonsView.class);
                 }
@@ -129,9 +129,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
             } else {
-                Notification.error(String.format("Die angeforderte Person wurde nicht gefunden, ID = %s", personId.get()));
-                // when a row is selected but the data is no longer available,
-                // refresh grid
+                // when a row is selected but the data is no longer available, refresh grid
                 refreshGrid();
                 event.forwardTo(PersonsView.class);
             }

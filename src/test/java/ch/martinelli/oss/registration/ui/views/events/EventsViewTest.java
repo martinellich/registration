@@ -57,10 +57,20 @@ class EventsViewTest extends KaribuTest {
 
     @Test
     void navigate_to_existing_event() {
-        // Navigate to person with id 1
+        // Navigate to event with id 1
         UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "1"));
 
-        // Check if the correct person is displayed
+        // Check if the correct event is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("CIS 2023");
     }
+
+    @Test
+    void navigate_to_non_existing_event() {
+        // Navigate to event with id 1
+        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "9999"));
+
+        // Check if the no person is displayed
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("");
+    }
+
 }

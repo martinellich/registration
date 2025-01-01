@@ -65,4 +65,13 @@ class PersonsViewTest extends KaribuTest {
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Lane");
     }
 
+    @Test
+    void navigate_to_non_existing_person() {
+        // Navigate to person with id 1
+        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "999"));
+
+        // Check if the no person is displayed
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("");
+    }
+
 }

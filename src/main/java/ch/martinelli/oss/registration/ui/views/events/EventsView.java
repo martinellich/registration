@@ -128,7 +128,6 @@ public class EventsView extends Div implements BeforeEnterObserver {
             if (eventFromBackend.isPresent()) {
                 populateForm(eventFromBackend.get());
             } else {
-                Notification.error(String.format("Die angeforderte Veranstaltung wurde nicht gefunden, ID = %s", eventId.get()));
                 // when a row is selected but the data is no longer available, refresh grid
                 refreshGrid();
                 event.forwardTo(EventsView.class);
