@@ -1,119 +1,94 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
-import ch.martinelli.oss.registration.db.tables.Registration;
-import ch.martinelli.oss.registration.db.tables.records.EventRegistrationViewRecord;
-import ch.martinelli.oss.registration.domain.RegistrationRepository;
-import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
+import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
+import ch.martinelli.oss.registration.domain.EventRegistrationRow;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
-import org.jooq.Condition;
-import org.jooq.impl.DSL;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
-import static ch.martinelli.oss.registration.db.tables.EventRegistrationView.EVENT_REGISTRATION_VIEW;
+import java.util.List;
 
 @PageTitle("Anmeldungen")
 @Route("event-registrations")
-@RouteAlias("")
-@Menu(order = 1, icon = LineAwesomeIconUrl.FILTER_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class EventRegistrationView extends VerticalLayout {
+public class EventRegistrationView extends Div implements HasUrlParameter<Long> {
 
-    private final transient RegistrationRepository registrationRepository;
+    private final transient EventRegistrationRepository eventRegistrationRepository;
 
-    private final Grid<EventRegistrationViewRecord> grid = new Grid<>(EventRegistrationViewRecord.class, false);
+    private final Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
 
-    private TextField nameTextField;
-    private IntegerField yearIntegerField;
+    private List<EventRegistrationRow> eventRegistrationMatrix;
+    private Long registrationId;
 
-    public EventRegistrationView(RegistrationRepository registrationRepository) {
-        this.registrationRepository = registrationRepository;
+    public EventRegistrationView(EventRegistrationRepository eventRegistrationRepository) {
+        this.eventRegistrationRepository = eventRegistrationRepository;
 
+        addClassNames("event-registrations-view");
         setSizeFull();
-
-        add(createFilters(), createGrid());
     }
 
-    public FormLayout createFilters() {
-        nameTextField = new TextField();
-        nameTextField.setPlaceholder("Vor- oder Nachname");
+    @Override
+    public void setParameter(BeforeEvent event, Long registrationId) {
+        this.registrationId = registrationId;
 
-        yearIntegerField = new IntegerField();
-        yearIntegerField.setPlaceholder("Jahr");
+        removeAll();
 
-        Button searchButton = new Button("Suchen");
-        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        searchButton.addClickListener(e -> grid.getDataProvider().refreshAll());
+        add(createGrid());
 
-        Button resetButton = new Button("Reset");
-        resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        resetButton.addClickListener(e -> {
-            nameTextField.clear();
-            yearIntegerField.clear();
-        });
-
-        FormLayout formLayout = new FormLayout(nameTextField, yearIntegerField, new HorizontalLayout(searchButton, resetButton));
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
-
-        return formLayout;
+        createButtons();
     }
 
     private Component createGrid() {
-        grid.addColumn(EventRegistrationViewRecord::getTitle)
-                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.TITLE.getName())
-                .setHeader("Bezeichnung").setAutoWidth(true);
-        grid.addColumn(EventRegistrationViewRecord::getLocation)
-                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.LOCATION.getName())
-                .setHeader("Beschreibung").setAutoWidth(true);
-        grid.addColumn(EventRegistrationViewRecord::getFromDate)
-                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.FROM_DATE.getName())
-                .setHeader("Datum").setAutoWidth(true);
-        grid.addColumn(EventRegistrationViewRecord::getLastName)
-                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.LAST_NAME.getName())
+        loadData();
+
+        grid.addColumn(EventRegistrationRow::lastName)
                 .setHeader("Nachname").setAutoWidth(true);
-        grid.addColumn(EventRegistrationViewRecord::getFirstName)
-                .setSortable(true).setSortProperty(EVENT_REGISTRATION_VIEW.FIRST_NAME.getName())
+        grid.addColumn(EventRegistrationRow::firstName)
                 .setHeader("Vorname").setAutoWidth(true);
 
-        grid.setItems(query -> registrationRepository.findAllEventRegistrationsFromView(
-                getFilter(),
-                query.getOffset(), query.getLimit(),
-                VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)
-        ).stream());
+        if (eventRegistrationMatrix.isEmpty()) {
+            Notification.warning("Keine Anmeldungen gefunden");
+        } else {
+            EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
+            firstRow.registrations().forEach((event, registered) ->
+                    grid.addColumn(registrationRow -> registrationRow.registrations().get(event))
+                            .setHeader(event).setWidth("20px"));
+        }
+
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
+
+        grid.setItems(eventRegistrationMatrix);
 
         return grid;
     }
 
-    private Condition getFilter() {
-        Condition condition = DSL.noCondition();
-
-        if (!nameTextField.isEmpty()) {
-            condition = condition.and(EVENT_REGISTRATION_VIEW.FIRST_NAME.likeIgnoreCase(nameTextField.getValue())
-                    .or(EVENT_REGISTRATION_VIEW.LAST_NAME.likeIgnoreCase(nameTextField.getValue())));
-        }
-        if (!yearIntegerField.isEmpty()) {
-            condition = condition.and(DSL.year(EVENT_REGISTRATION_VIEW.FROM_DATE).eq(yearIntegerField.getValue()));
-        }
-        return condition;
+    private void loadData() {
+        eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
     }
 
+    private void createButtons() {
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.setClassName("button-layout");
+        Button cancelButton = new Button("Zurück");
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        cancelButton.addClickListener(e -> UI.getCurrent().getPage().getHistory().back());
+        buttonLayout.add(cancelButton);
+        add(buttonLayout);
+    }
 }

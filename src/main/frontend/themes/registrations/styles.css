@@ -1,4 +1,5 @@
 @import url('./main-layout.css');
+@import url('./views/event-registrations-view.css');
 @import url('./views/events-view.css');
 @import url('./views/persons-view.css');
 @import url('./views/registrations-view.css');
@@ -6,9 +7,9 @@
 html {
     --lumo-border-radius: 0.125em;
     --lumo-primary-text-color: rgb(35, 87, 135);
-    --lumo-primary-color-50pct: rgba(35, 87, 135, 0.5);
-    --lumo-primary-color-10pct: rgba(35, 87, 135, 0.1);
-    --lumo-primary-color: hsl(209, 59%, 33%);
+    --lumo-primary-color-50pct: rgba(0, 114, 187, 0.5);
+    --lumo-primary-color-10pct: rgba(0, 114, 187, 0.1);
+    --lumo-primary-color: hsl(203, 100%, 37%);
     --lumo-success-text-color: rgb(0, 168, 149);
     --lumo-success-color-50pct: rgba(0, 168, 149, 0.5);
     --lumo-success-color-10pct: rgba(0, 168, 149, 0.1);

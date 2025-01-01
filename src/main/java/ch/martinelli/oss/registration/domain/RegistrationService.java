@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
@@ -126,6 +127,23 @@ public class RegistrationService {
         return true;
     }
 
+    @Transactional
+    public void register(EventRecord event, PersonRecord person, boolean registered) {
+        EventRegistrationRecord eventRegistration = dslContext
+                .selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.EVENT_ID.eq(event.getId()))
+                .and(EVENT_REGISTRATION.PERSON_ID.eq(person.getId()))
+                .fetchOptional()
+                .orElseGet(() -> {
+                    EventRegistrationRecord newEventRegistration = dslContext.newRecord(EVENT_REGISTRATION);
+                    newEventRegistration.setEventId(event.getId());
+                    newEventRegistration.setPersonId(person.getId());
+                    return newEventRegistration;
+                });
+        eventRegistration.setRegistered(registered);
+        eventRegistration.store();
+    }
+
     private List<PersonRecord> findPersonRByRegistrationIdOrderByEmail(Long registrationId) {
         return dslContext
                 .select(REGISTRATION_PERSON.person().fields())
@@ -133,4 +151,5 @@ public class RegistrationService {
                 .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registrationId))
                 .fetchInto(PersonRecord.class);
     }
+
 }

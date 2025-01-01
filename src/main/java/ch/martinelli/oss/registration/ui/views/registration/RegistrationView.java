@@ -45,9 +45,10 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
-@PageTitle("Tätigkeitsprogramm")
+@PageTitle("Auschreibungen")
 @Route("registrations/:registrationID?/:action?(edit)")
-@Menu(order = 2, icon = LineAwesomeIconUrl.LIST_SOLID)
+@RouteAlias("")
+@Menu(order = 0, icon = LineAwesomeIconUrl.LIST_SOLID)
 @RolesAllowed("ADMIN")
 public class RegistrationView extends Div implements BeforeEnterObserver {
 
@@ -61,6 +62,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private final Button cancelButton = new Button("Abbrechen");
     private final Button createMailingButton = new Button("Versand erstellen");
     private final Button sendEmailsButton = new Button("Emails verschicken");
+    private final Button showRegistrations = new Button("Anmeldungen anzeigen");
 
     private RegistrationRecord registration;
 
@@ -150,12 +152,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         if (binder.hasChanges()) {
             createMailingButton.setEnabled(false);
             sendEmailsButton.setEnabled(false);
+            showRegistrations.setEnabled(false);
         } else {
-            boolean eventListBoxEmpty = eventListBox.getSelectedItems().isEmpty();
-            boolean personListBoxEmpty = personListBox.getSelectedItems().isEmpty();
-            boolean isEmailCreatedCountZero = registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() == 0;
-            createMailingButton.setEnabled(!eventListBoxEmpty && !personListBoxEmpty && isEmailCreatedCountZero);
-            sendEmailsButton.setEnabled(registrationViewRecord != null && registrationViewRecord.getEmailCreatedCount() > 0 && registrationViewRecord.getEmailSentCount() == 0);
+            if (registrationViewRecord != null) {
+                createMailingButton.setEnabled(!eventListBox.getSelectedItems().isEmpty()
+                        && !personListBox.getSelectedItems().isEmpty()
+                        && registrationViewRecord.getEmailCreatedCount() == 0);
+                sendEmailsButton.setEnabled(registrationViewRecord.getEmailCreatedCount() > 0
+                        && registrationViewRecord.getEmailSentCount() == 0);
+                showRegistrations.setEnabled(registrationViewRecord.getEmailSentCount() > 0);
+            }
         }
     }
 
@@ -246,6 +252,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         }).open();
             }
         });
+        showRegistrations.addClickListener(e -> {
+            if (this.registration != null) {
+                UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
+            }
+        });
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
@@ -324,7 +335,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         createMailingButton.setEnabled(false);
         sendEmailsButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         sendEmailsButton.setEnabled(false);
-        buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton);
+        showRegistrations.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        showRegistrations.setEnabled(false);
+        buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton, showRegistrations);
         editorLayoutDiv.add(buttonLayout);
     }
 

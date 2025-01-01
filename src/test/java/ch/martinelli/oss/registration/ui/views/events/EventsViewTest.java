@@ -33,8 +33,8 @@ class EventsViewTest extends KaribuTest {
     void add_person() {
         // Check the content of grid
         Grid<EventRecord> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(3);
-        assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2024");
+        assertThat(GridKt._size(grid)).isEqualTo(4);
+        assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
 
         // Add new person
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugendturntag");
@@ -48,10 +48,10 @@ class EventsViewTest extends KaribuTest {
 
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
-        assertThat(GridKt._size(grid)).isEqualTo(4);
+        assertThat(GridKt._size(grid)).isEqualTo(5);
 
         // Click new item and check value
-        GridKt._clickItem(grid, 3);
+        GridKt._clickItem(grid, 4);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("Jugendturntag");
     }
 
@@ -61,6 +61,6 @@ class EventsViewTest extends KaribuTest {
         UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "1"));
 
         // Check if the correct person is displayed
-        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("CIS 2024");
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("CIS 2023");
     }
 }

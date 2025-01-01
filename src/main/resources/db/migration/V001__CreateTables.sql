@@ -107,32 +107,16 @@ create table registration_event
 
 create table event_registration
 (
-    event_id   bigint  not null,
-    person_id  bigint  not null,
+    registration_id bigint  not null,
+    event_id        bigint  not null,
+    person_id       bigint  not null,
 
-    registered boolean not null default false,
+    registered      boolean not null default false,
 
-    constraint pk_event_registration primary key (event_id, person_id),
+    constraint pk_event_registration primary key (registration_id, event_id, person_id),
     constraint fk_event foreign key (event_id) references event (id),
     constraint fk_person foreign key (person_id) references person (id)
 );
-
-create view event_registration_view as
-select e.id as event_id,
-       e.title,
-       e.description,
-       e.location,
-       e.from_date,
-       e.to_date,
-       p.id as person_id,
-       p.last_name,
-       p.first_name,
-       p.email,
-       p.date_of_birth,
-       r.registered
-from event e
-         join event_registration r on e.id = r.event_id
-         join person p on r.person_id = p.id;
 
 create view registration_email_view as
 select r.id as registration_id,
