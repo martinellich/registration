@@ -26,7 +26,7 @@ class EventRegistrationRepositoryTest {
                 .satisfies(eventRegistrationRow -> {
                     assertThat(eventRegistrationRow.lastName()).isEqualTo("Lane");
                     assertThat(eventRegistrationRow.firstName()).isEqualTo("Eula");
-                    assertThat(eventRegistrationRow.registrations()).hasSize(1);
+                    assertThat(eventRegistrationRow.registrations()).hasSize(2);
                 });
     }
 

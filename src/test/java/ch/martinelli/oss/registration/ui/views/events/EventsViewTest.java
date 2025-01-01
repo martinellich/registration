@@ -33,7 +33,7 @@ class EventsViewTest extends KaribuTest {
     void add_person() {
         // Check the content of grid
         Grid<EventRecord> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(4);
+        assertThat(GridKt._size(grid)).isEqualTo(5);
         assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
 
         // Add new person
@@ -48,10 +48,10 @@ class EventsViewTest extends KaribuTest {
 
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
-        assertThat(GridKt._size(grid)).isEqualTo(5);
+        assertThat(GridKt._size(grid)).isEqualTo(6);
 
         // Click new item and check value
-        GridKt._clickItem(grid, 4);
+        GridKt._clickItem(grid, 5);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("Jugendturntag");
     }
 

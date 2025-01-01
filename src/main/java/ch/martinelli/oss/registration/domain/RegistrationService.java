@@ -128,7 +128,7 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void register(EventRecord event, PersonRecord person, boolean registered) {
+    public void register(long registrationId, EventRecord event, PersonRecord person, boolean registered) {
         EventRegistrationRecord eventRegistration = dslContext
                 .selectFrom(EVENT_REGISTRATION)
                 .where(EVENT_REGISTRATION.EVENT_ID.eq(event.getId()))
@@ -136,6 +136,7 @@ public class RegistrationService {
                 .fetchOptional()
                 .orElseGet(() -> {
                     EventRegistrationRecord newEventRegistration = dslContext.newRecord(EVENT_REGISTRATION);
+                    newEventRegistration.setRegistrationId(registrationId);
                     newEventRegistration.setEventId(event.getId());
                     newEventRegistration.setPersonId(person.getId());
                     return newEventRegistration;

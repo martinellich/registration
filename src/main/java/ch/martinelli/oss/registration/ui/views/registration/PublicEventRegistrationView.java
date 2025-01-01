@@ -93,7 +93,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         registerButton.addClickListener(e -> {
             for (Map.Entry<Checkbox, EventWithPerson> entry : checkboxMap.entrySet()) {
-                registrationService.register(entry.getValue().event(), entry.getValue().person(), entry.getKey().getValue());
+                registrationService.register(registrationEmail.getRegistrationId(), entry.getValue().event(), entry.getValue().person(), entry.getKey().getValue());
             }
             Notification.success("Vielen Dank für die Anmeldung!");
         });
