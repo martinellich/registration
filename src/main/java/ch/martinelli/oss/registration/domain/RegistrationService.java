@@ -15,8 +15,6 @@ import java.util.UUID;
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
-import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
-import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 
 @Service
 public class RegistrationService {
@@ -25,52 +23,21 @@ public class RegistrationService {
     private final DSLContext dslContext;
     private final EmailSender emailSender;
     private final RegistrationEmailRepository registrationEmailRepository;
+    private final PersonRepository personRepository;
 
-    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext, EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository) {
+    public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
+                               EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
+                               PersonRepository personRepository) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
         this.registrationEmailRepository = registrationEmailRepository;
+        this.personRepository = personRepository;
     }
 
     @Transactional
     public void save(RegistrationRecord registration, Set<EventRecord> events, Set<PersonRecord> persons) {
-        registrationRepository.save(registration);
-
-        dslContext
-                .deleteFrom(REGISTRATION_EVENT)
-                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registration.getId()))
-                .execute();
-
-        events.forEach(event -> dslContext.insertInto(REGISTRATION_EVENT,
-                        REGISTRATION_EVENT.REGISTRATION_ID, REGISTRATION_EVENT.EVENT_ID)
-                .values(registration.getId(), event.getId())
-                .execute());
-
-        dslContext
-                .deleteFrom(REGISTRATION_PERSON)
-                .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registration.getId()))
-                .execute();
-
-        persons.forEach(person ->
-                dslContext.insertInto(REGISTRATION_PERSON,
-                                REGISTRATION_PERSON.REGISTRATION_ID, REGISTRATION_PERSON.PERSON_ID)
-                        .values(registration.getId(), person.getId())
-                        .execute());
-    }
-
-    public Set<EventRecord> findEventsByRegistrationId(Long registrationId) {
-        List<EventRecord> events = dslContext
-                .select(REGISTRATION_EVENT.event().fields())
-                .from(REGISTRATION_EVENT)
-                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
-                .fetchInto(EventRecord.class);
-        return new HashSet<>(events);
-    }
-
-    public Set<PersonRecord> findPersonsByRegistrationId(Long registrationId) {
-        List<PersonRecord> persons = findPersonRByRegistrationIdOrderByEmail(registrationId);
-        return new HashSet<>(persons);
+        registrationRepository.saveWithEventsAndPersons(registration, events, persons);
     }
 
     @Transactional
@@ -83,7 +50,7 @@ public class RegistrationService {
             return false;
         }
 
-        List<PersonRecord> persons = findPersonRByRegistrationIdOrderByEmail(registration.getId());
+        List<PersonRecord> persons = personRepository.findByRegistrationIdOrderByEmail(registration.getId());
         RegistrationEmailRecord registrationEmail = null;
         for (PersonRecord person : persons) {
             if (registrationEmail == null || !registrationEmail.getEmail().equals(person.getEmail())) {
@@ -144,13 +111,4 @@ public class RegistrationService {
         eventRegistration.setRegistered(registered);
         eventRegistration.store();
     }
-
-    private List<PersonRecord> findPersonRByRegistrationIdOrderByEmail(Long registrationId) {
-        return dslContext
-                .select(REGISTRATION_PERSON.person().fields())
-                .from(REGISTRATION_PERSON)
-                .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registrationId))
-                .fetchInto(PersonRecord.class);
-    }
-
 }

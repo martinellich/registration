@@ -37,6 +37,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -366,8 +367,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             personListBox.clear();
         } else {
             loadEvents(this.registration.getYear());
-            personListBox.setValue(registrationService.findPersonsByRegistrationId(this.registration.getId()));
-            eventListBox.setValue(registrationService.findEventsByRegistrationId(this.registration.getId()));
+            personListBox.setValue(new HashSet<>(personRepository.findByRegistrationIdOrderByEmail(this.registration.getId())));
+            eventListBox.setValue(eventRepository.findByRegistrationId(this.registration.getId()));
         }
     }
 

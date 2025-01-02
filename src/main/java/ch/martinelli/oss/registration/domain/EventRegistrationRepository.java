@@ -37,7 +37,7 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
     }
 
     public List<EventRegistrationRow> getEventRegistrationMatrix(Long registrationId) {
-        // First get all events ordered by date
+        // First get all events ordered by date and title
         List<EventRecord> events = dslContext
                 .select(REGISTRATION_EVENT.event().fields())
                 .from(REGISTRATION_EVENT)
@@ -60,7 +60,6 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
             fields.add(registrationField);
         }
 
-        // Build and execute the query
         return dslContext
                 .select(fields)
                 .from(PERSON)
