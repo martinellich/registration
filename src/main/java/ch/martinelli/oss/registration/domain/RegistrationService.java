@@ -13,8 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
+import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
+import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 
 @Service
 public class RegistrationService {
@@ -110,5 +113,37 @@ public class RegistrationService {
                 });
         eventRegistration.setRegistered(registered);
         eventRegistration.store();
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        dslContext
+                .deleteFrom(REGISTRATION_EMAIL_PERSON)
+                .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.in(
+                        dslContext.select(REGISTRATION_EMAIL.ID)
+                                .from(REGISTRATION_EMAIL)
+                                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(id))
+                ))
+                .execute();
+
+        dslContext
+                .deleteFrom(REGISTRATION_EMAIL)
+                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(id))
+                .execute();
+
+        dslContext
+                .deleteFrom(REGISTRATION_EVENT)
+                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(id))
+                .execute();
+
+        dslContext
+                .deleteFrom(REGISTRATION_PERSON)
+                .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(id))
+                .execute();
+
+        dslContext
+                .deleteFrom(REGISTRATION)
+                .where(REGISTRATION.ID.eq(id))
+                .execute();
     }
 }

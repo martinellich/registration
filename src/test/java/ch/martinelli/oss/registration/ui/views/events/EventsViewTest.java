@@ -58,6 +58,16 @@ class EventsViewTest extends KaribuTest {
         // Click new item and check value
         GridKt._clickItem(grid, 5);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("Jugendturntag");
+
+        // Delete new item
+        Component component = GridKt._getCellComponent(grid, 5, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Der Anlass wurde gelöscht");
     }
 
     @Test

@@ -1,33 +1,3 @@
-create sequence security_group_seq start with 1000;
-
-create table security_group
-(
-    id   bigint  not null default nextval('security_group_seq') primary key,
-
-    name varchar not null
-);
-
-create sequence security_user_seq start with 1000;
-
-create table security_user
-(
-    id         bigint  not null default nextval('security_user_seq') primary key,
-
-    first_name varchar not null,
-    last_name  varchar not null,
-    email      varchar not null,
-    secret     varchar not null
-);
-
-create table user_group
-(
-    user_id  bigint not null,
-    group_id bigint not null,
-
-    foreign key (user_id) references security_user (id),
-    foreign key (group_id) references security_group (id)
-);
-
 create sequence person_seq start with 1000;
 
 create table person
@@ -72,7 +42,7 @@ create table registration_email
     link            varchar not null,
     sent_at         timestamp,
 
-    foreign key (registration_id) references registration (id)
+    foreign key (registration_id) references registration (id) on delete cascade
 );
 
 create table registration_email_person
@@ -81,7 +51,7 @@ create table registration_email_person
     person_id             bigint not null,
 
     primary key (registration_email_id, person_id),
-    foreign key (registration_email_id) references registration_email (id),
+    foreign key (registration_email_id) references registration_email (id) on delete cascade,
     foreign key (person_id) references person (id)
 );
 
@@ -91,7 +61,7 @@ create table registration_person
     person_id       bigint not null,
 
     primary key (registration_id, person_id),
-    foreign key (registration_id) references registration (id),
+    foreign key (registration_id) references registration (id) on delete cascade,
     foreign key (person_id) references person (id)
 );
 
@@ -101,7 +71,7 @@ create table registration_event
     event_id        bigint not null,
 
     primary key (registration_id, event_id),
-    foreign key (registration_id) references registration (id),
+    foreign key (registration_id) references registration (id) on delete cascade,
     foreign key (event_id) references event (id)
 );
 

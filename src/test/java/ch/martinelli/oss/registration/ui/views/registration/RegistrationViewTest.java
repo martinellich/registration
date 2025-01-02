@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -81,6 +82,16 @@ class RegistrationViewTest extends KaribuTest {
 
         // Check if save was successful
         NotificationsKt.expectNotifications("Die Emails werden versendet");
+
+        // Delete new item
+        Component component = GridKt._getCellComponent(grid, 2, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Die Ausschreibung wurde gelöscht");
     }
 
     @Test

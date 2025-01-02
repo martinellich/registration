@@ -16,6 +16,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -114,6 +115,31 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .setHeader("Versand erstellt").setAutoWidth(true);
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
                 .setHeader("Emails verschickt").setAutoWidth(true);
+
+        Button addButton = new Button(VaadinIcon.PLUS.create());
+        addButton.setId("add-event-button");
+        addButton.addClickListener(e -> {
+            refreshGrid();
+            clearForm();
+        });
+
+        grid.addComponentColumn(registration -> {
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addClickListener(e ->
+                    new ConfirmDialog("Ausschreibung löschen",
+                            "Willst du die Ausschreibung wirklich löschen?",
+                            "Ja",
+                            ce -> {
+                                registrationRepository.deleteById(registration.getId());
+                                clearForm();
+                                refreshGrid();
+                                Notification.success("Die Ausschreibung wurde gelöscht");
+                            },
+                            "Abbrechen",
+                            ce -> {
+                            }).open());
+            return deleteButton;
+        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
 
         loadData();
 
