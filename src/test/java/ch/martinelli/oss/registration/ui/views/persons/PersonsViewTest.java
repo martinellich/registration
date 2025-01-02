@@ -87,7 +87,7 @@ class PersonsViewTest extends KaribuTest {
         UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "999"));
 
         // Check if the no person is displayed
-        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("");
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEmpty();
     }
 
     @Test

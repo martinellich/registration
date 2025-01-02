@@ -34,7 +34,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         assertThat(title).isNotNull();
 
         List<Checkbox> checkboxes = LocatorJ._find(Checkbox.class);
-        checkboxes.forEach(checkbox -> _click(checkbox));
+        checkboxes.forEach(LocatorJ::_click);
 
         _click(_get(Button.class, spec -> spec.withText("Anmelden")));
 

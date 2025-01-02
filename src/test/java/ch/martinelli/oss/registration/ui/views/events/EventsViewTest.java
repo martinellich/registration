@@ -85,7 +85,7 @@ class EventsViewTest extends KaribuTest {
         UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "9999"));
 
         // Check if the no person is displayed
-        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("");
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEmpty();
     }
 
     @Test

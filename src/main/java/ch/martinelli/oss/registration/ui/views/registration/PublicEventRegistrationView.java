@@ -31,11 +31,12 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
     private final transient RegistrationRepository registrationRepository;
-    private final RegistrationService registrationService;
-    private final EventRegistrationRepository eventRegistrationRepository;
-    private RegistrationEmailRecord registrationEmail;
+    private final transient RegistrationService registrationService;
+    private final transient EventRegistrationRepository eventRegistrationRepository;
 
-    private Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+    private transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+
+    private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
                                        RegistrationRepository registrationRepository, RegistrationService registrationService, EventRegistrationRepository eventRegistrationRepository) {

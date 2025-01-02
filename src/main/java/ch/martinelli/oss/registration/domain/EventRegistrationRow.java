@@ -13,14 +13,14 @@ public record EventRegistrationRow(
         String firstName,
         Map<String, Boolean> registrations) {
 
-    public static EventRegistrationRow fromRecord(Record record) {
-        String lastName = record.get(PERSON.LAST_NAME);
-        String firstName = record.get(PERSON.FIRST_NAME);
+    public static EventRegistrationRow fromRecord(Record jooqRecord) {
+        String lastName = jooqRecord.get(PERSON.LAST_NAME);
+        String firstName = jooqRecord.get(PERSON.FIRST_NAME);
 
         Map<String, Boolean> registrations = new LinkedHashMap<>(); // Keep order
-        Arrays.stream(record.fields())
+        Arrays.stream(jooqRecord.fields())
                 .filter(f -> f.getType() == Boolean.class)
-                .forEach(f -> registrations.put(f.getName(), record.get(f, Boolean.class)));
+                .forEach(f -> registrations.put(f.getName(), jooqRecord.get(f, Boolean.class)));
 
         return new EventRegistrationRow(lastName, firstName, registrations);
     }

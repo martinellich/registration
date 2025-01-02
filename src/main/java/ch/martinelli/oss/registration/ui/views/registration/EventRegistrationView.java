@@ -32,7 +32,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
 
     private final Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
 
-    private List<EventRegistrationRow> eventRegistrationMatrix;
+    private transient List<EventRegistrationRow> eventRegistrationMatrix;
     private Long registrationId;
 
     public EventRegistrationView(EventRegistrationRepository eventRegistrationRepository) {
