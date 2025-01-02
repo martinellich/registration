@@ -4,8 +4,11 @@ import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -30,13 +33,15 @@ class EventsViewTest extends KaribuTest {
     }
 
     @Test
-    void add_person() {
+    void add_and_delete_event() {
         // Check the content of grid
         Grid<EventRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(5);
         assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
 
         // Add new person
+        _click(_get(Button.class, spec -> spec.withId("add-event-button")));
+
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugendturntag");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Ort")), "Kallnach");
         _setValue(_get(TextArea.class, spec -> spec.withLabel("Beschreibung")), "");
@@ -71,6 +76,19 @@ class EventsViewTest extends KaribuTest {
 
         // Check if the no person is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("");
+    }
+
+    @Test
+    void try_to_delete_used_event() {
+        Grid<EventRecord> grid = _get(Grid.class);
+        Component component = GridKt._getCellComponent(grid, 1, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
     }
 
 }

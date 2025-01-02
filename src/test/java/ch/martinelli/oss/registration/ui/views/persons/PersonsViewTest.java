@@ -1,12 +1,16 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
+import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -38,6 +42,8 @@ class PersonsViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Eula");
 
         // Add new person
+        _click(_get(Button.class, spec -> spec.withId("add-person-button")));
+
         _setValue(_get(TextField.class, spec -> spec.withLabel("Nachname")), "Martinelli");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Vorname")), "Simon");
         _setValue(_get(EmailField.class, spec -> spec.withLabel("Email")), "simon@tverlach.ch");
@@ -74,4 +80,16 @@ class PersonsViewTest extends KaribuTest {
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("");
     }
 
+    @Test
+    void try_to_delete_used_person() {
+        Grid<EventRecord> grid = _get(Grid.class);
+        Component component = GridKt._getCellComponent(grid, 0, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Die Person wird noch verwendet und kann nicht gelöscht werden");
+    }
 }
