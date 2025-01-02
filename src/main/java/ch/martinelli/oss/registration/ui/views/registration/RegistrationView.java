@@ -52,7 +52,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRA
 @RolesAllowed("ADMIN")
 public class RegistrationView extends Div implements BeforeEnterObserver {
 
-    private static final String REGISTRATION_ID = "registrationID";
+    public static final String REGISTRATION_ID = "registrationID";
     private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
 
     private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
@@ -178,7 +178,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                     setButtonState(registrationViewRecord);
                 });
             } else {
-                Notification.error(String.format("Die angeforderte Registrierung wurde nicht gefunden, ID = %s", eventId.get()));
                 // when a row is selected but the data is no longer available, refresh grid
                 refreshGrid();
                 event.forwardTo(RegistrationView.class);

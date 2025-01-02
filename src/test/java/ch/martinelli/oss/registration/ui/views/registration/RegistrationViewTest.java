@@ -14,6 +14,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -82,4 +83,12 @@ class RegistrationViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Die Emails werden versendet");
     }
 
+    @Test
+    void navigate_to_non_existing_registration() {
+        // 999 doesn't exist
+        UI.getCurrent().navigate(RegistrationView.class, new RouteParam(RegistrationView.REGISTRATION_ID, "9999"));
+
+        // Form must be empty
+        assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
+    }
 }
