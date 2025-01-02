@@ -12,7 +12,7 @@ import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 
 class MainLayoutTest extends KaribuTest {
 
-        @BeforeEach
+    @BeforeEach
     void login() {
         login("simon@martinelli.ch");
         UI.getCurrent().getPage().reload();
