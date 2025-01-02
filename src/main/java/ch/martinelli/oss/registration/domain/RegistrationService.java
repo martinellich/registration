@@ -111,4 +111,5 @@ public class RegistrationService {
         eventRegistration.setRegistered(registered);
         eventRegistration.store();
     }
+
 }

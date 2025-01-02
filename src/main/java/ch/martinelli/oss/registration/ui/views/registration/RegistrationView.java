@@ -16,6 +16,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -55,12 +56,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
     public static final String REGISTRATION_ID = "registrationID";
     private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
+    private static final String ABBRECHEN = "Abbrechen";
 
     private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
 
     private final Button saveButton = new Button("Speichern");
-    private final Button cancelButton = new Button("Abbrechen");
+    private final Button cancelButton = new Button(ABBRECHEN);
     private final Button createMailingButton = new Button("Versand erstellen");
     private final Button sendEmailsButton = new Button("Emails verschicken");
     private final Button showRegistrations = new Button("Anmeldungen anzeigen");
@@ -95,7 +97,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         configureGrid();
-        configureButtons(registrationService);
+        configureButtons();
     }
 
     private void configureGrid() {
@@ -114,6 +116,31 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .setHeader("Versand erstellt").setAutoWidth(true);
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
                 .setHeader("Emails verschickt").setAutoWidth(true);
+
+        Button addButton = new Button(VaadinIcon.PLUS.create());
+        addButton.setId("add-event-button");
+        addButton.addClickListener(e -> {
+            refreshGrid();
+            clearForm();
+        });
+
+        grid.addComponentColumn(registrationViewRecord -> {
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addClickListener(e ->
+                    new ConfirmDialog("Ausschreibung löschen",
+                            "Willst du die Ausschreibung wirklich löschen?",
+                            "Ja",
+                            ce -> {
+                                registrationRepository.deleteById(registrationViewRecord.getId());
+                                clearForm();
+                                refreshGrid();
+                                Notification.success("Die Ausschreibung wurde gelöscht");
+                            },
+                            ABBRECHEN,
+                            ce -> {
+                            }).open());
+            return deleteButton;
+        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
 
         loadData();
 
@@ -189,7 +216,71 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         }
     }
 
-    private void configureButtons(RegistrationService registrationService) {
+    private void configureButtons() {
+        configureSaveButton();
+        configureCancelButton();
+        configureCreateMailingButton();
+        configureSendMailsButton();
+        configureShowRegistrationsButton();
+    }
+
+    private void configureShowRegistrationsButton() {
+        showRegistrations.addClickListener(e -> {
+            if (this.registration != null) {
+                UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
+            }
+        });
+    }
+
+    private void configureSendMailsButton() {
+        sendEmailsButton.addClickListener(e -> {
+            if (this.registration != null) {
+                new ConfirmDialog("Emails versenden",
+                        "Möchtest du die Emails verschicken?",
+                        "Ja",
+                        confirmEvent -> {
+                            if (registrationService.sendMails(this.registration)) {
+                                Notification.success("Die Emails werden versendet");
+                            } else {
+                                Notification.error("Die Emails wurden bereits versendet");
+                            }
+                        },
+                        ABBRECHEN,
+                        cancelEvent -> {
+                        }).open();
+            }
+        });
+    }
+
+    private void configureCreateMailingButton() {
+        createMailingButton.addClickListener(e -> {
+            if (this.registration != null) {
+                new ConfirmDialog("Versand erstellen",
+                        "Möchtest du den Versand für die Registrierung erstellen?",
+                        "Ja",
+                        confirmEvent -> {
+                            if (registrationService.createMailing(this.registration)) {
+                                Notification.success("Der Versand wurde erstellt");
+                                refreshGrid();
+                            } else {
+                                Notification.error("Es gibt bereits einen Versand");
+                            }
+                        },
+                        ABBRECHEN,
+                        cancelEvent -> {
+                        }).open();
+            }
+        });
+    }
+
+    private void configureCancelButton() {
+        cancelButton.addClickListener(e -> {
+            clearForm();
+            refreshGrid();
+        });
+    }
+
+    private void configureSaveButton() {
         saveButton.addClickListener(e -> {
             try {
                 if (this.registration == null) {
@@ -208,53 +299,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
                 Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
-            }
-        });
-
-        cancelButton.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
-        });
-
-        createMailingButton.addClickListener(e -> {
-            if (this.registration != null) {
-                new ConfirmDialog("Versand erstellen",
-                        "Möchtest du den Versand für die Registrierung erstellen?",
-                        "Ja",
-                        confirmEvent -> {
-                            if (registrationService.createMailing(this.registration)) {
-                                Notification.success("Der Versand wurde erstellt");
-                                refreshGrid();
-                            } else {
-                                Notification.error("Es gibt bereits einen Versand");
-                            }
-                        },
-                        "Abbrechen",
-                        cancelEvent -> {
-                        }).open();
-            }
-        });
-
-        sendEmailsButton.addClickListener(e -> {
-            if (this.registration != null) {
-                new ConfirmDialog("Emails versenden",
-                        "Möchtest du die Emails verschicken?",
-                        "Ja",
-                        confirmEvent -> {
-                            if (registrationService.sendMails(this.registration)) {
-                                Notification.success("Die Emails werden versendet");
-                            } else {
-                                Notification.error("Die Emails wurden bereits versendet");
-                            }
-                        },
-                        "Abbrechen",
-                        cancelEvent -> {
-                        }).open();
-            }
-        });
-        showRegistrations.addClickListener(e -> {
-            if (this.registration != null) {
-                UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
             }
         });
     }

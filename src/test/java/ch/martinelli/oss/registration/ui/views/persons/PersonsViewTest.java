@@ -60,6 +60,16 @@ class PersonsViewTest extends KaribuTest {
         // Click new item and check value
         GridKt._clickItem(grid, 12);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Martinelli");
+
+        // Delete new item
+        Component component = GridKt._getCellComponent(grid, 5, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Die Person wurde gelöscht");
     }
 
     @Test
@@ -77,7 +87,7 @@ class PersonsViewTest extends KaribuTest {
         UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "999"));
 
         // Check if the no person is displayed
-        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("");
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEmpty();
     }
 
     @Test

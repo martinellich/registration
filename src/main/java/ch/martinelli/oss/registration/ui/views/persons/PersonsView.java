@@ -90,7 +90,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
             clearForm();
         });
 
-        grid.addComponentColumn(person -> {
+        grid.addComponentColumn(personRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Person löschen",
@@ -98,7 +98,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                             "Ja",
                             ce -> {
                                 try {
-                                    personRepository.delete(person);
+                                    personRepository.delete(personRecord);
                                     clearForm();
                                     refreshGrid();
                                     Notification.success("Die Person wurde gelöscht");

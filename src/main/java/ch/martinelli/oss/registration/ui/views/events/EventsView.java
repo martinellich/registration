@@ -89,7 +89,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
             clearForm();
         });
 
-        grid.addComponentColumn(event -> {
+        grid.addComponentColumn(eventRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Anlass löschen",
@@ -97,7 +97,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
                             "Ja",
                             ce -> {
                                 try {
-                                    eventRepository.delete(event);
+                                    eventRepository.delete(eventRecord);
                                     clearForm();
                                     refreshGrid();
                                     Notification.success("Der Anlass wurde gelöscht");

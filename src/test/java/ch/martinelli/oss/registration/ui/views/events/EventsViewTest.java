@@ -58,6 +58,16 @@ class EventsViewTest extends KaribuTest {
         // Click new item and check value
         GridKt._clickItem(grid, 5);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("Jugendturntag");
+
+        // Delete new item
+        Component component = GridKt._getCellComponent(grid, 5, "action-column");
+        if (component instanceof Button button) {
+            _click(button);
+        }
+
+        ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
+
+        NotificationsKt.expectNotifications("Der Anlass wurde gelöscht");
     }
 
     @Test
@@ -75,7 +85,7 @@ class EventsViewTest extends KaribuTest {
         UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "9999"));
 
         // Check if the no person is displayed
-        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("");
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEmpty();
     }
 
     @Test
