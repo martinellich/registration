@@ -86,7 +86,8 @@ public class MainLayout extends AppLayout {
             div.add(new Icon("lumo", "dropdown"));
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER, LumoUtility.Gap.SMALL);
             userName.add(div);
-            userName.getSubMenu().addItem("Sign out", e -> securityContext.logout());
+            MenuItem signOut = userName.getSubMenu().addItem("Sign out", e -> securityContext.logout());
+            signOut.setId("sign-out");
 
             layout.add(userMenu);
         } else {
