@@ -8,11 +8,14 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -79,6 +82,36 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         grid.addColumn(PersonRecord::getActive)
                 .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
                 .setHeader("Aktiv?").setAutoWidth(true);
+
+        Button addButton = new Button(VaadinIcon.PLUS.create());
+        addButton.setId("add-person-button");
+        addButton.addClickListener(e -> {
+            refreshGrid();
+            clearForm();
+        });
+
+        grid.addComponentColumn(person -> {
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addClickListener(e ->
+                    new ConfirmDialog("Person löschen",
+                            "Willst du die Person wirklich löschen?",
+                            "Ja",
+                            ce -> {
+                                try {
+                                    personRepository.delete(person);
+                                    clearForm();
+                                    refreshGrid();
+                                    Notification.success("Die Person wurde gelöscht");
+                                } catch (DataIntegrityViolationException ex) {
+                                    Notification.error("Die Person wird noch verwendet und kann nicht gelöscht werden");
+                                }
+                            },
+                            "Abbrechen",
+                            ce -> {
+                            }).open());
+            return deleteButton;
+        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
+
 
         grid.setItems(query -> personRepository.findAll(
                         query.getOffset(), query.getLimit(),

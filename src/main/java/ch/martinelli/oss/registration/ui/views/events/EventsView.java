@@ -7,11 +7,14 @@ import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -78,6 +81,35 @@ public class EventsView extends Div implements BeforeEnterObserver {
         grid.addColumn(EventRecord::getToDate)
                 .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
                 .setHeader("bis").setAutoWidth(true);
+
+        Button addButton = new Button(VaadinIcon.PLUS.create());
+        addButton.setId("add-event-button");
+        addButton.addClickListener(e -> {
+            refreshGrid();
+            clearForm();
+        });
+
+        grid.addComponentColumn(event -> {
+            Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addClickListener(e ->
+                    new ConfirmDialog("Anlass löschen",
+                            "Willst du den Anlass wirklich löschen?",
+                            "Ja",
+                            ce -> {
+                                try {
+                                    eventRepository.delete(event);
+                                    clearForm();
+                                    refreshGrid();
+                                    Notification.success("Der Anlass wurde gelöscht");
+                                } catch (DataIntegrityViolationException ex) {
+                                    Notification.error("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
+                                }
+                            },
+                            "Abbrechen",
+                            ce -> {
+                            }).open());
+            return deleteButton;
+        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
 
         grid.setItems(query -> eventRepository.findAll(
                         query.getOffset(), query.getLimit(),
@@ -204,6 +236,5 @@ public class EventsView extends Div implements BeforeEnterObserver {
     private void populateForm(EventRecord value) {
         this.event = value;
         binder.readBean(this.event);
-
     }
 }
