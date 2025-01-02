@@ -6,17 +6,13 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 
 class MainLayoutTest extends KaribuTest {
 
-    private static final Logger log = LoggerFactory.getLogger(MainLayoutTest.class);
-
-    @BeforeEach
+        @BeforeEach
     void login() {
         login("simon@martinelli.ch");
         UI.getCurrent().getPage().reload();
