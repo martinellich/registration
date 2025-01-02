@@ -123,14 +123,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             clearForm();
         });
 
-        grid.addComponentColumn(registration -> {
+        grid.addComponentColumn(registrationViewRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Ausschreibung löschen",
                             "Willst du die Ausschreibung wirklich löschen?",
                             "Ja",
                             ce -> {
-                                registrationRepository.deleteById(registration.getId());
+                                registrationRepository.deleteById(registrationViewRecord.getId());
                                 clearForm();
                                 refreshGrid();
                                 Notification.success("Die Ausschreibung wurde gelöscht");
