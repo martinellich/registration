@@ -10,6 +10,7 @@ import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,10 +21,8 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -160,16 +159,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private Icon createIcon(long value) {
-        return value > 0
-                ? applyTheme(VaadinIcon.CHECK_SQUARE.create(), "badge success")
-                : applyTheme(VaadinIcon.THIN_SQUARE.create(), "badge contrast");
+    private Component createIcon(long value) {
+        return value > 0 ? VaadinIcon.CHECK.create() : new Span();
     }
 
-    private Icon applyTheme(Icon icon, String theme) {
-        icon.getElement().getThemeList().add(theme);
-        return icon;
-    }
 
     private void loadData() {
         grid.setItems(query -> registrationRepository.findAllFromView(
@@ -348,11 +341,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         editorDiv.add(formLayout);
 
-        editorDiv.add(new Hr());
-
         FormLayout listBoxFormLayout = new FormLayout();
-        listBoxFormLayout.add(new H3("Anlässe"), new H3("Jugeler"));
-        listBoxFormLayout.add(new Paragraph(), new Paragraph());
+        listBoxFormLayout.addClassName(LumoUtility.Padding.Top.LARGE);
+        H4 eventsTitle = new H4("Anlässe");
+        eventsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
+        H4 personsTitle = new H4("Jugeler");
+        personsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
+        listBoxFormLayout.add(eventsTitle, personsTitle);
 
         eventListBox = new MultiSelectListBox<>();
         eventListBox.setId("event-list-box");

@@ -11,7 +11,9 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -66,7 +68,13 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
         } else {
             EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
             firstRow.registrations().forEach((event, registered) ->
-                    grid.addColumn(registrationRow -> registrationRow.registrations().get(event))
+                    grid.addComponentColumn(registrationRow -> {
+                                if (registrationRow.registrations().get(event)) {
+                                    return VaadinIcon.CHECK.create();
+                                } else {
+                                    return new Span();
+                                }
+                            })
                             .setHeader(event).setWidth("20px"));
         }
 
