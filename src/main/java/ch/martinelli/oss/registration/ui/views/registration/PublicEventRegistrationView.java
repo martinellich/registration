@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailRecord;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
@@ -11,9 +12,7 @@ import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -34,17 +33,16 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private final transient RegistrationService registrationService;
     private final transient EventRegistrationRepository eventRegistrationRepository;
 
-    private transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+    private final transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
 
     private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
-                                       RegistrationRepository registrationRepository, RegistrationService registrationService, EventRegistrationRepository eventRegistrationRepository) {
+                                       RegistrationRepository registrationRepository, RegistrationService registrationService,
+                                       EventRegistrationRepository eventRegistrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
         this.registrationService = registrationService;
-
-        add(new H2("Anmeldung"));
         this.eventRegistrationRepository = eventRegistrationRepository;
     }
 
@@ -62,19 +60,42 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private void showRegistrationForm() {
         removeAll();
 
-        add(new H1("Jugi TV Erlach - Anmeldung"));
+        RegistrationRecord registration = registrationRepository.findById(registrationEmail.getRegistrationId()).orElseThrow();
+
+        Image logo = new Image("/icons/icon.png", "Logo");
+        logo.setHeight("50px");
+        HorizontalLayout header = new HorizontalLayout(logo, new H1("Jugi TV Erlach - Anmeldung %d".formatted(registration.getYear())));
+        add(header);
+        if (registration.getDescription() != null) {
+            add(new Paragraph(registration.getDescription()));
+        }
+
 
         List<PersonRecord> persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmail.getId());
+
+        add(new H3("Anmeldung für"));
+        UnorderedList unorderedList = new UnorderedList();
+        add(unorderedList);
         for (PersonRecord person : persons) {
-            add(new H2(person.getLastName() + " " + person.getFirstName()));
+            ListItem listItem = new ListItem("%s %s".formatted(person.getLastName(), person.getFirstName()));
+            unorderedList.add(listItem);
         }
+
+        add(new Hr());
+        add(new H2("Anlässe"));
 
         List<EventRecord> events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
         for (EventRecord event : events) {
             HorizontalLayout checkboxes = new HorizontalLayout();
             for (PersonRecord person : persons) {
-                Checkbox checkbox = new Checkbox(person.getLastName() + " " + person.getFirstName());
+                String text;
+                if (persons.size() > 1) {
+                    text = person.getLastName() + " " + person.getFirstName();
+                } else {
+                    text = "nimmt teil";
+                }
+                Checkbox checkbox = new Checkbox(text);
                 checkbox.setWidth("200px");
                 checkboxes.add(checkbox);
                 checkboxMap.put(checkbox, new EventWithPerson(event, person));
@@ -89,6 +110,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             HorizontalLayout line = new HorizontalLayout(titleSpan, dateSpan, checkboxes);
             add(line);
         }
+
+        add(new Hr());
 
         Button registerButton = new Button("Anmelden");
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

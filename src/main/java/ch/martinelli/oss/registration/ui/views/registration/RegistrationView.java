@@ -29,6 +29,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
@@ -47,7 +48,7 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
-@PageTitle("Auschreibungen")
+@PageTitle("Einladungen")
 @Route("registrations/:registrationID?/:action?(edit)")
 @RouteAlias("")
 @Menu(order = 0, icon = LineAwesomeIconUrl.LIST_SOLID)
@@ -127,14 +128,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         grid.addComponentColumn(registrationViewRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e ->
-                    new ConfirmDialog("Ausschreibung löschen",
-                            "Willst du die Ausschreibung wirklich löschen?",
+                    new ConfirmDialog("Einladung löschen",
+                            "Willst du die Einladung wirklich löschen?",
                             "Ja",
                             ce -> {
                                 registrationRepository.deleteById(registrationViewRecord.getId());
                                 clearForm();
                                 refreshGrid();
-                                Notification.success("Die Ausschreibung wurde gelöscht");
+                                Notification.success("Die Einladung wurde gelöscht");
                             },
                             ABBRECHEN,
                             ce -> {
@@ -335,7 +336,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .asRequired()
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
 
-        formLayout.add(yearIntegerField, openFromDatePicker, openUntilDatePicker);
+        TextArea description = new TextArea("Bemerkungen");
+        description.setHeight("100px");
+        binder.forField(description)
+                .bind(RegistrationRecord::getDescription, RegistrationRecord::setDescription);
+        formLayout.setColspan(description, 3);
+
+        formLayout.add(yearIntegerField, openFromDatePicker, openUntilDatePicker, description);
+
         editorDiv.add(formLayout);
 
         editorDiv.add(new Hr());

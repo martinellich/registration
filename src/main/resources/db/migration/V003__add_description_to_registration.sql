@@ -1,0 +1,1 @@
+alter table registration add column description varchar;

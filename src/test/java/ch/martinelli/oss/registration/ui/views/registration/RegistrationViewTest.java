@@ -91,7 +91,7 @@ class RegistrationViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Die Ausschreibung wurde gelöscht");
+        NotificationsKt.expectNotifications("Die Einladung wurde gelöscht");
     }
 
     @Test
