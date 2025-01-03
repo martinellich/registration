@@ -18,6 +18,10 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -26,6 +30,19 @@ import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RegistrationViewTest extends KaribuTest {
+
+    @Container
+    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        mailcatcherContainer.start();
+
+        registry.add("spring.mail.host", mailcatcherContainer::getHost);
+        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
+        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
+        registry.add("spring.mail.password", () -> "pass");
+    }
 
     @BeforeEach
     void login() {
@@ -81,7 +98,15 @@ class RegistrationViewTest extends KaribuTest {
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
         // Check if save was successful
-        NotificationsKt.expectNotifications("Die Emails werden versendet");
+        NotificationsKt.expectNotifications("Die Emails wurden versendet");
+
+        assertThat(mailcatcherContainer.getAllEmails())
+                .hasSize(1)
+                .first()
+                .satisfies(mail -> {
+                    assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung für 2025");
+                    assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
+                });
 
         // Delete new item
         Component component = GridKt._getCellComponent(grid, 2, "action-column");
@@ -91,7 +116,7 @@ class RegistrationViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Die Ausschreibung wurde gelöscht");
+        NotificationsKt.expectNotifications("Die Einladung wurde gelöscht");
     }
 
     @Test

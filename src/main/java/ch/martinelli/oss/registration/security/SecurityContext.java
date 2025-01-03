@@ -64,11 +64,11 @@ public final class SecurityContext {
      * Logs the currently authenticated user out of the application.
      * <p>
      * This method handles the following operations during logout:
-     * 1. Retrieves the current HTTP request and logs the user out via the `AuthenticationContext`.
-     * 2. Invalidates the "remember-me" cookie by setting its value to `null`
+     * 1. Retrieve the current HTTP request and logs the user out via the `AuthenticationContext`.
+     * 2. Invalidate the "remember-me" cookie by setting its value to `null`
      * and max age to `0`, effectively clearing it from the client.
-     * 3. Adjusts the cookie path based on the application context path.
-     * 4. Adds the invalidated cookie to the HTTP response to ensure it is removed on the client-side.
+     * 3. Adjust the cookie path based on the application context path.
+     * 4. Add the invalidated cookie to the HTTP response to ensure it is removed on the client-side.
      */
     public void logout() {
         var request = VaadinServletRequest.getCurrent().getHttpServletRequest();
