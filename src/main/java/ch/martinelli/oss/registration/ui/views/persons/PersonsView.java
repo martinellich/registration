@@ -4,20 +4,18 @@ import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
+import ch.martinelli.oss.registration.ui.views.EditView;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -36,26 +34,18 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 @Route("persons/:personID?/:action?(edit)")
 @Menu(order = 4, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
-public class PersonsView extends Div implements BeforeEnterObserver {
+public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver {
 
     public static final String PERSON_ID = "personID";
     private static final String PERSON_EDIT_ROUTE_TEMPLATE = "persons/%s/edit";
-
-    private final Grid<PersonRecord> grid = new Grid<>(PersonRecord.class, false);
-
-    private final Button cancel = new Button("Abbrechen");
-    private final Button save = new Button("Speichern");
-
-    private final Binder<PersonRecord> binder = new Binder<>(PersonRecord.class);
-
-    private PersonRecord person;
 
     private final transient PersonRepository personRepository;
 
     public PersonsView(PersonRepository personRepository) {
         this.personRepository = personRepository;
 
-        addClassNames("persons-view");
+        grid = new Grid<>(PersonRecord.class, false);
+        binder = new Binder<>(PersonRecord.class);
 
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.addToPrimary(createGridLayout());
@@ -63,7 +53,6 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
         add(splitLayout);
     }
-
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -80,17 +69,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         }
     }
 
-    private Div createGridLayout() {
-        Div wrapper = new Div();
-        wrapper.setClassName("grid-wrapper");
-        wrapper.add(grid);
-
-        configureGrid();
-
-        return wrapper;
-    }
-
-    private void configureGrid() {
+    protected void configureGrid() {
         // Configure Grid
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
@@ -159,16 +138,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private Div createEditorLayout() {
-        Div editorLayoutDiv = new Div();
-        editorLayoutDiv.setClassName("editor-layout");
-
-        Div editorDiv = new Div();
-        editorDiv.setClassName("editor");
-        editorLayoutDiv.add(editorDiv);
-
-        FormLayout formLayout = new FormLayout();
-
+    protected void createComponents(FormLayout formLayout) {
         TextField lastNameTextField = new TextField("Nachname");
         binder.forField(lastNameTextField)
                 .asRequired()
@@ -195,27 +165,9 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 .bind(PersonRecord::getActive, PersonRecord::setActive);
 
         formLayout.add(lastNameTextField, firstNameTextField, emailTextField, dateOfBirthDatePicker, active);
-
-        editorDiv.add(formLayout);
-        createButtonLayout(editorLayoutDiv);
-
-        return editorLayoutDiv;
     }
 
-    private void createButtonLayout(Div editorLayoutDiv) {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setClassName("button-layout");
-
-        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
-
-        editorLayoutDiv.add(buttonLayout);
-
-        configureButtons();
-    }
-
-    private void configureButtons() {
+    protected void configureButtons() {
         cancel.addClickListener(e -> {
             clearForm();
             grid.getDataProvider().refreshAll();
@@ -223,15 +175,15 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.person == null) {
-                    this.person = new PersonRecord();
-                    this.person.setActive(true);
+                if (this.currentRecord == null) {
+                    this.currentRecord = new PersonRecord();
+                    this.currentRecord.setActive(true);
                 }
                 if (binder.validate().isOk()) {
-                    binder.writeBean(this.person);
-                    personRepository.save(this.person);
+                    binder.writeBean(this.currentRecord);
+                    personRepository.save(this.currentRecord);
 
-                    grid.getDataProvider().refreshItem(this.person);
+                    grid.getDataProvider().refreshItem(this.currentRecord);
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(PersonsView.class);
@@ -242,12 +194,4 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private void clearForm() {
-        populateForm(null);
-    }
-
-    private void populateForm(PersonRecord value) {
-        this.person = value;
-        binder.readBean(this.person);
-    }
 }
