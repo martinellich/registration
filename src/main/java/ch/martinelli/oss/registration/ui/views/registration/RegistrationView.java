@@ -315,11 +315,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         sendEmailsButton.addClickListener(e -> {
             if (this.registration != null) {
                 new ConfirmDialog("Emails versenden",
-                        "Möchtest du die Emails verschicken?",
+                        "Möchtest du die Emails versenden?",
                         "Ja",
                         confirmEvent -> {
                             if (registrationService.sendMails(this.registration)) {
-                                Notification.success("Die Emails werden versendet");
+                                Notification.success("Die Emails wurden versendet");
                             } else {
                                 Notification.error("Die Emails wurden bereits versendet");
                             }
