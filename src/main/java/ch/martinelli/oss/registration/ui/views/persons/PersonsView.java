@@ -106,7 +106,8 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         grid.addColumn(PersonRecord::getDateOfBirth)
                 .setSortable(true).setSortProperty(PERSON.DATE_OF_BIRTH.getName())
                 .setHeader("Geburtsdatum").setAutoWidth(true);
-        grid.addComponentColumn(personRecord -> personRecord.getActive() ? VaadinIcon.CHECK.create() : new Span())
+        grid.addComponentColumn(personRecord ->
+                        personRecord.getActive() != null && personRecord.getActive() ? VaadinIcon.CHECK.create() : new Span())
                 .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
                 .setHeader("Aktiv?").setAutoWidth(true);
 

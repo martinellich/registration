@@ -111,7 +111,7 @@ class RegistrationViewTest extends KaribuTest {
         // Delete new item
         Component actions = GridKt._getCellComponent(grid, 2, "action-column");
         actions.getChildren()
-                .filter(component -> component instanceof Button).findFirst().map(component -> (Button) component)
+                .filter(Button.class::isInstance).findFirst().map(Button.class::cast)
                 .ifPresent(Button::click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));

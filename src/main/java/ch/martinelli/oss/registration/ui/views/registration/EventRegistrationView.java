@@ -67,9 +67,10 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
             Notification.warning("Keine Anmeldungen gefunden");
         } else {
             EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
-            firstRow.registrations().forEach((event, registered) ->
+            firstRow.registrations().forEach((event, r) ->
                     grid.addComponentColumn(registrationRow -> {
-                                if (registrationRow.registrations().get(event)) {
+                                boolean registered = registrationRow.registrations().get(event);
+                                if (registered) {
                                     return VaadinIcon.CHECK.create();
                                 } else {
                                     return new Span();
