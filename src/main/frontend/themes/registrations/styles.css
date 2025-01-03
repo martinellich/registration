@@ -19,3 +19,7 @@ html {
     --lumo-error-color-10pct: rgba(238, 64, 36, 0.1);
     --lumo-error-color: hsl(8, 86%, 54%);
 }
+
+vaadin-button {
+    cursor: pointer;
+}
