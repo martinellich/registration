@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.domain;
 import ch.martinelli.oss.registration.db.tables.records.*;
 import ch.martinelli.oss.registration.mail.EmailSender;
 import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +23,17 @@ public class RegistrationService {
     private final EmailSender emailSender;
     private final RegistrationEmailRepository registrationEmailRepository;
     private final PersonRepository personRepository;
+    private final String publicAddress;
 
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
                                EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-                               PersonRepository personRepository) {
+                               PersonRepository personRepository, @Value("${public.address}") String publicAddress) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
         this.registrationEmailRepository = registrationEmailRepository;
         this.personRepository = personRepository;
+        this.publicAddress = publicAddress;
     }
 
     @Transactional
@@ -85,7 +88,16 @@ public class RegistrationService {
             message.setFrom("jugi@tverlach.ch");
             message.setTo(registrationEmail.getEmail());
             message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
-            message.setText("Test Text");
+            message.setText("""
+                    Liebe Jugeler,
+                    
+                    Ab sofort kannst du dich für die Anlässe unter folgendem Link anmelden:
+                    
+                    %s/public/%s
+                    
+                    Viele Grüsse
+                    Jugi TV Erlach
+                    """.formatted(publicAddress, registrationEmail.getLink()));
             mails.add(message);
 
             dslContext.update(REGISTRATION_EMAIL)

@@ -220,6 +220,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
             try {
                 if (this.person == null) {
                     this.person = new PersonRecord();
+                    this.person.setActive(true);
                 }
                 if (binder.validate().isOk()) {
                     binder.writeBean(this.person);
