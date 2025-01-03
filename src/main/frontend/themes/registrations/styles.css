@@ -1,4 +1,5 @@
 @import url('./main-layout.css');
+@import url('./components/checkbox-switch.css');
 @import url('./views/event-registrations-view.css');
 @import url('./views/events-view.css');
 @import url('./views/persons-view.css');

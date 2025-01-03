@@ -29,6 +29,7 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import java.util.Optional;
 
 import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
+import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Anlässe")
 @Route("events/:eventID?/:action?(edit)")
@@ -97,10 +98,10 @@ public class EventsView extends Div implements BeforeEnterObserver {
         grid.addColumn(EventRecord::getLocation)
                 .setSortable(true).setSortProperty(EVENT.LOCATION.getName())
                 .setHeader("Ort").setAutoWidth(true);
-        grid.addColumn(EventRecord::getFromDate)
+        grid.addColumn(eventRecord -> DATE_FORMAT.format(eventRecord.getFromDate()))
                 .setSortable(true).setSortProperty(EVENT.FROM_DATE.getName())
                 .setHeader("von").setAutoWidth(true);
-        grid.addColumn(EventRecord::getToDate)
+        grid.addColumn(eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
                 .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
                 .setHeader("bis").setAutoWidth(true);
 

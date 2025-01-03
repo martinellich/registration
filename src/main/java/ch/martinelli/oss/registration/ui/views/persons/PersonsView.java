@@ -15,6 +15,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -105,7 +106,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         grid.addColumn(PersonRecord::getDateOfBirth)
                 .setSortable(true).setSortProperty(PERSON.DATE_OF_BIRTH.getName())
                 .setHeader("Geburtsdatum").setAutoWidth(true);
-        grid.addColumn(PersonRecord::getActive)
+        grid.addComponentColumn(personRecord -> personRecord.getActive() ? VaadinIcon.CHECK.create() : new Span())
                 .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
                 .setHeader("Aktiv?").setAutoWidth(true);
 
@@ -188,6 +189,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
 
         Checkbox active = new Checkbox("Aktiv");
+        active.getElement().getThemeList().add("switch");
         binder.forField(active)
                 .bind(PersonRecord::getActive, PersonRecord::setActive);
 

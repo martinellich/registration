@@ -49,6 +49,7 @@ import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
+import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Einladungen")
 @Route("registrations/:registrationID?/:action?(edit)")
@@ -135,10 +136,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         grid.addColumn(RegistrationViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
                 .setHeader("Jahr").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getOpenFrom)
+        grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenFrom()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
                 .setHeader("Offen von").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getOpenUntil)
+        grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenUntil()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
                 .setHeader("Offen bis").setAutoWidth(true);
         grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount()))
