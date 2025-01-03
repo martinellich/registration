@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
+import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
@@ -15,7 +16,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -219,12 +219,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             }
         });
 
-        DatePicker openFromDatePicker = new DatePicker("Offen von");
+        I18nDatePicker openFromDatePicker = new I18nDatePicker("Offen von");
         binder.forField(openFromDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
 
-        DatePicker openUntilDatePicker = new DatePicker("Offen bis");
+        I18nDatePicker openUntilDatePicker = new I18nDatePicker("Offen bis");
         binder.forField(openUntilDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);

@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
+import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
@@ -9,7 +10,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -180,7 +180,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 .asRequired()
                 .bind(PersonRecord::getEmail, PersonRecord::setEmail);
 
-        DatePicker dateOfBirthDatePicker = new DatePicker("Geburtsdatum");
+        I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker("Geburtsdatum");
         binder.forField(dateOfBirthDatePicker)
                 .asRequired()
                 .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
