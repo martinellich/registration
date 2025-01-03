@@ -64,7 +64,7 @@ public final class SecurityContext {
      * Logs the currently authenticated user out of the application.
      * <p>
      * This method handles the following operations during logout:
-     * 1. Retrieve the current HTTP request and logs the user out via the `AuthenticationContext`.
+     * 1. Retrieve the current HTTP request and log the user out via the `AuthenticationContext`.
      * 2. Invalidate the "remember-me" cookie by setting its value to `null`
      * and max age to `0`, effectively clearing it from the client.
      * 3. Adjust the cookie path based on the application context path.

@@ -84,20 +84,7 @@ public class RegistrationService {
 
         List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationId(registration.getId());
         for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
-            var message = new SimpleMailMessage();
-            message.setFrom("jugi@tverlach.ch");
-            message.setTo(registrationEmail.getEmail());
-            message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
-            message.setText("""
-                    Liebe Jugeler,
-                    
-                    Ab sofort kannst du dich für die Anlässe unter folgendem Link anmelden:
-                    
-                    %s/public/%s
-                    
-                    Viele Grüsse
-                    Jugi TV Erlach
-                    """.formatted(publicAddress, registrationEmail.getLink()));
+            SimpleMailMessage message = createMailMessage(registration, registrationEmail);
             mails.add(message);
 
             dslContext.update(REGISTRATION_EMAIL)
@@ -109,6 +96,24 @@ public class RegistrationService {
         emailSender.send(mails);
 
         return true;
+    }
+
+    private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail) {
+        var message = new SimpleMailMessage();
+        message.setFrom("jugi@tverlach.ch");
+        message.setTo(registrationEmail.getEmail());
+        message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
+        message.setText("""
+                Liebe Jugeler,
+                
+                Ab sofort kannst du dich für die Anlässe unter folgendem Link anmelden:
+                
+                %s/public/%s
+                
+                Viele Grüsse
+                Jugi TV Erlach
+                """.formatted(publicAddress, registrationEmail.getLink()));
+        return message;
     }
 
     @Transactional
