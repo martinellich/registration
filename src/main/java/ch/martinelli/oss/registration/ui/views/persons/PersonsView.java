@@ -73,7 +73,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 populateForm(personFromBackend.get());
             } else {
                 // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
+                grid.getDataProvider().refreshAll();
                 event.forwardTo(PersonsView.class);
             }
         }
@@ -112,8 +112,8 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-person-button");
         addButton.addClickListener(e -> {
-            refreshGrid();
             clearForm();
+            grid.getDataProvider().refreshAll();
         });
 
         grid.addComponentColumn(personRecord -> {
@@ -125,8 +125,10 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                             ce -> {
                                 try {
                                     personRepository.delete(personRecord);
+
                                     clearForm();
-                                    refreshGrid();
+                                    grid.getDataProvider().refreshAll();
+
                                     Notification.success("Die Person wurde gelöscht");
                                 } catch (DataIntegrityViolationException ex) {
                                     Notification.error("Die Person wird noch verwendet und kann nicht gelöscht werden");
@@ -213,7 +215,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
     private void configureButtons() {
         cancel.addClickListener(e -> {
             clearForm();
-            refreshGrid();
+            grid.getDataProvider().refreshAll();
         });
 
         save.addClickListener(e -> {
@@ -226,8 +228,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                     binder.writeBean(this.person);
                     personRepository.save(this.person);
 
-                    clearForm();
-                    refreshGrid();
+                    grid.getDataProvider().refreshItem(this.person);
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(PersonsView.class);
@@ -236,11 +237,6 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
             }
         });
-    }
-
-    private void refreshGrid() {
-        grid.select(null);
-        grid.getDataProvider().refreshAll();
     }
 
     private void clearForm() {

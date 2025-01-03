@@ -18,9 +18,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.beans.factory.annotation.Autowired;
 import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
@@ -31,18 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RegistrationViewTest extends KaribuTest {
 
-    @Container
-    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
-
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailcatcherContainer.start();
-
-        registry.add("spring.mail.host", mailcatcherContainer::getHost);
-        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
-        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
-        registry.add("spring.mail.password", () -> "pass");
-    }
+    @Autowired
+    private MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
 
     @BeforeEach
     void login() {

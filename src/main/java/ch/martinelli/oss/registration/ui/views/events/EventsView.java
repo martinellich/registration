@@ -69,7 +69,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 populateForm(eventFromBackend.get());
             } else {
                 // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
+                grid.getDataProvider().refreshAll();
                 event.forwardTo(EventsView.class);
             }
         }
@@ -107,8 +107,8 @@ public class EventsView extends Div implements BeforeEnterObserver {
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-event-button");
         addButton.addClickListener(e -> {
-            refreshGrid();
             clearForm();
+            grid.getDataProvider().refreshAll();
         });
 
         grid.addComponentColumn(eventRecord -> {
@@ -120,8 +120,10 @@ public class EventsView extends Div implements BeforeEnterObserver {
                             ce -> {
                                 try {
                                     eventRepository.delete(eventRecord);
+
                                     clearForm();
-                                    refreshGrid();
+                                    grid.getDataProvider().refreshAll();
+
                                     Notification.success("Der Anlass wurde gelöscht");
                                 } catch (DataIntegrityViolationException ex) {
                                     Notification.error("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
@@ -206,7 +208,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
     private void configureButtons() {
         cancel.addClickListener(e -> {
             clearForm();
-            refreshGrid();
+            grid.getDataProvider().refreshAll();
         });
 
         save.addClickListener(e -> {
@@ -218,8 +220,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
                     binder.writeBean(this.event);
                     eventRepository.save(this.event);
 
-                    clearForm();
-                    refreshGrid();
+                    grid.getDataProvider().refreshItem(this.event);
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(EventsView.class);
@@ -230,12 +231,8 @@ public class EventsView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private void refreshGrid() {
-        grid.select(null);
-        grid.getDataProvider().refreshAll();
-    }
-
     private void clearForm() {
+        grid.deselectAll();
         populateForm(null);
     }
 

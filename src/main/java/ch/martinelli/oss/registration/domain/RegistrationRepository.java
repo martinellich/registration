@@ -36,6 +36,10 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
                 .fetch();
     }
 
+    public int countFromView(Condition condition) {
+        return dslContext.fetchCount(dslContext.selectFrom(REGISTRATION_VIEW).where(condition));
+    }
+
     public Optional<RegistrationViewRecord> findByIdFromView(Long registrationId) {
         return dslContext.selectFrom(REGISTRATION_VIEW)
                 .where(REGISTRATION_VIEW.ID.eq(registrationId))
@@ -76,4 +80,5 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
                         .values(registration.getId(), person.getId())
                         .execute());
     }
+
 }
