@@ -22,6 +22,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -339,7 +341,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         TextArea description = new TextArea("Bemerkungen");
         description.setHeight("100px");
         binder.forField(description)
-                .bind(RegistrationRecord::getDescription, RegistrationRecord::setDescription);
+                .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(description, 3);
 
         formLayout.add(yearIntegerField, openFromDatePicker, openUntilDatePicker, description);
@@ -350,9 +352,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         FormLayout listBoxFormLayout = new FormLayout();
         listBoxFormLayout.add(new H3("Anlässe"), new H3("Jugeler"));
+        listBoxFormLayout.add(new Paragraph(), new Paragraph());
 
         eventListBox = new MultiSelectListBox<>();
         eventListBox.setId("event-list-box");
+        eventListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
         eventListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
 
@@ -362,6 +366,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         personListBox = new MultiSelectListBox<>();
         personListBox.setId("person-list-box");
+        personListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
         personListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
 

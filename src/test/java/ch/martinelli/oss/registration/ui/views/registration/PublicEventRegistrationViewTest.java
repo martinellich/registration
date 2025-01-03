@@ -6,7 +6,7 @@ import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.ListItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -27,10 +27,10 @@ class PublicEventRegistrationViewTest extends KaribuTest {
     }
 
     @Test
-    void navgation_with_correct_parameter() {
+    void navigation_with_correct_parameter() {
         UI.getCurrent().navigate("public/550e8400e29b41d4a716446655440000");
 
-        H2 title = _get(H2.class, spec -> spec.withText("Lane Eula"));
+        ListItem title = _get(ListItem.class, spec -> spec.withText("Lane Eula"));
         assertThat(title).isNotNull();
 
         List<Checkbox> checkboxes = LocatorJ._find(Checkbox.class);

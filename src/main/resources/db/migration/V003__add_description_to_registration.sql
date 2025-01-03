@@ -1,1 +1,1 @@
-alter table registration add column description varchar;
+alter table registration add column remarks varchar;

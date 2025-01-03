@@ -66,10 +66,9 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         logo.setHeight("50px");
         HorizontalLayout header = new HorizontalLayout(logo, new H1("Jugi TV Erlach - Anmeldung %d".formatted(registration.getYear())));
         add(header);
-        if (registration.getDescription() != null) {
-            add(new Paragraph(registration.getDescription()));
+        if (registration.getRemarks() != null) {
+            add(new Paragraph(registration.getRemarks()));
         }
-
 
         List<PersonRecord> persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmail.getId());
 
