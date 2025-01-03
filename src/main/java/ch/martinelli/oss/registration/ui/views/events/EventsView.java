@@ -2,13 +2,13 @@ package ch.martinelli.oss.registration.ui.views.events;
 
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
+import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -173,12 +173,12 @@ public class EventsView extends Div implements BeforeEnterObserver {
         binder.forField(descriptionTextArea)
                 .bind(EventRecord::getDescription, EventRecord::setDescription);
 
-        DatePicker fromDatePicker = new DatePicker("von");
+        I18nDatePicker fromDatePicker = new I18nDatePicker("von");
         binder.forField(fromDatePicker)
                 .asRequired()
                 .bind(EventRecord::getFromDate, EventRecord::setFromDate);
 
-        DatePicker toDatePicker = new DatePicker("bis");
+        I18nDatePicker toDatePicker = new I18nDatePicker("bis");
         binder.forField(toDatePicker)
                 .bind(EventRecord::getToDate, EventRecord::setToDate);
 

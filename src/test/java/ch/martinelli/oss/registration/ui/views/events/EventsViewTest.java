@@ -1,6 +1,7 @@
 package ch.martinelli.oss.registration.ui.views.events;
 
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
+import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -9,7 +10,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -45,8 +45,8 @@ class EventsViewTest extends KaribuTest {
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugendturntag");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Ort")), "Kallnach");
         _setValue(_get(TextArea.class, spec -> spec.withLabel("Beschreibung")), "");
-        _get(DatePicker.class, spec -> spec.withLabel("von")).setValue(LocalDate.of(2024, 6, 11));
-        _get(DatePicker.class, spec -> spec.withLabel("bis")).setValue(LocalDate.of(2024, 6, 12));
+        _get(I18nDatePicker.class, spec -> spec.withLabel("von")).setValue(LocalDate.of(2024, 6, 11));
+        _get(I18nDatePicker.class, spec -> spec.withLabel("bis")).setValue(LocalDate.of(2024, 6, 12));
 
         // Save
         _click(_get(Button.class, spec -> spec.withText("Speichern")));

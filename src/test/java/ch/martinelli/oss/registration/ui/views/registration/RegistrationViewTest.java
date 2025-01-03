@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
+import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -11,7 +12,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -62,8 +62,8 @@ class RegistrationViewTest extends KaribuTest {
 
         // Add new person
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
-        _get(DatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
-        _get(DatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
+        _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
+        _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
 
         MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class, spec -> spec.withId("event-list-box"));
         eventListBox.setValue(Set.of(eventListBox.getListDataView().getItem(0)));
