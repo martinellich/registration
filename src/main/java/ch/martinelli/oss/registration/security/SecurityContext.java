@@ -1,5 +1,6 @@
 package ch.martinelli.oss.registration.security;
 
+import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.servlet.http.Cookie;
@@ -79,7 +80,7 @@ public final class SecurityContext {
         cookie.setMaxAge(0);
         cookie.setPath(StringUtils.hasLength(request.getContextPath()) ? request.getContextPath() : "/");
 
-        HttpServletResponse response = (HttpServletResponse) VaadinServletRequest.getCurrent().getHttpServletResponse();
+        HttpServletResponse response = (HttpServletResponse) VaadinResponse.getCurrent();
         response.addCookie(cookie);
     }
 }
