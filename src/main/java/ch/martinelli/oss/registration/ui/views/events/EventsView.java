@@ -39,31 +39,53 @@ public class EventsView extends Div implements BeforeEnterObserver {
     public static final String EVENT_ID = "eventID";
     private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
 
-    private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
+    private final transient EventRepository eventRepository;
 
+    private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
     private final Button cancel = new Button("Abbrechen");
     private final Button save = new Button("Speichern");
 
     private final Binder<EventRecord> binder = new Binder<>(EventRecord.class);
-
     private EventRecord event;
-
-    private final transient EventRepository eventRepository;
 
     public EventsView(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
 
         addClassNames("events-view");
 
-        // Create UI
         SplitLayout splitLayout = new SplitLayout();
-
-        createGridLayout(splitLayout);
-        createEditorLayout(splitLayout);
+        splitLayout.addToPrimary(createGridLayout());
+        splitLayout.addToSecondary(createEditorLayout());
 
         add(splitLayout);
+    }
 
-        // Configure Grid
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        Optional<Long> eventId = event.getRouteParameters().get(EVENT_ID).map(Long::parseLong);
+        if (eventId.isPresent()) {
+            Optional<EventRecord> eventFromBackend = eventRepository.findById(eventId.get());
+            if (eventFromBackend.isPresent()) {
+                populateForm(eventFromBackend.get());
+            } else {
+                // when a row is selected but the data is no longer available, refresh grid
+                refreshGrid();
+                event.forwardTo(EventsView.class);
+            }
+        }
+    }
+
+    private Div createGridLayout() {
+        Div wrapper = new Div();
+        wrapper.setClassName("grid-wrapper");
+        wrapper.add(grid);
+
+        configureGrid();
+
+        return wrapper;
+    }
+
+    private void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(EventRecord::getTitle)
@@ -125,49 +147,9 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(EventsView.class);
             }
         });
-
-        cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
-        });
-
-        save.addClickListener(e -> {
-            try {
-                if (this.event == null) {
-                    this.event = new EventRecord();
-                }
-                if (binder.validate().isOk()) {
-                    binder.writeBean(this.event);
-                    eventRepository.save(this.event);
-
-                    clearForm();
-                    refreshGrid();
-
-                    Notification.success("Die Daten wurden gespeichert");
-                    UI.getCurrent().navigate(EventsView.class);
-                }
-            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
-            }
-        });
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> eventId = event.getRouteParameters().get(EVENT_ID).map(Long::parseLong);
-        if (eventId.isPresent()) {
-            Optional<EventRecord> eventFromBackend = eventRepository.findById(eventId.get());
-            if (eventFromBackend.isPresent()) {
-                populateForm(eventFromBackend.get());
-            } else {
-                // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
-                event.forwardTo(EventsView.class);
-            }
-        }
-    }
-
-    private void createEditorLayout(SplitLayout splitLayout) {
+    private Div createEditorLayout() {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
@@ -205,7 +187,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
-        splitLayout.addToSecondary(editorLayoutDiv);
+        return editorLayoutDiv;
     }
 
     private void createButtonLayout(Div editorLayoutDiv) {
@@ -215,13 +197,35 @@ public class EventsView extends Div implements BeforeEnterObserver {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buttonLayout.add(save, cancel);
         editorLayoutDiv.add(buttonLayout);
+
+        configureButtons();
     }
 
-    private void createGridLayout(SplitLayout splitLayout) {
-        Div wrapper = new Div();
-        wrapper.setClassName("grid-wrapper");
-        splitLayout.addToPrimary(wrapper);
-        wrapper.add(grid);
+    private void configureButtons() {
+        cancel.addClickListener(e -> {
+            clearForm();
+            refreshGrid();
+        });
+
+        save.addClickListener(e -> {
+            try {
+                if (this.event == null) {
+                    this.event = new EventRecord();
+                }
+                if (binder.validate().isOk()) {
+                    binder.writeBean(this.event);
+                    eventRepository.save(this.event);
+
+                    clearForm();
+                    refreshGrid();
+
+                    Notification.success("Die Daten wurden gespeichert");
+                    UI.getCurrent().navigate(EventsView.class);
+                }
+            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
+                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+            }
+        });
     }
 
     private void refreshGrid() {

@@ -56,14 +56,40 @@ public class PersonsView extends Div implements BeforeEnterObserver {
 
         addClassNames("persons-view");
 
-        // Create UI
         SplitLayout splitLayout = new SplitLayout();
-
-        createGridLayout(splitLayout);
-        createEditorLayout(splitLayout);
+        splitLayout.addToPrimary(createGridLayout());
+        splitLayout.addToSecondary(createEditorLayout());
 
         add(splitLayout);
+    }
 
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
+        if (personId.isPresent()) {
+            Optional<PersonRecord> personFromBackend = personRepository.findById(personId.get());
+            if (personFromBackend.isPresent()) {
+                populateForm(personFromBackend.get());
+            } else {
+                // when a row is selected but the data is no longer available, refresh grid
+                refreshGrid();
+                event.forwardTo(PersonsView.class);
+            }
+        }
+    }
+
+    private Div createGridLayout() {
+        Div wrapper = new Div();
+        wrapper.setClassName("grid-wrapper");
+        wrapper.add(grid);
+
+        configureGrid();
+
+        return wrapper;
+    }
+
+    private void configureGrid() {
         // Configure Grid
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
@@ -127,49 +153,9 @@ public class PersonsView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(PersonsView.class);
             }
         });
-
-        cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
-        });
-
-        save.addClickListener(e -> {
-            try {
-                if (this.person == null) {
-                    this.person = new PersonRecord();
-                }
-                if (binder.validate().isOk()) {
-                    binder.writeBean(this.person);
-                    personRepository.save(this.person);
-
-                    clearForm();
-                    refreshGrid();
-
-                    Notification.success("Die Daten wurden gespeichert");
-                    UI.getCurrent().navigate(PersonsView.class);
-                }
-            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
-            }
-        });
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
-        if (personId.isPresent()) {
-            Optional<PersonRecord> personFromBackend = personRepository.findById(personId.get());
-            if (personFromBackend.isPresent()) {
-                populateForm(personFromBackend.get());
-            } else {
-                // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
-                event.forwardTo(PersonsView.class);
-            }
-        }
-    }
-
-    private void createEditorLayout(SplitLayout splitLayout) {
+    private Div createEditorLayout() {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
@@ -208,7 +194,7 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
-        splitLayout.addToSecondary(editorLayoutDiv);
+        return editorLayoutDiv;
     }
 
     private void createButtonLayout(Div editorLayoutDiv) {
@@ -218,13 +204,35 @@ public class PersonsView extends Div implements BeforeEnterObserver {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buttonLayout.add(save, cancel);
         editorLayoutDiv.add(buttonLayout);
+
+        configureButtons();
     }
 
-    private void createGridLayout(SplitLayout splitLayout) {
-        Div wrapper = new Div();
-        wrapper.setClassName("grid-wrapper");
-        splitLayout.addToPrimary(wrapper);
-        wrapper.add(grid);
+    private void configureButtons() {
+        cancel.addClickListener(e -> {
+            clearForm();
+            refreshGrid();
+        });
+
+        save.addClickListener(e -> {
+            try {
+                if (this.person == null) {
+                    this.person = new PersonRecord();
+                }
+                if (binder.validate().isOk()) {
+                    binder.writeBean(this.person);
+                    personRepository.save(this.person);
+
+                    clearForm();
+                    refreshGrid();
+
+                    Notification.success("Die Daten wurden gespeichert");
+                    UI.getCurrent().navigate(PersonsView.class);
+                }
+            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
+                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+            }
+        });
     }
 
     private void refreshGrid() {
@@ -239,6 +247,5 @@ public class PersonsView extends Div implements BeforeEnterObserver {
     private void populateForm(PersonRecord value) {
         this.person = value;
         binder.readBean(this.person);
-
     }
 }
