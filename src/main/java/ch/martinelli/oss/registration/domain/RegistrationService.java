@@ -7,10 +7,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
@@ -68,6 +66,7 @@ public class RegistrationService {
         return true;
     }
 
+    @Transactional
     public boolean sendMails(RegistrationRecord registration) {
         Integer count = dslContext.selectCount()
                 .from(REGISTRATION_EMAIL)
@@ -87,6 +86,12 @@ public class RegistrationService {
             message.setTo(registrationEmail.getEmail());
             message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
             message.setText("Test Text");
+            mails.add(message);
+
+            dslContext.update(REGISTRATION_EMAIL)
+                    .set(REGISTRATION_EMAIL.SENT_AT, LocalDateTime.now())
+                    .where(REGISTRATION_EMAIL.ID.eq(registrationEmail.getRegistrationEmailId()))
+                    .execute();
         }
 
         emailSender.send(mails);
@@ -95,21 +100,23 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void register(long registrationId, EventRecord event, PersonRecord person, boolean registered) {
-        EventRegistrationRecord eventRegistration = dslContext
-                .selectFrom(EVENT_REGISTRATION)
-                .where(EVENT_REGISTRATION.EVENT_ID.eq(event.getId()))
-                .and(EVENT_REGISTRATION.PERSON_ID.eq(person.getId()))
-                .fetchOptional()
-                .orElseGet(() -> {
-                    EventRegistrationRecord newEventRegistration = dslContext.newRecord(EVENT_REGISTRATION);
-                    newEventRegistration.setRegistrationId(registrationId);
-                    newEventRegistration.setEventId(event.getId());
-                    newEventRegistration.setPersonId(person.getId());
-                    return newEventRegistration;
-                });
-        eventRegistration.setRegistered(registered);
-        eventRegistration.store();
+    public void register(Set<EventRegistrationRecord> eventRegistrations) {
+        for (EventRegistrationRecord eventRegistration : eventRegistrations) {
+            Optional<EventRegistrationRecord> existingEventRegistration = dslContext
+                    .selectFrom(EVENT_REGISTRATION)
+                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
+                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
+                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
+                    .fetchOptional();
+            if (existingEventRegistration.isPresent()) {
+                EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
+                eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
+                eventRegistrationRecord.store();
+            } else {
+                dslContext.attach(eventRegistration);
+                eventRegistration.store();
+            }
+        }
     }
 
 }

@@ -1,9 +1,6 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
-import ch.martinelli.oss.registration.db.tables.records.EventRecord;
-import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
-import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailRecord;
-import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import ch.martinelli.oss.registration.db.tables.records.*;
 import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
@@ -18,10 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @PageTitle("Anmeldung")
 @Route(value = "public", autoLayout = false)
@@ -102,10 +96,12 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 eventRegistrationRepository.findByEventIdAndPersonId(event.getId(), person.getId())
                         .ifPresent(eventRegistration -> checkbox.setValue(eventRegistration.getRegistered()));
             }
+
             Span titleSpan = new Span(event.getTitle());
             titleSpan.setWidth("300px");
             Span dateSpan = new Span(event.getFromDate().toString());
             dateSpan.setWidth("150px");
+
             HorizontalLayout line = new HorizontalLayout(titleSpan, dateSpan, checkboxes);
             add(line);
         }
@@ -115,11 +111,21 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         Button registerButton = new Button("Anmelden");
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         registerButton.addClickListener(e -> {
+            Set<EventRegistrationRecord> eventRegistrations = new HashSet<>();
             for (Map.Entry<Checkbox, EventWithPerson> entry : checkboxMap.entrySet()) {
-                registrationService.register(registrationEmail.getRegistrationId(), entry.getValue().event(), entry.getValue().person(), entry.getKey().getValue());
+                EventRegistrationRecord eventRegistration = new EventRegistrationRecord();
+                eventRegistration.setRegistrationId(registration.getId());
+                eventRegistration.setEventId(entry.getValue().event().getId());
+                eventRegistration.setPersonId(entry.getValue().person().getId());
+                eventRegistration.setRegistered(entry.getKey().getValue());
+                eventRegistrations.add(eventRegistration);
             }
+            registrationService.register(eventRegistrations);
             Notification.success("Vielen Dank für die Anmeldung!");
         });
         add(registerButton);
+    }
+
+    public record EventWithPerson(EventRecord event, PersonRecord person) {
     }
 }

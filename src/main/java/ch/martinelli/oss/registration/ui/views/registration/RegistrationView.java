@@ -279,6 +279,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private void createButtonLayout(Div editorLayoutDiv) {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
+
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         createMailingButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
@@ -288,6 +289,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         showRegistrations.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         showRegistrations.setEnabled(false);
         buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton, showRegistrations);
+
         editorLayoutDiv.add(buttonLayout);
 
         configureButtons();

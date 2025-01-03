@@ -18,6 +18,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
@@ -78,6 +79,11 @@ public class RegistrationEmailView extends VerticalLayout {
         grid.addColumn(RegistrationEmailViewRecord::getSentAt)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
                 .setHeader("Versendet").setAutoWidth(true);
+        grid.addComponentColumn(registrationEmailViewRecord -> {
+            RouterLink link = new RouterLink("Anmeldeformular", PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
+            link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
+            return link;
+        });
 
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
                 getFilter(),
