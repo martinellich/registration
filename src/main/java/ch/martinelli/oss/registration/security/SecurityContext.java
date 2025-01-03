@@ -1,9 +1,9 @@
 package ch.martinelli.oss.registration.security;
 
-import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,7 +33,7 @@ public final class SecurityContext {
      * has not signed in
      */
     public String getUsername() {
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return switch (principal) {
             case UserDetails userDetails -> userDetails.getUsername();
             case Jwt jwt -> jwt.getSubject();
@@ -71,15 +71,15 @@ public final class SecurityContext {
      * 4. Add the invalidated cookie to the HTTP response to ensure it is removed on the client-side.
      */
     public void logout() {
-        var request = VaadinServletRequest.getCurrent().getHttpServletRequest();
+        HttpServletRequest request = VaadinServletRequest.getCurrent().getHttpServletRequest();
 
         authenticationContext.logout();
 
-        var cookie = new Cookie("remember-me", null);
+        Cookie cookie = new Cookie("remember-me", null);
         cookie.setMaxAge(0);
         cookie.setPath(StringUtils.hasLength(request.getContextPath()) ? request.getContextPath() : "/");
 
-        var response = (HttpServletResponse) VaadinResponse.getCurrent();
+        HttpServletResponse response = (HttpServletResponse) VaadinServletRequest.getCurrent().getHttpServletResponse();
         response.addCookie(cookie);
     }
 }

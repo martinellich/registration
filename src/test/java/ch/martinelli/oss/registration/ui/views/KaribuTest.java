@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,7 +66,7 @@ public abstract class KaribuTest {
      * @param username Username
      */
     protected void login(String username) {
-        var userDetails = userDetailsService.loadUserByUsername(username);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         setAuthentication(userDetails);
     }
 
@@ -78,21 +79,21 @@ public abstract class KaribuTest {
     protected void login(String username, final List<String> roles) {
         // taken from https://www.baeldung.com/manually-set-user-authentication-spring-security
         // also see https://github.com/mvysny/karibu-testing/issues/47 for more details.
-        var authorities = roles.stream()
+        List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(it -> new SimpleGrantedAuthority(ROLE_PREFIX + it))
                 .toList();
 
-        var userDetails = new User(username, "pass", authorities);
-        setAuthentication(userDetails);
+        User user = new User(username, "pass", authorities);
+        setAuthentication(user);
     }
 
     private static void setAuthentication(UserDetails userDetails) {
-        var authReq = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
                 userDetails.getAuthorities());
-        var sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(authReq);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(authReq);
 
-        final var request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
+        FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
         request.setUserPrincipalInt(authReq);
         request.setUserInRole((principal, role) -> userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals(role) || a.getAuthority().equals(ROLE_PREFIX + role)));
@@ -102,7 +103,7 @@ public abstract class KaribuTest {
         try {
             SecurityContextHolder.getContext().setAuthentication(null);
             if (VaadinServletRequest.getCurrent() != null) {
-                final FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
+                FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
                 request.setUserPrincipalInt(null);
                 request.setUserInRole((principal, role) -> false);
             }

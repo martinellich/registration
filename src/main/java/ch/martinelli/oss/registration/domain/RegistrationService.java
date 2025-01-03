@@ -99,7 +99,7 @@ public class RegistrationService {
     }
 
     private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail) {
-        var message = new SimpleMailMessage();
+        SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("jugi@tverlach.ch");
         message.setTo(registrationEmail.getEmail());
         message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
