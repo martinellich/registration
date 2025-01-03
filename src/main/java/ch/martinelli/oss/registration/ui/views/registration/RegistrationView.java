@@ -392,10 +392,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private void refreshGridButPreserveSelection() {
         RegistrationViewRecord selectedRegistration = grid.asSingleSelect().getValue();
         loadData();
-        registrationRepository.findByIdFromView(selectedRegistration.getId()).ifPresent(registrationViewRecord -> {
-            grid.select(registrationViewRecord);
-            setButtonState(registrationViewRecord);
-        });
+        if (selectedRegistration != null) {
+            registrationRepository.findByIdFromView(selectedRegistration.getId()).ifPresent(registrationViewRecord -> {
+                grid.select(registrationViewRecord);
+                setButtonState(registrationViewRecord);
+            });
+        } else {
+            clearForm();
+        }
     }
 
     private void setButtonState(RegistrationViewRecord registrationViewRecord) {

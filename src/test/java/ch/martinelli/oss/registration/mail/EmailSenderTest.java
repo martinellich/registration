@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
 import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 import skydrinker.testcontainers.mailcatcher.MailcatcherMail;
 
@@ -18,10 +21,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class EmailSenderTest {
 
+    @Container
+    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+
     @Autowired
     private EmailSender emailSender;
-    @Autowired
-    private MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        mailcatcherContainer.start();
+
+        registry.add("spring.mail.host", mailcatcherContainer::getHost);
+        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
+        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
+        registry.add("spring.mail.password", () -> "pass");
+    }
 
     @Test
     void send_mails() {

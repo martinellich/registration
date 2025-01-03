@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.PrettyPrintTreeKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -18,7 +19,9 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
 import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
@@ -29,8 +32,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RegistrationViewTest extends KaribuTest {
 
-    @Autowired
-    private MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    @Container
+    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        mailcatcherContainer.start();
+
+        registry.add("spring.mail.host", mailcatcherContainer::getHost);
+        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
+        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
+        registry.add("spring.mail.password", () -> "pass");
+    }
 
     @BeforeEach
     void login() {
@@ -76,11 +89,10 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Der Versand wurde erstellt");
 
-        // Select newly created record
-        GridKt._clickItem(grid, 2);
-
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Emails verschicken")));
+
+        System.out.println(PrettyPrintTreeKt.toPrettyTree(UI.getCurrent()));
 
         // Confirm
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
