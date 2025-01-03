@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
+import ch.martinelli.oss.registration.ui.components.DateFormat;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -76,7 +77,7 @@ public class RegistrationEmailView extends VerticalLayout {
         grid.addColumn(RegistrationEmailViewRecord::getLink)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.LINK.getName())
                 .setHeader("Link").setAutoWidth(true);
-        grid.addColumn(RegistrationEmailViewRecord::getSentAt)
+        grid.addColumn(registrationEmailViewRecord -> DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()))
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
                 .setHeader("Versendet").setAutoWidth(true);
         grid.addComponentColumn(registrationEmailViewRecord -> {

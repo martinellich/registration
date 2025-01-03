@@ -4,18 +4,16 @@ import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
+import ch.martinelli.oss.registration.ui.views.EditView;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -29,29 +27,24 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import java.util.Optional;
 
 import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
+import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Anlässe")
 @Route("events/:eventID?/:action?(edit)")
 @Menu(order = 3, icon = LineAwesomeIconUrl.CALENDAR_SOLID)
 @RolesAllowed("ADMIN")
-public class EventsView extends Div implements BeforeEnterObserver {
+public class EventsView extends EditView<EventRecord> implements BeforeEnterObserver {
 
     public static final String EVENT_ID = "eventID";
     private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
 
     private final transient EventRepository eventRepository;
 
-    private final Grid<EventRecord> grid = new Grid<>(EventRecord.class, false);
-    private final Button cancel = new Button("Abbrechen");
-    private final Button save = new Button("Speichern");
-
-    private final Binder<EventRecord> binder = new Binder<>(EventRecord.class);
-    private EventRecord event;
-
     public EventsView(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
 
-        addClassNames("events-view");
+        grid = new Grid<>(EventRecord.class, false);
+        binder = new Binder<>(EventRecord.class);
 
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.addToPrimary(createGridLayout());
@@ -69,23 +62,14 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 populateForm(eventFromBackend.get());
             } else {
                 // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
+                grid.getDataProvider().refreshAll();
                 event.forwardTo(EventsView.class);
             }
         }
     }
 
-    private Div createGridLayout() {
-        Div wrapper = new Div();
-        wrapper.setClassName("grid-wrapper");
-        wrapper.add(grid);
-
-        configureGrid();
-
-        return wrapper;
-    }
-
-    private void configureGrid() {
+    @Override
+    protected void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(EventRecord::getTitle)
@@ -97,18 +81,18 @@ public class EventsView extends Div implements BeforeEnterObserver {
         grid.addColumn(EventRecord::getLocation)
                 .setSortable(true).setSortProperty(EVENT.LOCATION.getName())
                 .setHeader("Ort").setAutoWidth(true);
-        grid.addColumn(EventRecord::getFromDate)
+        grid.addColumn(eventRecord -> DATE_FORMAT.format(eventRecord.getFromDate()))
                 .setSortable(true).setSortProperty(EVENT.FROM_DATE.getName())
                 .setHeader("von").setAutoWidth(true);
-        grid.addColumn(EventRecord::getToDate)
+        grid.addColumn(eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
                 .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
                 .setHeader("bis").setAutoWidth(true);
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-event-button");
         addButton.addClickListener(e -> {
-            refreshGrid();
             clearForm();
+            grid.getDataProvider().refreshAll();
         });
 
         grid.addComponentColumn(eventRecord -> {
@@ -120,8 +104,10 @@ public class EventsView extends Div implements BeforeEnterObserver {
                             ce -> {
                                 try {
                                     eventRepository.delete(eventRecord);
+
                                     clearForm();
-                                    refreshGrid();
+                                    grid.getDataProvider().refreshAll();
+
                                     Notification.success("Der Anlass wurde gelöscht");
                                 } catch (DataIntegrityViolationException ex) {
                                     Notification.error("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
@@ -149,16 +135,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private Div createEditorLayout() {
-        Div editorLayoutDiv = new Div();
-        editorLayoutDiv.setClassName("editor-layout");
-
-        Div editorDiv = new Div();
-        editorDiv.setClassName("editor");
-        editorLayoutDiv.add(editorDiv);
-
-        FormLayout formLayout = new FormLayout();
-
+    protected void createComponents(FormLayout formLayout) {
         TextField titleTextField = new TextField("Bezeichnung");
         binder.forField(titleTextField)
                 .asRequired()
@@ -183,43 +160,24 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 .bind(EventRecord::getToDate, EventRecord::setToDate);
 
         formLayout.add(titleTextField, locationTextField, descriptionTextArea, fromDatePicker, toDatePicker);
-
-        editorDiv.add(formLayout);
-        createButtonLayout(editorLayoutDiv);
-
-        return editorLayoutDiv;
     }
 
-    private void createButtonLayout(Div editorLayoutDiv) {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setClassName("button-layout");
-
-        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
-
-        editorLayoutDiv.add(buttonLayout);
-
-        configureButtons();
-    }
-
-    private void configureButtons() {
+    protected void configureButtons() {
         cancel.addClickListener(e -> {
             clearForm();
-            refreshGrid();
+            grid.getDataProvider().refreshAll();
         });
 
         save.addClickListener(e -> {
             try {
-                if (this.event == null) {
-                    this.event = new EventRecord();
+                if (this.currentRecord == null) {
+                    this.currentRecord = new EventRecord();
                 }
                 if (binder.validate().isOk()) {
-                    binder.writeBean(this.event);
-                    eventRepository.save(this.event);
+                    binder.writeBean(this.currentRecord);
+                    eventRepository.save(this.currentRecord);
 
-                    clearForm();
-                    refreshGrid();
+                    grid.getDataProvider().refreshItem(this.currentRecord);
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(EventsView.class);
@@ -230,17 +188,4 @@ public class EventsView extends Div implements BeforeEnterObserver {
         });
     }
 
-    private void refreshGrid() {
-        grid.select(null);
-        grid.getDataProvider().refreshAll();
-    }
-
-    private void clearForm() {
-        populateForm(null);
-    }
-
-    private void populateForm(EventRecord value) {
-        this.event = value;
-        binder.readBean(this.event);
-    }
 }

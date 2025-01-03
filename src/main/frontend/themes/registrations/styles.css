@@ -1,7 +1,7 @@
 @import url('./main-layout.css');
+@import url('./components/checkbox-switch.css');
 @import url('./views/event-registrations-view.css');
-@import url('./views/events-view.css');
-@import url('./views/persons-view.css');
+@import url('./views/edit-view.css');
 @import url('./views/registrations-view.css');
 
 html {
@@ -18,4 +18,8 @@ html {
     --lumo-error-color-50pct: rgba(238, 64, 36, 0.5);
     --lumo-error-color-10pct: rgba(238, 64, 36, 0.1);
     --lumo-error-color: hsl(8, 86%, 54%);
+}
+
+vaadin-button {
+    cursor: pointer;
 }

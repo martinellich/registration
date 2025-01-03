@@ -19,8 +19,8 @@ class DatePickerI18nFactory {
      * @return a {@link DatePicker.DatePickerI18n} instance with locale-specific configurations
      */
     static DatePicker.DatePickerI18n createDatePickerI18n(Locale locale) {
-        var symbols = new DateFormatSymbols(locale);
-        var datePickerI18n = new DatePicker.DatePickerI18n();
+        DateFormatSymbols symbols = new DateFormatSymbols(locale);
+        DatePicker.DatePickerI18n datePickerI18n = new DatePicker.DatePickerI18n();
         datePickerI18n.setMonthNames(Arrays.asList(symbols.getMonths()));
         datePickerI18n.setFirstDayOfWeek(1);
         datePickerI18n.setWeekdays(Arrays.stream(symbols.getWeekdays()).filter(s -> !s.isEmpty()).toList());

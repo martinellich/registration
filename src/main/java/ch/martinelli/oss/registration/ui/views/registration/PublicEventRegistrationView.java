@@ -9,13 +9,17 @@ import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.*;
+
+import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Anmeldung")
 @Route(value = "public", autoLayout = false)
@@ -89,6 +93,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                     text = "nimmt teil";
                 }
                 Checkbox checkbox = new Checkbox(text);
+                checkbox.getElement().getThemeList().add("switch");
                 checkbox.setWidth("200px");
                 checkboxes.add(checkbox);
                 checkboxMap.put(checkbox, new EventWithPerson(event, person));
@@ -98,12 +103,15 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             }
 
             Span titleSpan = new Span(event.getTitle());
+            titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
             titleSpan.setWidth("300px");
-            Span dateSpan = new Span(event.getFromDate().toString());
+            Span dateSpan = new Span(DATE_FORMAT.format(event.getFromDate()));
             dateSpan.setWidth("150px");
 
-            HorizontalLayout line = new HorizontalLayout(titleSpan, dateSpan, checkboxes);
-            add(line);
+            FormLayout formLayout = new FormLayout();
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("600px", 3));
+            formLayout.add(titleSpan, dateSpan, checkboxes);
+            add(formLayout);
         }
 
         add(new Hr());

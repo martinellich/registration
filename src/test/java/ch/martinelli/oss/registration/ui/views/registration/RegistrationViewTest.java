@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.PrettyPrintTreeKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -88,11 +89,10 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Der Versand wurde erstellt");
 
-        // Select newly created record
-        GridKt._clickItem(grid, 2);
-
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Emails verschicken")));
+
+        System.out.println(PrettyPrintTreeKt.toPrettyTree(UI.getCurrent()));
 
         // Confirm
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
@@ -109,10 +109,10 @@ class RegistrationViewTest extends KaribuTest {
                 });
 
         // Delete new item
-        Component component = GridKt._getCellComponent(grid, 2, "action-column");
-        if (component instanceof Button button) {
-            _click(button);
-        }
+        Component actions = GridKt._getCellComponent(grid, 2, "action-column");
+        actions.getChildren()
+                .filter(Button.class::isInstance).findFirst().map(Button.class::cast)
+                .ifPresent(Button::click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 

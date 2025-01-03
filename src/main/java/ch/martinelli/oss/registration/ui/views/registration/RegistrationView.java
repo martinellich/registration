@@ -32,6 +32,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
@@ -48,6 +49,7 @@ import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
+import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Einladungen")
 @Route("registrations/:registrationID?/:action?(edit)")
@@ -72,7 +74,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private final Button cancelButton = new Button(ABBRECHEN);
     private final Button createMailingButton = new Button("Versand erstellen");
     private final Button sendEmailsButton = new Button("Emails verschicken");
-    private final Button showRegistrations = new Button("Anmeldungen anzeigen");
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
     private RegistrationRecord registration;
@@ -109,7 +110,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 });
             } else {
                 // when a row is selected but the data is no longer available, refresh grid
-                refreshGrid();
+                loadData();
                 event.forwardTo(RegistrationView.class);
             }
         } else {
@@ -133,26 +134,27 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(RegistrationViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
-                .setHeader("Jahr").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getOpenFrom)
+                .setHeader("Jahr");
+        grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenFrom()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
-                .setHeader("Offen von").setAutoWidth(true);
-        grid.addColumn(RegistrationViewRecord::getOpenUntil)
+                .setHeader("Offen von");
+        grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenUntil()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
-                .setHeader("Offen bis").setAutoWidth(true);
+                .setHeader("Offen bis");
         grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount()))
-                .setHeader("Versand erstellt").setAutoWidth(true);
+                .setHeader("Versand erstellt");
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
-                .setHeader("Emails verschickt").setAutoWidth(true);
+                .setHeader("Emails verschickt");
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-event-button");
         addButton.addClickListener(e -> {
-            refreshGrid();
             clearForm();
+            loadData();
         });
 
         grid.addComponentColumn(registrationViewRecord -> {
+            Div buttonLayout = new Div();
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Einladung löschen",
@@ -160,15 +162,29 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                             "Ja",
                             ce -> {
                                 registrationRepository.deleteById(registrationViewRecord.getId());
+
                                 clearForm();
-                                refreshGrid();
+                                loadData();
+
                                 Notification.success("Die Einladung wurde gelöscht");
                             },
                             ABBRECHEN,
                             ce -> {
                             }).open());
-            return deleteButton;
-        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
+            deleteButton.setId("delete-action");
+            buttonLayout.add(deleteButton);
+
+            Button showRegistrationsButton = new Button(VaadinIcon.RECORDS.create(), e -> {
+                if (this.registration != null) {
+                    UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
+                }
+            });
+            showRegistrationsButton.setTooltipText("Anmeldungen anzeigen");
+            showRegistrationsButton.addClassName(LumoUtility.Margin.Left.SMALL);
+            buttonLayout.add(showRegistrationsButton);
+
+            return buttonLayout;
+        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
 
         loadData();
 
@@ -190,11 +206,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     }
 
     private void loadData() {
-        grid.setItems(query -> registrationRepository.findAllFromView(
-                        DSL.noCondition(),
-                        query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
-                .stream());
+        CallbackDataProvider<RegistrationViewRecord, Void> dataProvider = new CallbackDataProvider<>(
+                query -> registrationRepository.findAllFromView(
+                                DSL.noCondition(),
+                                query.getOffset(), query.getLimit(),
+                                VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
+                        .stream(),
+                query -> registrationRepository.countFromView(DSL.noCondition()),
+                RegistrationViewRecord::getId
+        );
+        grid.setDataProvider(dataProvider);
     }
 
     private Div createEditorLayout() {
@@ -286,9 +307,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         createMailingButton.setEnabled(false);
         sendEmailsButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         sendEmailsButton.setEnabled(false);
-        showRegistrations.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        showRegistrations.setEnabled(false);
-        buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton, showRegistrations);
+        buttonLayout.add(saveButton, cancelButton, createMailingButton, sendEmailsButton);
 
         editorLayoutDiv.add(buttonLayout);
 
@@ -300,15 +319,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         configureCancelButton();
         configureCreateMailingButton();
         configureSendMailsButton();
-        configureShowRegistrationsButton();
-    }
-
-    private void configureShowRegistrationsButton() {
-        showRegistrations.addClickListener(e -> {
-            if (this.registration != null) {
-                UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
-            }
-        });
     }
 
     private void configureSendMailsButton() {
@@ -320,6 +330,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         confirmEvent -> {
                             if (registrationService.sendMails(this.registration)) {
                                 Notification.success("Die Emails wurden versendet");
+                                refreshGridButPreserveSelection();
                             } else {
                                 Notification.error("Die Emails wurden bereits versendet");
                             }
@@ -340,7 +351,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
                                 Notification.success("Der Versand wurde erstellt");
-                                refreshGrid();
+                                refreshGridButPreserveSelection();
                             } else {
                                 Notification.error("Es gibt bereits einen Versand");
                             }
@@ -355,7 +366,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private void configureCancelButton() {
         cancelButton.addClickListener(e -> {
             clearForm();
-            refreshGrid();
+            loadData();
         });
     }
 
@@ -370,11 +381,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                     registrationService.save(this.registration,
                             this.eventListBox.getSelectedItems(), this.personListBox.getSelectedItems());
 
-                    clearForm();
-                    refreshGrid();
+                    refreshGridButPreserveSelection();
 
                     Notification.success("Die Daten wurden gespeichert");
-                    UI.getCurrent().navigate(RegistrationView.class);
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
                 Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
@@ -382,25 +391,32 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         });
     }
 
+    private void refreshGridButPreserveSelection() {
+        RegistrationViewRecord selectedRegistration = grid.asSingleSelect().getValue();
+        loadData();
+        if (selectedRegistration != null) {
+            registrationRepository.findByIdFromView(selectedRegistration.getId()).ifPresent(registrationViewRecord -> {
+                grid.select(registrationViewRecord);
+                setButtonState(registrationViewRecord);
+            });
+        } else {
+            clearForm();
+        }
+    }
+
     private void setButtonState(RegistrationViewRecord registrationViewRecord) {
         if (binder.hasChanges()) {
             createMailingButton.setEnabled(false);
             sendEmailsButton.setEnabled(false);
-            showRegistrations.setEnabled(false);
         } else {
-            if (registrationViewRecord != null) {
+            if (registrationViewRecord != null && registrationViewRecord.getId() != null) {
                 createMailingButton.setEnabled(!eventListBox.getSelectedItems().isEmpty()
                         && !personListBox.getSelectedItems().isEmpty()
                         && registrationViewRecord.getEmailCreatedCount() == 0);
                 sendEmailsButton.setEnabled(registrationViewRecord.getEmailCreatedCount() > 0
                         && registrationViewRecord.getEmailSentCount() == 0);
-                showRegistrations.setEnabled(registrationViewRecord.getEmailSentCount() > 0);
             }
         }
-    }
-
-    private void refreshGrid() {
-        loadData();
     }
 
     private void clearForm() {

@@ -1,6 +1,9 @@
 package ch.martinelli.oss.registration.domain;
 
+import ch.martinelli.oss.registration.db.tables.records.SecurityUserRecord;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.Result;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -25,17 +28,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var securityUserRecord = dslContext
-            .selectFrom(SECURITY_USER)
-            .where(SECURITY_USER.EMAIL.eq(username))
-            .fetchOne();
+        SecurityUserRecord securityUserRecord = dslContext
+                .selectFrom(SECURITY_USER)
+                .where(SECURITY_USER.EMAIL.eq(username))
+                .fetchOne();
 
         if (securityUserRecord != null) {
-            var groups = dslContext
-                .select(USER_GROUP.securityGroup().NAME)
-                .from(USER_GROUP)
-                .where(USER_GROUP.USER_ID.eq(securityUserRecord.getId()))
-                .fetch();
+            Result<Record1<String>> groups = dslContext
+                    .select(USER_GROUP.securityGroup().NAME)
+                    .from(USER_GROUP)
+                    .where(USER_GROUP.USER_ID.eq(securityUserRecord.getId()))
+                    .fetch();
 
             return new User(securityUserRecord.getEmail(), securityUserRecord.getSecret(),
                 groups.stream()
