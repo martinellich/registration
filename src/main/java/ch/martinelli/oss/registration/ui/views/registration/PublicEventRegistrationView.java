@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.*;
 
@@ -102,6 +103,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             }
 
             Span titleSpan = new Span(event.getTitle());
+            titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
             titleSpan.setWidth("300px");
             Span dateSpan = new Span(DATE_FORMAT.format(event.getFromDate()));
             dateSpan.setWidth("150px");
