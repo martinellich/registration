@@ -55,7 +55,7 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
             Field<Boolean> registrationField = boolOr(
                     when(EVENT.TITLE.eq(event.getTitle()), EVENT_REGISTRATION.REGISTERED)
                             .otherwise(false)
-            ).as(DSL.name(event.getTitle().toLowerCase().replace(' ', '_')));
+            ).as(DSL.name(event.getTitle()));
 
             fields.add(registrationField);
         }

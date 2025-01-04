@@ -33,7 +33,7 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 
 @PageTitle("Jugeler")
 @Route("persons/:personID?")
-@Menu(order = 4, icon = LineAwesomeIconUrl.USERS_SOLID)
+@Menu(order = 5, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
 public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver {
 

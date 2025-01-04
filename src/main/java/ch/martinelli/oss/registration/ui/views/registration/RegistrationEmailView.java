@@ -14,6 +14,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -32,10 +33,10 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REG
 
 @PageTitle("Versand")
 @Route("registration-emails")
-@Menu(order = 1, icon = LineAwesomeIconUrl.MAIL_BULK_SOLID)
+@Menu(order = 2, icon = LineAwesomeIconUrl.MAIL_BULK_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class RegistrationEmailView extends VerticalLayout {
+public class RegistrationEmailView extends Div {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
     private final transient RegistrationRepository registrationRepository;
@@ -50,29 +51,31 @@ public class RegistrationEmailView extends VerticalLayout {
 
         setSizeFull();
 
-        add(createFilters(), createGrid());
+        add(createFilter(), createGrid());
     }
 
-    public FormLayout createFilters() {
+    public VerticalLayout createFilter() {
         registrationSelect.setLabel("Jahr");
         registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
-
-        Button searchButton = new Button("Suchen");
-        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        searchButton.addClickListener(e -> grid.getDataProvider().refreshAll());
+        registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
 
         Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        resetButton.addClickListener(e -> registrationSelect.clear());
+        resetButton.addClickListener(e -> {
+            registrationSelect.clear();
+            grid.getDataProvider().refreshAll();
+        });
 
-        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(searchButton, resetButton));
+        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 
-        return formLayout;
+        return new VerticalLayout(formLayout);
     }
 
     private Component createGrid() {
+        grid.setHeight("calc(100% - 100px)");
+
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
                 .setHeader("Jahr").setAutoWidth(true);
@@ -82,7 +85,8 @@ public class RegistrationEmailView extends VerticalLayout {
         grid.addColumn(RegistrationEmailViewRecord::getLink)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.LINK.getName())
                 .setHeader("Link").setAutoWidth(true);
-        grid.addColumn(registrationEmailViewRecord -> DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()))
+        grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
+                        ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
                 .setHeader("Versendet").setAutoWidth(true);
         grid.addComponentColumn(registrationEmailViewRecord -> {

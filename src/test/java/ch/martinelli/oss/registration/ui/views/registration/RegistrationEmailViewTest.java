@@ -32,14 +32,12 @@ class RegistrationEmailViewTest extends KaribuTest {
         // Filter
         Select select = _get(Select.class);
         _setValue(_get(Select.class), select.getListDataView().getItem(1));
-        _click(_get(Button.class, spec -> spec.withText("Suchen")));
 
         // Check the content of grid
         assertThat(GridKt._size(grid)).isZero();
 
         // Filter
         _setValue(_get(Select.class), select.getListDataView().getItem(0));
-        _click(_get(Button.class, spec -> spec.withText("Suchen")));
 
         // Check the content of grid
         assertThat(GridKt._size(grid)).isEqualTo(1);
