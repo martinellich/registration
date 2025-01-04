@@ -155,7 +155,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         grid.addComponentColumn(registrationViewRecord -> {
             Div buttonLayout = new Div();
+
+            Button showRegistrationsButton = new Button(VaadinIcon.RECORDS.create(), e ->
+                    UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
+            showRegistrationsButton.setTooltipText("Anmeldungen anzeigen");
+            buttonLayout.add(showRegistrationsButton);
+
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.setId("delete-action");
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            deleteButton.addClassName(LumoUtility.Margin.Left.SMALL);
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Einladung löschen",
                             "Willst du die Einladung wirklich löschen?",
@@ -171,17 +180,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                             ABBRECHEN,
                             ce -> {
                             }).open());
-            deleteButton.setId("delete-action");
             buttonLayout.add(deleteButton);
-
-            Button showRegistrationsButton = new Button(VaadinIcon.RECORDS.create(), e -> {
-                if (this.registration != null) {
-                    UI.getCurrent().navigate(EventRegistrationView.class, this.registration.getId());
-                }
-            });
-            showRegistrationsButton.setTooltipText("Anmeldungen anzeigen");
-            showRegistrationsButton.addClassName(LumoUtility.Margin.Left.SMALL);
-            buttonLayout.add(showRegistrationsButton);
 
             return buttonLayout;
         }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
@@ -267,6 +266,20 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         H4 personsTitle = new H4("Jugeler");
         personsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
         listBoxFormLayout.add(eventsTitle, personsTitle);
+
+        Button selectAllEvents = new Button("Alle Anlässe auswählen");
+        selectAllEvents.addClickListener(e -> eventListBox.select(eventListBox.getListDataView().getItems().toList()));
+        Button selectNoEvents = new Button("Keine Anlässe auswählen");
+        selectNoEvents.addClickListener(e -> eventListBox.deselectAll());
+        HorizontalLayout eventButtons = new HorizontalLayout(selectAllEvents, selectNoEvents);
+
+        Button selectAllPersons = new Button("Alle Personen auswählen");
+        selectAllPersons.addClickListener(e -> personListBox.select(personListBox.getListDataView().getItems().toList()));
+        Button selectNoPersons = new Button("Keine Personen auswählen");
+        selectNoPersons.addClickListener(e -> personListBox.deselectAll());
+        HorizontalLayout personButtons = new HorizontalLayout(selectAllPersons, selectNoPersons);
+
+        listBoxFormLayout.add(eventButtons, personButtons);
 
         eventListBox = new MultiSelectListBox<>();
         eventListBox.setId("event-list-box");

@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.ui.views.EditView;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -97,6 +98,7 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
 
         grid.addComponentColumn(eventRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Anlass löschen",
                             "Willst du den Anlass wirklich löschen?",

@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.ui.views.EditView;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -99,6 +100,7 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
 
         grid.addComponentColumn(personRecord -> {
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteButton.addClickListener(e ->
                     new ConfirmDialog("Person löschen",
                             "Willst du die Person wirklich löschen?",
