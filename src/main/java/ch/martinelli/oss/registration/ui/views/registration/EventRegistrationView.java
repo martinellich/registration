@@ -21,16 +21,15 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.List;
 
-@PageTitle("Anmeldungen")
+import static com.vaadin.flow.i18n.I18NProvider.translate;
+
 @Route("event-registrations")
-@Menu(order = 1, icon = LineAwesomeIconUrl.TH_LIST_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class EventRegistrationView extends Div implements HasUrlParameter<Long> {
+public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient EventRegistrationRepository eventRegistrationRepository;
     private final transient RegistrationRepository registrationRepository;
@@ -63,7 +62,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
     }
 
     public VerticalLayout createFilter() {
-        registrationSelect.setLabel("Jahr");
+        registrationSelect.setLabel(translate("year"));
         registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
         registrationSelect.addValueChangeListener(e -> {
@@ -83,9 +82,9 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
 
         Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
         grid.addColumn(EventRegistrationRow::lastName)
-                .setHeader("Nachname").setAutoWidth(true);
+                .setHeader(translate("last.name")).setAutoWidth(true);
         grid.addColumn(EventRegistrationRow::firstName)
-                .setHeader("Vorname").setAutoWidth(true);
+                .setHeader(translate("first.name")).setAutoWidth(true);
 
         if (!eventRegistrationMatrix.isEmpty()) {
             EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
@@ -112,11 +111,15 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
     private void createButtons() {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
-        Button cancelButton = new Button("Zurück");
+        Button cancelButton = new Button(translate("back"));
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         cancelButton.addClickListener(e -> UI.getCurrent().getPage().getHistory().back());
         buttonLayout.add(cancelButton);
         add(buttonLayout);
     }
-}
 
+    @Override
+    public String getPageTitle() {
+        return translate("event.registrations");
+    }
+}

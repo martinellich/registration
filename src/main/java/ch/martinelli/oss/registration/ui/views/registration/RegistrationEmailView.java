@@ -19,24 +19,21 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.router.Menu;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@PageTitle("Versand")
 @Route("registration-emails")
-@Menu(order = 2, icon = LineAwesomeIconUrl.MAIL_BULK_SOLID)
 @RolesAllowed("ADMIN")
 @Uses(Icon.class)
-public class RegistrationEmailView extends Div {
+public class RegistrationEmailView extends Div implements HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
     private final transient RegistrationRepository registrationRepository;
@@ -55,12 +52,12 @@ public class RegistrationEmailView extends Div {
     }
 
     public VerticalLayout createFilter() {
-        registrationSelect.setLabel("Jahr");
+        registrationSelect.setLabel(translate("year"));
         registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
+        Button resetButton = new Button(translate("reset"));
 
-        Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetButton.addClickListener(e -> {
             registrationSelect.clear();
@@ -78,19 +75,19 @@ public class RegistrationEmailView extends Div {
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
-                .setHeader("Jahr").setAutoWidth(true);
+                .setHeader(translate("year")).setAutoWidth(true);
         grid.addColumn(RegistrationEmailViewRecord::getEmail)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.EMAIL.getName())
-                .setHeader("Email").setAutoWidth(true);
+                .setHeader(translate("email")).setAutoWidth(true);
         grid.addColumn(RegistrationEmailViewRecord::getLink)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.LINK.getName())
-                .setHeader("Link").setAutoWidth(true);
+                .setHeader(translate("link")).setAutoWidth(true);
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
                         ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
-                .setHeader("Versendet").setAutoWidth(true);
+                .setHeader(translate("sent")).setAutoWidth(true);
         grid.addComponentColumn(registrationEmailViewRecord -> {
-            RouterLink link = new RouterLink("Anmeldeformular", PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
+            RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
             return link;
         });
@@ -115,4 +112,8 @@ public class RegistrationEmailView extends Div {
         return condition;
     }
 
+    @Override
+    public String getPageTitle() {
+        return translate("mailing");
+    }
 }

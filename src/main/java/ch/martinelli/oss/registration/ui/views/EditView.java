@@ -10,11 +10,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import org.jooq.Record;
 
+import static com.vaadin.flow.i18n.I18NProvider.translate;
+
 public abstract class EditView<R extends Record> extends Div {
 
     protected Grid<R> grid;
-    protected final Button cancelButton = new Button("Abbrechen");
-    protected final Button saveButton = new Button("Speichern");
+    protected final Button cancelButton = new Button(translate("cancel"));
+    protected final Button saveButton = new Button(translate("save"));
 
     protected Binder<R> binder;
     protected R currentRecord;

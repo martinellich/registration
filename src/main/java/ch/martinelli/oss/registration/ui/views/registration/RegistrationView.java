@@ -39,7 +39,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -51,13 +50,12 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@PageTitle("Einladungen")
 @Route("registrations/:registrationID?")
 @RouteAlias("")
-@Menu(order = 0, icon = LineAwesomeIconUrl.LIST_SOLID)
 @RolesAllowed("ADMIN")
-public class RegistrationView extends Div implements BeforeEnterObserver {
+public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String REGISTRATION_ID = "registrationID";
     private static final String REGISTRATION_ROUTE_TEMPLATE = "registrations/%s";
@@ -71,10 +69,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
     private MultiSelectListBox<EventRecord> eventListBox;
     private MultiSelectListBox<PersonRecord> personListBox;
-    private final Button saveButton = new Button("Speichern");
+    private final Button saveButton = new Button(translate("save"));
     private final Button cancelButton = new Button(ABBRECHEN);
-    private final Button createMailingButton = new Button("Versand erstellen");
-    private final Button sendEmailsButton = new Button("Emails verschicken");
+    private final Button createMailingButton = new Button(translate("create.mailing"));
+    private final Button sendEmailsButton = new Button(translate("send.emails"));
     private FormLayout formLayout;
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
@@ -136,17 +134,17 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(RegistrationViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
-                .setHeader("Jahr");
+                .setHeader(translate("year"));
         grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenFrom()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
-                .setHeader("Offen von");
+                .setHeader(translate("open.from"));
         grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenUntil()))
                 .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
-                .setHeader("Offen bis");
+                .setHeader(translate("open.until"));
         grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount()))
-                .setHeader("Versand erstellt");
+                .setHeader(translate("mailing.created"));
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
-                .setHeader("Emails verschickt");
+                .setHeader(translate("emails.sent"));
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-registration-button");
@@ -230,8 +228,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         formLayout = new FormLayout();
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
+        IntegerField yearIntegerField = new IntegerField(translate("year"));
 
-        IntegerField yearIntegerField = new IntegerField("Jahr");
         binder.forField(yearIntegerField)
                 .asRequired()
                 .bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
@@ -241,18 +239,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 eventListBox.clear();
             }
         });
+        I18nDatePicker openFromDatePicker = new I18nDatePicker(translate("open.from"));
 
-        I18nDatePicker openFromDatePicker = new I18nDatePicker("Offen von");
         binder.forField(openFromDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
+        I18nDatePicker openUntilDatePicker = new I18nDatePicker(translate("open.to"));
 
-        I18nDatePicker openUntilDatePicker = new I18nDatePicker("Offen bis");
         binder.forField(openUntilDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
+        TextArea description = new TextArea(translate("remarks"));
 
-        TextArea description = new TextArea("Bemerkungen");
         description.setHeight("100px");
         binder.forField(description)
                 .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
@@ -264,21 +262,21 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
 
         FormLayout listBoxFormLayout = new FormLayout();
         listBoxFormLayout.addClassName(LumoUtility.Padding.Top.LARGE);
-        H4 eventsTitle = new H4("Anlässe");
+        H4 eventsTitle = new H4(translate("events"));
         eventsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
-        H4 personsTitle = new H4("Jugeler");
+        H4 personsTitle = new H4(translate("persons"));
         personsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
         listBoxFormLayout.add(eventsTitle, personsTitle);
+        Button selectAllEvents = new Button(translate("select.all.events"));
 
-        Button selectAllEvents = new Button("Alle Anlässe auswählen");
         selectAllEvents.addClickListener(e -> eventListBox.select(eventListBox.getListDataView().getItems().toList()));
-        Button selectNoEvents = new Button("Keine Anlässe auswählen");
+        Button selectNoEvents = new Button(translate("select.no.events"));
         selectNoEvents.addClickListener(e -> eventListBox.deselectAll());
         HorizontalLayout eventButtons = new HorizontalLayout(selectAllEvents, selectNoEvents);
+        Button selectAllPersons = new Button(translate("select.all.persons"));
 
-        Button selectAllPersons = new Button("Alle Personen auswählen");
         selectAllPersons.addClickListener(e -> personListBox.select(personListBox.getListDataView().getItems().toList()));
-        Button selectNoPersons = new Button("Keine Personen auswählen");
+        Button selectNoPersons = new Button(translate("select.no.persons"));
         selectNoPersons.addClickListener(e -> personListBox.deselectAll());
         HorizontalLayout personButtons = new HorizontalLayout(selectAllPersons, selectNoPersons);
 
@@ -475,6 +473,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         LocalDate toDate = LocalDate.of(year, 12, 31);
 
         eventListBox.setItems(eventRepository.findAll(EVENT.FROM_DATE.between(fromDate, toDate), List.of(EVENT.TITLE)));
+    }
+
+    @Override
+    public String getPageTitle() {
+        return translate("registrations");
     }
 
 }

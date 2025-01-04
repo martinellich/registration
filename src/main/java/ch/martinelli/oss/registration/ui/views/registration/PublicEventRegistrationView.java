@@ -16,15 +16,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@PageTitle("Anmeldung")
 @Route(value = "public", autoLayout = false)
 @AnonymousAllowed
-public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String> {
+public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String>, HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
     private final transient RegistrationRepository registrationRepository;
@@ -32,16 +33,19 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private final transient EventRegistrationRepository eventRegistrationRepository;
 
     private final transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+    private final String registrationTitle;
 
     private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
                                        RegistrationRepository registrationRepository, RegistrationService registrationService,
-                                       EventRegistrationRepository eventRegistrationRepository) {
+                                       EventRegistrationRepository eventRegistrationRepository,
+                                       @Value("${registration.title}") String registrationTitle) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
         this.registrationService = registrationService;
         this.eventRegistrationRepository = eventRegistrationRepository;
+        this.registrationTitle = registrationTitle;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         Image logo = new Image("/icons/icon.png", "Logo");
         logo.setHeight("50px");
-        HorizontalLayout header = new HorizontalLayout(logo, new H1("Jugi TV Erlach - Anmeldung %d".formatted(registration.getYear())));
+        HorizontalLayout header = new HorizontalLayout(logo, new H1("%s %d".formatted(registrationTitle, registration.getYear())));
         add(header);
         if (registration.getRemarks() != null) {
             add(new Paragraph(registration.getRemarks()));
@@ -70,7 +74,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         List<PersonRecord> persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmail.getId());
 
-        add(new H3("Anmeldung für"));
+        add(new H3(translate("registration.for")));
         UnorderedList unorderedList = new UnorderedList();
         add(unorderedList);
         for (PersonRecord person : persons) {
@@ -79,7 +83,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         }
 
         add(new Hr());
-        add(new H2("Anlässe"));
+        add(new H2(translate("events")));
 
         List<EventRecord> events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
@@ -90,7 +94,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 if (persons.size() > 1) {
                     text = person.getLastName() + " " + person.getFirstName();
                 } else {
-                    text = "nimmt teil";
+                    text = translate("participates");
                 }
                 Checkbox checkbox = new Checkbox(text);
                 checkbox.getElement().getThemeList().add("switch");
@@ -132,6 +136,11 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             Notification.success("Vielen Dank für die Anmeldung!");
         });
         add(registerButton);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return "registration";
     }
 
     public record EventWithPerson(EventRecord event, PersonRecord person) {

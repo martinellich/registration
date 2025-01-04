@@ -20,21 +20,22 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
 
 import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@PageTitle("Anlässe")
 @Route("events/:eventID?")
-@Menu(order = 3, icon = LineAwesomeIconUrl.CALENDAR_SOLID)
 @RolesAllowed("ADMIN")
-public class EventsView extends EditView<EventRecord> implements BeforeEnterObserver {
+public class EventsView extends EditView<EventRecord> implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String EVENT_ID = "eventID";
     private static final String EVENT_ROUTE_TEMPLATE = "events/%s";
@@ -77,19 +78,19 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
 
         grid.addColumn(EventRecord::getTitle)
                 .setSortable(true).setSortProperty(EVENT.TITLE.getName())
-                .setHeader("Titel").setAutoWidth(true);
+                .setHeader(translate("title")).setAutoWidth(true);
         grid.addColumn(EventRecord::getDescription)
                 .setSortable(true).setSortProperty(EVENT.DESCRIPTION.getName())
-                .setHeader("Beschreibung").setAutoWidth(true);
+                .setHeader(translate("description")).setAutoWidth(true);
         grid.addColumn(EventRecord::getLocation)
                 .setSortable(true).setSortProperty(EVENT.LOCATION.getName())
-                .setHeader("Ort").setAutoWidth(true);
+                .setHeader(translate("location")).setAutoWidth(true);
         grid.addColumn(eventRecord -> DATE_FORMAT.format(eventRecord.getFromDate()))
                 .setSortable(true).setSortProperty(EVENT.FROM_DATE.getName())
-                .setHeader("von").setAutoWidth(true);
+                .setHeader(translate("from")).setAutoWidth(true);
         grid.addColumn(eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
                 .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
-                .setHeader("bis").setAutoWidth(true);
+                .setHeader(translate("until")).setAutoWidth(true);
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-event-button");
@@ -104,9 +105,9 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteButton.addClickListener(e ->
-                    new ConfirmDialog("Anlass löschen",
-                            "Willst du den Anlass wirklich löschen?",
-                            "Ja",
+                    new ConfirmDialog(translate("delete.event"),
+                            translate("delete.event.question"),
+                            translate("yes"),
                             ce -> {
                                 try {
                                     eventRepository.delete(eventRecord);
@@ -114,12 +115,12 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
                                     clearForm();
                                     grid.getDataProvider().refreshAll();
 
-                                    Notification.success("Der Anlass wurde gelöscht");
+                                    Notification.success(translate("delete.event.success"));
                                 } catch (DataIntegrityViolationException ex) {
-                                    Notification.error("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
+                                    Notification.error(translate("delete.event.error"));
                                 }
                             },
-                            "Abbrechen",
+                            translate("cancel"),
                             ce -> {
                             }).open());
             return deleteButton;
@@ -142,26 +143,26 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
     }
 
     protected void createComponents(FormLayout formLayout) {
-        TextField titleTextField = new TextField("Bezeichnung");
+        TextField titleTextField = new TextField(translate("title"));
         binder.forField(titleTextField)
                 .asRequired()
                 .bind(EventRecord::getTitle, EventRecord::setTitle);
+        TextField locationTextField = new TextField(translate("location"));
 
-        TextField locationTextField = new TextField("Ort");
         binder.forField(locationTextField)
                 .asRequired()
                 .bind(EventRecord::getLocation, EventRecord::setLocation);
+        TextArea descriptionTextArea = new TextArea(translate("description"));
 
-        TextArea descriptionTextArea = new TextArea("Beschreibung");
         binder.forField(descriptionTextArea)
                 .bind(EventRecord::getDescription, EventRecord::setDescription);
+        I18nDatePicker fromDatePicker = new I18nDatePicker(translate("from"));
 
-        I18nDatePicker fromDatePicker = new I18nDatePicker("von");
         binder.forField(fromDatePicker)
                 .asRequired()
                 .bind(EventRecord::getFromDate, EventRecord::setFromDate);
+        I18nDatePicker toDatePicker = new I18nDatePicker(translate("until"));
 
-        I18nDatePicker toDatePicker = new I18nDatePicker("bis");
         binder.forField(toDatePicker)
                 .bind(EventRecord::getToDate, EventRecord::setToDate);
 
@@ -185,13 +186,17 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
                         grid.getDataProvider().refreshItem(this.currentRecord);
                     }
 
-                    Notification.success("Die Daten wurden gespeichert");
+                    Notification.success(translate("save.success"));
                     UI.getCurrent().navigate(EventsView.class);
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+                Notification.error(translate("save.error"));
             }
         });
     }
 
+    @Override
+    public String getPageTitle() {
+        return translate("events");
+    }
 }

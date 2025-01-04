@@ -22,20 +22,21 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.vaadin.lineawesome.LineAwesomeIconUrl;
 
 import java.util.Optional;
 
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@PageTitle("Jugeler")
 @Route("persons/:personID?")
-@Menu(order = 5, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
-public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver {
+public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String PERSON_ID = "personID";
     private static final String PERSON_ROUTE_TEMPLATE = "persons/%s";
@@ -78,20 +79,20 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
 
         grid.addColumn(PersonRecord::getLastName)
                 .setSortable(true).setSortProperty(PERSON.LAST_NAME.getName())
-                .setHeader("Nachname").setAutoWidth(true);
+                .setHeader(translate("last.name")).setAutoWidth(true);
         grid.addColumn(PersonRecord::getFirstName)
                 .setSortable(true).setSortProperty(PERSON.FIRST_NAME.getName())
-                .setHeader("Vornamen").setAutoWidth(true);
+                .setHeader(translate("first.name")).setAutoWidth(true);
         grid.addColumn(PersonRecord::getEmail)
                 .setSortable(true).setSortProperty(PERSON.EMAIL.getName())
-                .setHeader("Email").setAutoWidth(true);
+                .setHeader(translate("email")).setAutoWidth(true);
         grid.addColumn(PersonRecord::getDateOfBirth)
                 .setSortable(true).setSortProperty(PERSON.DATE_OF_BIRTH.getName())
-                .setHeader("Geburtsdatum").setAutoWidth(true);
+                .setHeader(translate("date.of.birth")).setAutoWidth(true);
         grid.addComponentColumn(personRecord ->
                         personRecord.getActive() != null && personRecord.getActive() ? VaadinIcon.CHECK.create() : new Span())
                 .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
-                .setHeader("Aktiv?").setAutoWidth(true);
+                .setHeader(translate("active")).setAutoWidth(true);
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-person-button");
@@ -107,9 +108,9 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteButton.addClickListener(e ->
-                    new ConfirmDialog("Person löschen",
-                            "Willst du die Person wirklich löschen?",
-                            "Ja",
+                    new ConfirmDialog(translate("delete.person"),
+                            translate("delete.person.question"),
+                            translate("yes"),
                             ce -> {
                                 try {
                                     personRepository.delete(personRecord);
@@ -117,12 +118,12 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
                                     clearForm();
                                     grid.getDataProvider().refreshAll();
 
-                                    Notification.success("Die Person wurde gelöscht");
+                                    Notification.success(translate("delete.person.success"));
                                 } catch (DataIntegrityViolationException ex) {
-                                    Notification.error("Die Person wird noch verwendet und kann nicht gelöscht werden");
+                                    Notification.error(translate("delete.person.error"));
                                 }
                             },
-                            "Abbrechen",
+                            translate("cancel"),
                             ce -> {
                             }).open());
             return deleteButton;
@@ -146,27 +147,27 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
     }
 
     protected void createComponents(FormLayout formLayout) {
-        TextField lastNameTextField = new TextField("Nachname");
+        TextField lastNameTextField = new TextField(translate("last.name"));
         binder.forField(lastNameTextField)
                 .asRequired()
                 .bind(PersonRecord::getLastName, PersonRecord::setLastName);
+        TextField firstNameTextField = new TextField(translate("first.name"));
 
-        TextField firstNameTextField = new TextField("Vorname");
         binder.forField(firstNameTextField)
                 .asRequired()
                 .bind(PersonRecord::getFirstName, PersonRecord::setFirstName);
+        EmailField emailTextField = new EmailField(translate("email"));
 
-        EmailField emailTextField = new EmailField("Email");
         binder.forField(emailTextField)
                 .asRequired()
                 .bind(PersonRecord::getEmail, PersonRecord::setEmail);
+        I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker(translate("date.of.birth"));
 
-        I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker("Geburtsdatum");
         binder.forField(dateOfBirthDatePicker)
                 .asRequired()
                 .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
+        Checkbox active = new Checkbox(translate("active"));
 
-        Checkbox active = new Checkbox("Aktiv");
         active.getElement().getThemeList().add("switch");
         binder.forField(active)
                 .bind(PersonRecord::getActive, PersonRecord::setActive);
@@ -191,13 +192,17 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
                         grid.getDataProvider().refreshItem(this.currentRecord);
                     }
 
-                    Notification.success("Die Daten wurden gespeichert");
+                    Notification.success(translate("save.success"));
                     UI.getCurrent().navigate(PersonsView.class);
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+                Notification.error(translate("save.error"));
             }
         });
     }
 
+    @Override
+    public String getPageTitle() {
+        return translate("persons");
+    }
 }
