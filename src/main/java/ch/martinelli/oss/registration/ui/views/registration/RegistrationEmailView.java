@@ -2,7 +2,9 @@ package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
+import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.ui.components.DateFormat;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
@@ -15,7 +17,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -39,10 +41,12 @@ public class RegistrationEmailView extends VerticalLayout {
 
     private final Grid<RegistrationEmailViewRecord> grid = new Grid<>(RegistrationEmailViewRecord.class, false);
 
-    private IntegerField yearIntegerField;
+    private final Select<RegistrationRecord> registrationSelect = new Select<>();
+    private final RegistrationRepository registrationRepository;
 
-    public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository) {
+    public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository, RegistrationRepository registrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
+        this.registrationRepository = registrationRepository;
 
         setSizeFull();
 
@@ -50,8 +54,9 @@ public class RegistrationEmailView extends VerticalLayout {
     }
 
     public FormLayout createFilters() {
-        yearIntegerField = new IntegerField();
-        yearIntegerField.setPlaceholder("Jahr");
+        registrationSelect.setLabel("Jahr");
+        registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
 
         Button searchButton = new Button("Suchen");
         searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -59,9 +64,9 @@ public class RegistrationEmailView extends VerticalLayout {
 
         Button resetButton = new Button("Reset");
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        resetButton.addClickListener(e -> yearIntegerField.clear());
+        resetButton.addClickListener(e -> registrationSelect.clear());
 
-        FormLayout formLayout = new FormLayout(yearIntegerField, new HorizontalLayout(searchButton, resetButton));
+        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(searchButton, resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 
         return formLayout;
@@ -100,8 +105,8 @@ public class RegistrationEmailView extends VerticalLayout {
     private Condition getFilter() {
         Condition condition = DSL.noCondition();
 
-        if (!yearIntegerField.isEmpty()) {
-            condition = condition.and(REGISTRATION_EMAIL_VIEW.YEAR.eq(yearIntegerField.getValue()));
+        if (registrationSelect.getValue() != null) {
+            condition = condition.and(REGISTRATION_EMAIL_VIEW.YEAR.eq(registrationSelect.getValue().getYear()));
         }
         return condition;
     }

@@ -26,7 +26,8 @@ insert into registration_person (registration_id,person_id) values (1,5);
 insert into registration_event (registration_id,event_id) values (1,1);
 insert into registration_event (registration_id,event_id) values (1,2);
 
-insert into event_registration (registration_id,event_id,person_id) values (1,1,1);
+insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,1, true);
+insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,2, false);
 
 insert into registration_email (id,registration_id,email,link,sent_at) values (1,1,'jordan.miccinesi@duod.gy','550e8400e29b41d4a716446655440000','2023-01-01 11:00:00');
 insert into registration_email_person (registration_email_id,person_id) values (1,1);

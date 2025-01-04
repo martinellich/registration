@@ -6,7 +6,7 @@ import com.github.mvysny.kaributesting.v10.GridKt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.select.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,14 +30,15 @@ class RegistrationEmailViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
 
         // Filter
-        _setValue(_get(IntegerField.class, spec -> spec.withPlaceholder("Jahr")), 2024);
+        Select select = _get(Select.class);
+        _setValue(_get(Select.class), select.getListDataView().getItem(1));
         _click(_get(Button.class, spec -> spec.withText("Suchen")));
 
         // Check the content of grid
         assertThat(GridKt._size(grid)).isZero();
 
         // Filter
-        _setValue(_get(IntegerField.class, spec -> spec.withPlaceholder("Jahr")), 2023);
+        _setValue(_get(Select.class), select.getListDataView().getItem(0));
         _click(_get(Button.class, spec -> spec.withText("Suchen")));
 
         // Check the content of grid
