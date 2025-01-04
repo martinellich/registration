@@ -38,11 +38,11 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REG
 public class RegistrationEmailView extends VerticalLayout {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
+    private final transient RegistrationRepository registrationRepository;
 
     private final Grid<RegistrationEmailViewRecord> grid = new Grid<>(RegistrationEmailViewRecord.class, false);
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
-    private final RegistrationRepository registrationRepository;
 
     public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository, RegistrationRepository registrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
