@@ -92,7 +92,7 @@ public abstract class EditView<R extends Record> extends Div {
 
     private void enableComponents(boolean enable) {
         formLayout.getChildren()
-                .filter(component -> component instanceof HasEnabled)
+                .filter(HasEnabled.class::isInstance)
                 .map(HasEnabled.class::cast)
                 .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
     }
