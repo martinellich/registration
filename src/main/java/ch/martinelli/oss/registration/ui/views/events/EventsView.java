@@ -92,8 +92,10 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-event-button");
         addButton.addClickListener(e -> {
-            clearForm();
+            grid.deselectAll();
             grid.getDataProvider().refreshAll();
+            EventRecord eventRecord = new EventRecord();
+            populateForm(eventRecord);
         });
 
         grid.addComponentColumn(eventRecord -> {
@@ -176,10 +178,16 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
                     this.currentRecord = new EventRecord();
                 }
                 if (binder.validate().isOk()) {
+                    boolean isNew = this.currentRecord.getId() == null;
+
                     binder.writeBean(this.currentRecord);
                     eventRepository.save(this.currentRecord);
 
-                    grid.getDataProvider().refreshItem(this.currentRecord);
+                    if (isNew) {
+                        grid.getDataProvider().refreshAll();
+                    } else {
+                        grid.getDataProvider().refreshItem(this.currentRecord);
+                    }
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(EventsView.class);

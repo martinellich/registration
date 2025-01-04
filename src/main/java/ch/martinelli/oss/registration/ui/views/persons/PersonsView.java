@@ -94,8 +94,11 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
         Button addButton = new Button(VaadinIcon.PLUS.create());
         addButton.setId("add-person-button");
         addButton.addClickListener(e -> {
-            clearForm();
+            grid.deselectAll();
             grid.getDataProvider().refreshAll();
+            PersonRecord personRecord = new PersonRecord();
+            personRecord.setActive(true);
+            populateForm(personRecord);
         });
 
         grid.addComponentColumn(personRecord -> {
@@ -182,10 +185,16 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
                     this.currentRecord.setActive(true);
                 }
                 if (binder.validate().isOk()) {
+                    boolean isNew = this.currentRecord.getId() == null;
+
                     binder.writeBean(this.currentRecord);
                     personRepository.save(this.currentRecord);
 
-                    grid.getDataProvider().refreshItem(this.currentRecord);
+                    if (isNew) {
+                        grid.getDataProvider().refreshAll();
+                    } else {
+                        grid.getDataProvider().refreshItem(this.currentRecord);
+                    }
 
                     Notification.success("Die Daten wurden gespeichert");
                     UI.getCurrent().navigate(PersonsView.class);
