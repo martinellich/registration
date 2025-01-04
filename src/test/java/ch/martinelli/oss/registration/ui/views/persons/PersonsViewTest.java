@@ -79,6 +79,10 @@ class PersonsViewTest extends KaribuTest {
 
         // Check if the correct person is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Lane");
+
+        // Cancel edit
+        _click(_get(Button.class, spec -> spec.withText("Abbrechen")));
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).isEnabled()).isFalse();
     }
 
     @Test
