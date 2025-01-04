@@ -70,6 +70,13 @@ public abstract class EditView<R extends Record> extends Div {
 
     protected abstract void configureButtons();
 
+    protected void configureCancelButton() {
+        cancelButton.addClickListener(e -> {
+            clearForm();
+            grid.getDataProvider().refreshAll();
+        });
+    }
+
     protected void clearForm() {
         grid.deselectAll();
         populateForm(null);

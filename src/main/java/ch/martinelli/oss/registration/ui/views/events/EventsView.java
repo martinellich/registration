@@ -169,10 +169,7 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
     }
 
     protected void configureButtons() {
-        cancelButton.addClickListener(e -> {
-            clearForm();
-            grid.getDataProvider().refreshAll();
-        });
+        configureCancelButton();
 
         saveButton.addClickListener(e -> {
             try {

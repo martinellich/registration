@@ -175,10 +175,7 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
     }
 
     protected void configureButtons() {
-        cancelButton.addClickListener(e -> {
-            clearForm();
-            grid.getDataProvider().refreshAll();
-        });
+        configureCancelButton();
 
         saveButton.addClickListener(e -> {
             try {
