@@ -32,13 +32,13 @@ import java.util.Optional;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 
 @PageTitle("Jugeler")
-@Route("persons/:personID?/:action?(edit)")
+@Route("persons/:personID?")
 @Menu(order = 4, icon = LineAwesomeIconUrl.USERS_SOLID)
 @RolesAllowed("ADMIN")
 public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver {
 
     public static final String PERSON_ID = "personID";
-    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "persons/%s/edit";
+    private static final String PERSON_ROUTE_TEMPLATE = "persons/%s";
 
     private final transient PersonRepository personRepository;
 
@@ -67,6 +67,8 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
                 grid.getDataProvider().refreshAll();
                 event.forwardTo(PersonsView.class);
             }
+        } else {
+            populateForm(null);
         }
     }
 
@@ -135,7 +137,7 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(PERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(PERSON_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(PersonsView.class);
@@ -173,12 +175,12 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
     }
 
     protected void configureButtons() {
-        cancel.addClickListener(e -> {
+        cancelButton.addClickListener(e -> {
             clearForm();
             grid.getDataProvider().refreshAll();
         });
 
-        save.addClickListener(e -> {
+        saveButton.addClickListener(e -> {
             try {
                 if (this.currentRecord == null) {
                     this.currentRecord = new PersonRecord();

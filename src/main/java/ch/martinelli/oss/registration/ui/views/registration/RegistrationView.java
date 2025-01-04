@@ -52,14 +52,14 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRA
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Einladungen")
-@Route("registrations/:registrationID?/:action?(edit)")
+@Route("registrations/:registrationID?")
 @RouteAlias("")
 @Menu(order = 0, icon = LineAwesomeIconUrl.LIST_SOLID)
 @RolesAllowed("ADMIN")
 public class RegistrationView extends Div implements BeforeEnterObserver {
 
     public static final String REGISTRATION_ID = "registrationID";
-    private static final String REGISTRATION_EDIT_ROUTE_TEMPLATE = "registrations/%s/edit";
+    private static final String REGISTRATION_ROUTE_TEMPLATE = "registrations/%s";
     private static final String ABBRECHEN = "Abbrechen";
 
     private final transient RegistrationService registrationService;
@@ -192,7 +192,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
             RegistrationViewRecord registrationViewRecord = event.getValue();
 
             if (registrationViewRecord != null) {
-                UI.getCurrent().navigate(String.format(REGISTRATION_EDIT_ROUTE_TEMPLATE, registrationViewRecord.getId()));
+                UI.getCurrent().navigate(String.format(REGISTRATION_ROUTE_TEMPLATE, registrationViewRecord.getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(RegistrationView.class);

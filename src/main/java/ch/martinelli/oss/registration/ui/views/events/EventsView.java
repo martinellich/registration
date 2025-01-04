@@ -31,13 +31,13 @@ import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 
 @PageTitle("Anlässe")
-@Route("events/:eventID?/:action?(edit)")
+@Route("events/:eventID?")
 @Menu(order = 3, icon = LineAwesomeIconUrl.CALENDAR_SOLID)
 @RolesAllowed("ADMIN")
 public class EventsView extends EditView<EventRecord> implements BeforeEnterObserver {
 
     public static final String EVENT_ID = "eventID";
-    private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
+    private static final String EVENT_ROUTE_TEMPLATE = "events/%s";
 
     private final transient EventRepository eventRepository;
 
@@ -66,6 +66,8 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
                 grid.getDataProvider().refreshAll();
                 event.forwardTo(EventsView.class);
             }
+        } else {
+            populateForm(null);
         }
     }
 
@@ -131,7 +133,7 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(EVENT_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(EVENT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(EventsView.class);
@@ -167,12 +169,12 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
     }
 
     protected void configureButtons() {
-        cancel.addClickListener(e -> {
+        cancelButton.addClickListener(e -> {
             clearForm();
             grid.getDataProvider().refreshAll();
         });
 
-        save.addClickListener(e -> {
+        saveButton.addClickListener(e -> {
             try {
                 if (this.currentRecord == null) {
                     this.currentRecord = new EventRecord();

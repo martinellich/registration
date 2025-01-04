@@ -1,5 +1,6 @@
 package ch.martinelli.oss.registration.ui.views;
 
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -12,11 +13,12 @@ import org.jooq.Record;
 public abstract class EditView<R extends Record> extends Div {
 
     protected Grid<R> grid;
-    protected final Button cancel = new Button("Abbrechen");
-    protected final Button save = new Button("Speichern");
+    protected final Button cancelButton = new Button("Abbrechen");
+    protected final Button saveButton = new Button("Speichern");
 
     protected Binder<R> binder;
     protected R currentRecord;
+    private FormLayout formLayout;
 
     protected EditView() {
         addClassName("edit-view");
@@ -42,7 +44,7 @@ public abstract class EditView<R extends Record> extends Div {
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
-        FormLayout formLayout = new FormLayout();
+        formLayout = new FormLayout();
         createComponents(formLayout);
 
         editorDiv.add(formLayout);
@@ -57,9 +59,9 @@ public abstract class EditView<R extends Record> extends Div {
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
 
-        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonLayout.add(saveButton, cancelButton);
 
         editorLayoutDiv.add(buttonLayout);
 
@@ -76,6 +78,23 @@ public abstract class EditView<R extends Record> extends Div {
     protected void populateForm(R value) {
         this.currentRecord = value;
         binder.readBean(this.currentRecord);
+
+        if (value == null) {
+            enableComponents(false);
+            cancelButton.setEnabled(false);
+            saveButton.setEnabled(false);
+        } else {
+            enableComponents(true);
+            cancelButton.setEnabled(true);
+            saveButton.setEnabled(true);
+        }
+    }
+
+    private void enableComponents(boolean enable) {
+        formLayout.getChildren()
+                .filter(component -> component instanceof HasEnabled)
+                .map(HasEnabled.class::cast)
+                .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
     }
 
 }
