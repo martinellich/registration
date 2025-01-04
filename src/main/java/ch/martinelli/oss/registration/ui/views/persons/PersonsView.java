@@ -182,10 +182,6 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
 
         saveButton.addClickListener(e -> {
             try {
-                if (this.currentRecord == null) {
-                    this.currentRecord = new PersonRecord();
-                    this.currentRecord.setActive(true);
-                }
                 if (binder.validate().isOk()) {
                     boolean isNew = this.currentRecord.getId() == null;
 

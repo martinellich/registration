@@ -60,7 +60,9 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
         assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
 
-        // Add new person
+        // Add new registration
+        _click(_get(Button.class, spec -> spec.withId("add-registration-button")));
+
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));

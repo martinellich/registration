@@ -12,6 +12,7 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -74,6 +75,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private final Button cancelButton = new Button(ABBRECHEN);
     private final Button createMailingButton = new Button("Versand erstellen");
     private final Button sendEmailsButton = new Button("Emails verschicken");
+    private FormLayout formLayout;
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
     private RegistrationRecord registration;
@@ -147,10 +149,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
                 .setHeader("Emails verschickt");
 
         Button addButton = new Button(VaadinIcon.PLUS.create());
-        addButton.setId("add-event-button");
+        addButton.setId("add-registration-button");
         addButton.addClickListener(e -> {
-            clearForm();
             loadData();
+            RegistrationRecord registrationRecord = new RegistrationRecord();
+            populateForm(registrationRecord);
         });
 
         grid.addComponentColumn(registrationViewRecord -> {
@@ -225,7 +228,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
-        FormLayout formLayout = new FormLayout();
+        formLayout = new FormLayout();
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
 
         IntegerField yearIntegerField = new IntegerField("Jahr");
@@ -386,9 +389,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
     private void configureSaveButton() {
         saveButton.addClickListener(e -> {
             try {
-                if (this.registration == null) {
-                    this.registration = new RegistrationRecord();
-                }
                 if (binder.validate().isOk()) {
                     binder.writeBean(this.registration);
                     registrationService.save(this.registration,
@@ -445,12 +445,30 @@ public class RegistrationView extends Div implements BeforeEnterObserver {
         if (value == null) {
             eventListBox.clear();
             personListBox.clear();
+
+            enableComponents(false);
+            cancelButton.setEnabled(false);
+            saveButton.setEnabled(false);
         } else {
-            loadEvents(this.registration.getYear());
-            personListBox.setValue(new HashSet<>(personRepository.findByRegistrationIdOrderByEmail(this.registration.getId())));
-            eventListBox.setValue(eventRepository.findByRegistrationId(this.registration.getId()));
+            if (this.registration.getId() != null) {
+                loadEvents(this.registration.getYear());
+                personListBox.setValue(new HashSet<>(personRepository.findByRegistrationIdOrderByEmail(this.registration.getId())));
+                eventListBox.setValue(eventRepository.findByRegistrationId(this.registration.getId()));
+            }
+
+            enableComponents(true);
+            cancelButton.setEnabled(true);
+            saveButton.setEnabled(true);
         }
     }
+
+    private void enableComponents(boolean enable) {
+        formLayout.getChildren()
+                .filter(HasEnabled.class::isInstance)
+                .map(HasEnabled.class::cast)
+                .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
+    }
+
 
     private void loadEvents(Integer year) {
         LocalDate fromDate = LocalDate.of(year, 1, 1);

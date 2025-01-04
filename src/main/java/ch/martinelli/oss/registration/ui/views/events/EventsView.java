@@ -176,9 +176,6 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
 
         saveButton.addClickListener(e -> {
             try {
-                if (this.currentRecord == null) {
-                    this.currentRecord = new EventRecord();
-                }
                 if (binder.validate().isOk()) {
                     boolean isNew = this.currentRecord.getId() == null;
 
