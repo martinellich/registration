@@ -37,7 +37,6 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
     private Div gridContainer;
-    private Grid<EventRegistrationRow> grid;
 
     private Long registrationId;
 
@@ -82,7 +81,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long> 
 
         List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
-        grid = new Grid<>(EventRegistrationRow.class, false);
+        Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
         grid.addColumn(EventRegistrationRow::lastName)
                 .setHeader("Nachname").setAutoWidth(true);
         grid.addColumn(EventRegistrationRow::firstName)
