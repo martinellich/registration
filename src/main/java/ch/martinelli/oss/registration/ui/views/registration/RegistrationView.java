@@ -20,6 +20,7 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
@@ -31,9 +32,11 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
@@ -89,7 +92,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-        splitLayout.setSplitterPosition(20);
+        splitLayout.setSplitterPosition(30);
 
         splitLayout.addToPrimary(createGridLayout());
         splitLayout.addToSecondary(createEditorLayout());
@@ -132,7 +135,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        grid.addColumn(RegistrationViewRecord::getYear)
+        Grid.Column<RegistrationViewRecord> titleColumn = grid.addColumn(RegistrationViewRecord::getTitle)
+                .setSortable(true).setSortProperty(REGISTRATION.TITLE.getName())
+                .setHeader(translate("title"));
+        Grid.Column<RegistrationViewRecord> yearColumn = grid.addColumn(RegistrationViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
                 .setHeader(translate("year"));
         grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenFrom()))
@@ -188,6 +194,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         loadData();
 
+        grid.sort(List.of(new GridSortOrder<>(yearColumn, SortDirection.DESCENDING),
+                new GridSortOrder<>(titleColumn, SortDirection.ASCENDING)));
+
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             RegistrationViewRecord registrationViewRecord = event.getValue();
@@ -227,7 +236,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         editorLayoutDiv.add(editorDiv);
 
         formLayout = new FormLayout();
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
         IntegerField yearIntegerField = new IntegerField(translate("year"));
 
         binder.forField(yearIntegerField)
@@ -249,14 +258,19 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         binder.forField(openUntilDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
-        TextArea description = new TextArea(translate("remarks"));
 
+        TextField titleTextField = new TextField(translate("title"));
+        binder.forField(titleTextField)
+                .asRequired()
+                .bind(RegistrationRecord::getTitle, RegistrationRecord::setTitle);
+
+        TextArea description = new TextArea(translate("remarks"));
         description.setHeight("100px");
         binder.forField(description)
                 .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(description, 3);
 
-        formLayout.add(yearIntegerField, openFromDatePicker, openUntilDatePicker, description);
+        formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, description);
 
         editorDiv.add(formLayout);
 
@@ -344,7 +358,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                         confirmEvent -> {
                             if (registrationService.sendMails(this.registration)) {
                                 Notification.success("Die Emails wurden versendet");
-                                refreshGridButPreserveSelection();
+                                refreshGridButPreserveSelection(this.registration.getId());
                             } else {
                                 Notification.error("Die Emails wurden bereits versendet");
                             }
@@ -365,7 +379,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
                                 Notification.success("Der Versand wurde erstellt");
-                                refreshGridButPreserveSelection();
+                                refreshGridButPreserveSelection(this.registration.getId());
                             } else {
                                 Notification.error("Es gibt bereits einen Versand");
                             }
@@ -392,7 +406,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                     registrationService.save(this.registration,
                             this.eventListBox.getSelectedItems(), this.personListBox.getSelectedItems());
 
-                    refreshGridButPreserveSelection();
+                    refreshGridButPreserveSelection(this.registration.getId());
 
                     Notification.success("Die Daten wurden gespeichert");
                 }
@@ -402,17 +416,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         });
     }
 
-    private void refreshGridButPreserveSelection() {
-        RegistrationViewRecord selectedRegistration = grid.asSingleSelect().getValue();
+    private void refreshGridButPreserveSelection(long registrationId) {
         loadData();
-        if (selectedRegistration != null) {
-            registrationRepository.findByIdFromView(selectedRegistration.getId()).ifPresent(registrationViewRecord -> {
-                grid.select(registrationViewRecord);
-                setButtonState(registrationViewRecord);
-            });
-        } else {
-            clearForm();
-        }
+
+        registrationRepository.findByIdFromView(registrationId).ifPresent(registrationViewRecord -> {
+            grid.select(registrationViewRecord);
+            setButtonState(registrationViewRecord);
+        });
     }
 
     private void setButtonState(RegistrationViewRecord registrationViewRecord) {

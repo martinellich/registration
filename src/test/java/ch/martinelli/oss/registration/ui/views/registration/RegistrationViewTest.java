@@ -15,6 +15,7 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,12 +58,13 @@ class RegistrationViewTest extends KaribuTest {
         // Check the content of grid
         Grid<RegistrationViewRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(2);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
-        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
+        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2024);
+        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2023);
 
         // Add new registration
         _click(_get(Button.class, spec -> spec.withId("add-registration-button")));
 
+        _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Versand 2025");
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
@@ -79,7 +81,7 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._size(grid)).isEqualTo(3);
 
         // Select newly created record
-        GridKt._clickItem(grid, 2);
+        GridKt._clickItem(grid, 0);
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
