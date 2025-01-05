@@ -33,7 +33,7 @@ public abstract class KaribuTest {
     private static final String ROLE_PREFIX = "ROLE_";
 
     protected static Routes routes;
-    protected static String packageName = "ch.martinelli.oss.registration.ui.views";
+    protected static final String packageName = "ch.martinelli.oss.registration.ui.views";
 
     @Autowired
     protected ApplicationContext ctx;
