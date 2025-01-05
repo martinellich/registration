@@ -9,6 +9,8 @@ import ch.martinelli.oss.registration.ui.views.registration.RegistrationView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -96,9 +98,9 @@ public class MainLayout extends AppLayout {
         verticalLayout.add(nav);
 
         Locale locale = UI.getCurrent().getSession().getLocale();
-        Anchor languageSwitch = new Anchor("#", locale.equals(Locale.ENGLISH) ? "DE" : "EN");
-        languageSwitch.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        languageSwitch.getElement().addEventListener("click", e -> {
+        Button languageSwitch = new Button(locale.equals(Locale.ENGLISH) ? "DE" : "EN");
+        languageSwitch.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        languageSwitch.addClickListener(e -> {
             UI.getCurrent().getSession().setLocale(locale.equals(Locale.ENGLISH) ? Locale.GERMAN : Locale.ENGLISH);
             UI.getCurrent().getPage().reload();
         });
