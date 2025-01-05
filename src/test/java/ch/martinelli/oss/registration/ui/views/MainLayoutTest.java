@@ -37,5 +37,11 @@ class MainLayoutTest extends KaribuTest {
 
         languageSelector = _get(Button.class, spec -> spec.withText("DE"));
         assertThat(languageSelector.getText()).isEqualTo("DE");
+
+        languageSelector = _get(Button.class, spec -> spec.withText("DE"));
+        _click(languageSelector);
+
+        languageSelector = _get(Button.class, spec -> spec.withText("EN"));
+        assertThat(languageSelector.getText()).isEqualTo("EN");
     }
 }
