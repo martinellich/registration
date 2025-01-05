@@ -106,7 +106,7 @@ public class RegistrationService {
         message.setText("""
                 Liebe Jugeler,
                 
-                Ab sofort kannst du dich für die Anlässe unter folgendem Link anmelden:
+                Ab sofort könnt ihr euch für die Anlässe unter folgendem Link anmelden:
                 
                 %s/public/%s
                 
