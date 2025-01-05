@@ -34,6 +34,7 @@ import java.util.Optional;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
+@SuppressWarnings("java:S110")
 @Route("persons/:personID?")
 @RolesAllowed("ADMIN")
 public class PersonsView extends EditView<PersonRecord> implements BeforeEnterObserver, HasDynamicTitle {

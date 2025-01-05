@@ -33,6 +33,7 @@ import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
+@SuppressWarnings("java:S110")
 @Route("events/:eventID?")
 @RolesAllowed("ADMIN")
 public class EventsView extends EditView<EventRecord> implements BeforeEnterObserver, HasDynamicTitle {
