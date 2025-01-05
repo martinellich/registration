@@ -253,7 +253,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         binder.forField(openFromDatePicker)
                 .asRequired()
                 .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
-        I18nDatePicker openUntilDatePicker = new I18nDatePicker(translate("open.to"));
+        I18nDatePicker openUntilDatePicker = new I18nDatePicker(translate("open.until"));
 
         binder.forField(openUntilDatePicker)
                 .asRequired()
