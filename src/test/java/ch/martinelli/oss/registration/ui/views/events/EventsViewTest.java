@@ -77,6 +77,11 @@ class EventsViewTest extends KaribuTest {
 
         // Check if the correct event is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("CIS 2023");
+
+
+        // Cancel edit
+        _click(_get(Button.class, spec -> spec.withText("Abbrechen")));
+        assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).isEnabled()).isFalse();
     }
 
     @Test

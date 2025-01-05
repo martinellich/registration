@@ -7,7 +7,6 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
-import com.github.mvysny.kaributesting.v10.PrettyPrintTreeKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,18 +56,24 @@ class RegistrationViewTest extends KaribuTest {
     @Test
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
+        @SuppressWarnings("unchecked")
         Grid<RegistrationViewRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(2);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
-        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
+        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2024);
+        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2023);
 
-        // Add new person
+        // Add new registration
+        _click(_get(Button.class, spec -> spec.withId("add-registration-button")));
+
+        _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Versand 2025");
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
 
+        @SuppressWarnings("unchecked")
         MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class, spec -> spec.withId("event-list-box"));
         eventListBox.setValue(Set.of(eventListBox.getListDataView().getItem(0)));
+        @SuppressWarnings("unchecked")
         MultiSelectListBox<PersonRecord> personListBox = _get(MultiSelectListBox.class, spec -> spec.withId("person-list-box"));
         personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
 
@@ -78,7 +84,8 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._size(grid)).isEqualTo(3);
 
         // Select newly created record
-        GridKt._clickItem(grid, 2);
+        RegistrationViewRecord registrationViewRecord = GridKt._get(grid, 0);
+        assertThat(registrationViewRecord.getTitle()).isEqualTo("Versand 2025");
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
@@ -91,8 +98,6 @@ class RegistrationViewTest extends KaribuTest {
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Emails verschicken")));
-
-        System.out.println(PrettyPrintTreeKt.toPrettyTree(UI.getCurrent()));
 
         // Confirm
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
@@ -111,7 +116,9 @@ class RegistrationViewTest extends KaribuTest {
         // Delete new item
         Component actions = GridKt._getCellComponent(grid, 2, "action-column");
         actions.getChildren()
-                .filter(Button.class::isInstance).findFirst().map(Button.class::cast)
+                .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
+                .findFirst()
+                .map(Button.class::cast)
                 .ifPresent(Button::click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));

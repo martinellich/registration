@@ -1,23 +1,35 @@
 package ch.martinelli.oss.registration.ui.views;
 
 import ch.martinelli.oss.registration.security.SecurityContext;
+import ch.martinelli.oss.registration.ui.views.events.EventsView;
+import ch.martinelli.oss.registration.ui.views.persons.PersonsView;
+import ch.martinelli.oss.registration.ui.views.registration.EventRegistrationView;
+import ch.martinelli.oss.registration.ui.views.registration.RegistrationEmailView;
+import ch.martinelli.oss.registration.ui.views.registration.RegistrationView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
-import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.util.List;
+import java.util.Locale;
+
+import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -26,12 +38,14 @@ import java.util.List;
 @AnonymousAllowed
 public class MainLayout extends AppLayout {
 
+    private final transient SecurityContext securityContext;
+    private final AccessAnnotationChecker accessAnnotationChecker;
+
     private H1 viewTitle;
 
-    private final transient SecurityContext securityContext;
-
-    public MainLayout(SecurityContext securityContext) {
+    public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker) {
         this.securityContext = securityContext;
+        this.accessAnnotationChecker = accessAnnotationChecker;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -49,7 +63,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        Span appName = new Span("Anmeldetool");
+        Span appName = new Span(translate("application.title"));
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
 
@@ -58,19 +72,43 @@ public class MainLayout extends AppLayout {
         addToDrawer(header, scroller, createFooter());
     }
 
-    private SideNav createNavigation() {
+    private VerticalLayout createNavigation() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setPadding(false);
+        verticalLayout.setSpacing(false);
+
         SideNav nav = new SideNav();
 
-        List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
-        menuEntries.forEach(entry -> {
-            if (entry.icon() != null) {
-                nav.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
-            } else {
-                nav.addItem(new SideNavItem(entry.title(), entry.path()));
-            }
+        if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
+            nav.addItem(new SideNavItem(translate("registrations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create()));
+        }
+        if (accessAnnotationChecker.hasAccess(EventRegistrationView.class)) {
+            nav.addItem(new SideNavItem(translate("event.registrations"), EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
+        }
+        if (accessAnnotationChecker.hasAccess(RegistrationEmailView.class)) {
+            nav.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class, LineAwesomeIcon.MAIL_BULK_SOLID.create()));
+        }
+        if (accessAnnotationChecker.hasAccess(EventsView.class)) {
+            nav.addItem(new SideNavItem(translate("events"), EventsView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));
+        }
+        if (accessAnnotationChecker.hasAccess(PersonsView.class)) {
+            nav.addItem(new SideNavItem(translate("persons"), PersonsView.class, LineAwesomeIcon.USERS_SOLID.create()));
+        }
+
+        verticalLayout.add(nav);
+
+        Locale locale = UI.getCurrent().getSession().getLocale();
+        Button languageSwitch = new Button(locale.equals(Locale.ENGLISH) ? "DE" : "EN");
+        languageSwitch.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        languageSwitch.addClickListener(e -> {
+            UI.getCurrent().getSession().setLocale(locale.equals(Locale.ENGLISH) ? Locale.GERMAN : Locale.ENGLISH);
+            UI.getCurrent().getPage().reload();
         });
 
-        return nav;
+        HorizontalLayout languageLayout = new HorizontalLayout(languageSwitch);
+        languageLayout.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
+        verticalLayout.add(languageLayout);
+        return verticalLayout;
     }
 
     private Footer createFooter() {

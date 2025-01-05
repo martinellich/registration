@@ -25,7 +25,8 @@ class EventRegistrationViewTest extends KaribuTest {
     void display_event_registrations() {
         // Check the content of grid
         Grid<EventRegistrationRow> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(1);
+
+        assertThat(GridKt._size(grid)).isEqualTo(2);
         assertThat(GridKt._get(grid, 0).firstName()).isEqualTo("Eula");
     }
 

@@ -17,7 +17,7 @@ insert into event(id,title,description,location,from_date,to_date) values ( 3,'C
 insert into event(id,title,description,location,from_date,to_date) values ( 4,'CIS 2025','Concours Inter Section','Twann', '2025-05-12',null);
 insert into event(id,title,description,location,from_date,to_date) values ( 5,'Jugendmeisterschaft 2025','','Erlach', '2025-08-31',null);
 
-insert into registration(id,year,open_from,open_until) values (1,2023,'2023-01-01','2023-02-28');
+insert into registration(id,year,open_from,open_until,remarks) values (1,2023,'2023-01-01','2023-02-28','Some remarks');
 insert into registration(id,year,open_from,open_until) values (2,2024,'2024-01-01','2024-02-28');
 
 insert into registration_person (registration_id,person_id) values (1,1);
@@ -26,7 +26,8 @@ insert into registration_person (registration_id,person_id) values (1,5);
 insert into registration_event (registration_id,event_id) values (1,1);
 insert into registration_event (registration_id,event_id) values (1,2);
 
-insert into event_registration (registration_id,event_id,person_id) values (1,1,1);
+insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,1, true);
+insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,2, false);
 
 insert into registration_email (id,registration_id,email,link,sent_at) values (1,1,'jordan.miccinesi@duod.gy','550e8400e29b41d4a716446655440000','2023-01-01 11:00:00');
 insert into registration_email_person (registration_email_id,person_id) values (1,1);

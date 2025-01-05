@@ -8,20 +8,9 @@ public class Notification {
     private Notification() {
     }
 
-    public static void info(String message) {
-        com.vaadin.flow.component.notification.Notification notification = createNotification(message);
-        notification.open();
-    }
-
     public static void success(String message) {
         com.vaadin.flow.component.notification.Notification notification = createNotification(message);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.open();
-    }
-
-    public static void warning(String message) {
-        com.vaadin.flow.component.notification.Notification notification = createNotification(message);
-        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
         notification.open();
     }
 
