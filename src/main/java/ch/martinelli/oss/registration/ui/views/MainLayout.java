@@ -25,6 +25,7 @@ import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.factory.annotation.Value;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Locale;
@@ -40,12 +41,15 @@ public class MainLayout extends AppLayout {
 
     private final transient SecurityContext securityContext;
     private final AccessAnnotationChecker accessAnnotationChecker;
+    private final String applicationVersion;
 
     private H1 viewTitle;
 
-    public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker) {
+    public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker,
+                      @Value("${spring.application.version}") String applicationVersion) {
         this.securityContext = securityContext;
         this.accessAnnotationChecker = accessAnnotationChecker;
+        this.applicationVersion = applicationVersion;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -108,6 +112,11 @@ public class MainLayout extends AppLayout {
         HorizontalLayout languageLayout = new HorizontalLayout(languageSwitch);
         languageLayout.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
         verticalLayout.add(languageLayout);
+
+        Span version = new Span(applicationVersion);
+        version.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
+        verticalLayout.add(version);
+
         return verticalLayout;
     }
 

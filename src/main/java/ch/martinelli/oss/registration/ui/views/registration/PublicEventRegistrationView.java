@@ -16,7 +16,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
@@ -33,19 +32,16 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private final transient EventRegistrationRepository eventRegistrationRepository;
 
     private final transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
-    private final String registrationTitle;
 
     private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
                                        RegistrationRepository registrationRepository, RegistrationService registrationService,
-                                       EventRegistrationRepository eventRegistrationRepository,
-                                       @Value("${registration.title}") String registrationTitle) {
+                                       EventRegistrationRepository eventRegistrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
         this.registrationService = registrationService;
         this.eventRegistrationRepository = eventRegistrationRepository;
-        this.registrationTitle = registrationTitle;
     }
 
     @Override
@@ -66,7 +62,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         Image logo = new Image("/icons/icon.png", "Logo");
         logo.setHeight("50px");
-        HorizontalLayout header = new HorizontalLayout(logo, new H1("%s %d".formatted(registrationTitle, registration.getYear())));
+        HorizontalLayout header = new HorizontalLayout(logo, new H1("%s %d".formatted(registration.getTitle(), registration.getYear())));
         add(header);
         if (registration.getRemarks() != null) {
             add(new Paragraph(registration.getRemarks()));
