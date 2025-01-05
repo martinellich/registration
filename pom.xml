@@ -12,7 +12,7 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registrations</artifactId>
-    <version>0.5.2</version>
+    <version>0.5.3-SNAPSHOT</version>
 
     <properties>
         <java.version>21</java.version>
