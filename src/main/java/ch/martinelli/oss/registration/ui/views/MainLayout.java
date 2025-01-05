@@ -6,13 +6,16 @@ import ch.martinelli.oss.registration.ui.views.persons.PersonsView;
 import ch.martinelli.oss.registration.ui.views.registration.EventRegistrationView;
 import ch.martinelli.oss.registration.ui.views.registration.RegistrationEmailView;
 import ch.martinelli.oss.registration.ui.views.registration.RegistrationView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
@@ -21,6 +24,8 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+
+import java.util.Locale;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
@@ -65,7 +70,11 @@ public class MainLayout extends AppLayout {
         addToDrawer(header, scroller, createFooter());
     }
 
-    private SideNav createNavigation() {
+    private VerticalLayout createNavigation() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setPadding(false);
+        verticalLayout.setSpacing(false);
+
         SideNav nav = new SideNav();
 
         if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
@@ -84,7 +93,20 @@ public class MainLayout extends AppLayout {
             nav.addItem(new SideNavItem(translate("persons"), PersonsView.class, LineAwesomeIcon.USERS_SOLID.create()));
         }
 
-        return nav;
+        verticalLayout.add(nav);
+
+        Locale locale = UI.getCurrent().getSession().getLocale();
+        Anchor languageSwitch = new Anchor("#", locale.equals(Locale.ENGLISH) ? "DE" : "EN");
+        languageSwitch.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        languageSwitch.getElement().addEventListener("click", e -> {
+            UI.getCurrent().getSession().setLocale(locale.equals(Locale.ENGLISH) ? Locale.GERMAN : Locale.ENGLISH);
+            UI.getCurrent().getPage().reload();
+        });
+
+        HorizontalLayout languageLayout = new HorizontalLayout(languageSwitch);
+        languageLayout.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
+        verticalLayout.add(languageLayout);
+        return verticalLayout;
     }
 
     private Footer createFooter() {
