@@ -33,7 +33,6 @@ public abstract class KaribuTest {
     private static final String ROLE_PREFIX = "ROLE_";
 
     protected static Routes routes;
-    protected static final String packageName = "ch.martinelli.oss.registration.ui.views";
 
     @Autowired
     protected ApplicationContext ctx;
@@ -45,7 +44,7 @@ public abstract class KaribuTest {
         System.setProperty("logging.level.org.jooq", "debug");
 
         Locale.setDefault(Locale.GERMAN);
-        routes = new Routes().autoDiscoverViews(packageName);
+        routes = new Routes().autoDiscoverViews("ch.martinelli.oss.registration.ui.views");
     }
 
     @BeforeEach
