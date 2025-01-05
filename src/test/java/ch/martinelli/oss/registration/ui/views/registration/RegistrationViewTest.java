@@ -81,7 +81,8 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._size(grid)).isEqualTo(3);
 
         // Select newly created record
-        GridKt._clickItem(grid, 0);
+        RegistrationViewRecord registrationViewRecord = GridKt._get(grid, 0);
+        assertThat(registrationViewRecord.getTitle()).isEqualTo("Versand 2025");
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
