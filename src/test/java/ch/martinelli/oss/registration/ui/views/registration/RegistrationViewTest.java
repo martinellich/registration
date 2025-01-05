@@ -56,6 +56,7 @@ class RegistrationViewTest extends KaribuTest {
     @Test
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
+        @SuppressWarnings("unchecked")
         Grid<RegistrationViewRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(2);
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2024);
@@ -69,8 +70,10 @@ class RegistrationViewTest extends KaribuTest {
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
 
+        @SuppressWarnings("unchecked")
         MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class, spec -> spec.withId("event-list-box"));
         eventListBox.setValue(Set.of(eventListBox.getListDataView().getItem(0)));
+        @SuppressWarnings("unchecked")
         MultiSelectListBox<PersonRecord> personListBox = _get(MultiSelectListBox.class, spec -> spec.withId("person-list-box"));
         personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
 
