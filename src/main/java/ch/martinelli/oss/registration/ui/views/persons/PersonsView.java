@@ -65,7 +65,6 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
             } else {
-                // when a row is selected but the data is no longer available, refresh grid
                 grid.getDataProvider().refreshAll();
                 event.forwardTo(PersonsView.class);
             }
@@ -75,7 +74,6 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
     }
 
     protected void configureGrid() {
-        // Configure Grid
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.addColumn(PersonRecord::getLastName)
@@ -136,7 +134,6 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
                         VaadinJooqUtil.orderFields(PERSON, query))
                 .stream());
 
-        // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
                 UI.getCurrent().navigate(String.format(PERSON_ROUTE_TEMPLATE, event.getValue().getId()));

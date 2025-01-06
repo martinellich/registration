@@ -65,7 +65,7 @@ class RegistrationViewTest extends KaribuTest {
         // Add new registration
         _click(_get(Button.class, spec -> spec.withId("add-registration-button")));
 
-        _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Versand 2025");
+        _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugi TV Erlach - Anmeldung");
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen von")).setValue(LocalDate.of(2025, 1, 1));
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
@@ -85,7 +85,7 @@ class RegistrationViewTest extends KaribuTest {
 
         // Select newly created record
         RegistrationViewRecord registrationViewRecord = GridKt._get(grid, 0);
-        assertThat(registrationViewRecord.getTitle()).isEqualTo("Versand 2025");
+        assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
@@ -109,7 +109,7 @@ class RegistrationViewTest extends KaribuTest {
                 .hasSize(1)
                 .first()
                 .satisfies(mail -> {
-                    assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung für 2025");
+                    assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
                     assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
                 });
 

@@ -34,25 +34,25 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .fetch();
     }
 
-    public List<RegistrationEmailViewRecord> findByRegistrationId(Long id) {
+    public List<RegistrationEmailViewRecord> findByRegistrationId(Long registrationId) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL_VIEW)
-                .where(REGISTRATION_EMAIL_VIEW.REGISTRATION_ID.eq(id))
+                .where(REGISTRATION_EMAIL_VIEW.REGISTRATION_ID.eq(registrationId))
                 .fetch();
     }
 
-    public Optional<RegistrationEmailRecord> findByLink(String parameter) {
+    public Optional<RegistrationEmailRecord> findByLink(String link) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL)
-                .where(REGISTRATION_EMAIL.LINK.eq(parameter))
+                .where(REGISTRATION_EMAIL.LINK.eq(link))
                 .fetchOptional();
     }
 
-    public List<PersonRecord> findPersonsByRegistrationEmailId(Long id) {
+    public List<PersonRecord> findPersonsByRegistrationEmailId(Long registrationEmailId) {
         return dslContext
                 .select(REGISTRATION_EMAIL_PERSON.person().fields())
                 .from(REGISTRATION_EMAIL_PERSON)
-                .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.eq(id))
+                .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.eq(registrationEmailId))
                 .fetchInto(PersonRecord.class);
     }
 }

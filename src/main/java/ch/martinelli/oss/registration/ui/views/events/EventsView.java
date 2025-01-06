@@ -64,7 +64,6 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
             if (eventFromBackend.isPresent()) {
                 populateForm(eventFromBackend.get());
             } else {
-                // when a row is selected but the data is no longer available, refresh grid
                 grid.getDataProvider().refreshAll();
                 event.forwardTo(EventsView.class);
             }
@@ -132,7 +131,6 @@ public class EventsView extends EditView<EventRecord> implements BeforeEnterObse
                         VaadinJooqUtil.orderFields(EVENT, query))
                 .stream());
 
-        // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
                 UI.getCurrent().navigate(String.format(EVENT_ROUTE_TEMPLATE, event.getValue().getId()));
