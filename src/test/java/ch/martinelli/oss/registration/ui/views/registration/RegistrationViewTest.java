@@ -79,7 +79,7 @@ class RegistrationViewTest extends KaribuTest {
 
         _click(_get(Button.class, spec -> spec.withText("Speichern")));
 
-        NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
+        NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
 
         assertThat(GridKt._size(grid)).isEqualTo(3);
 

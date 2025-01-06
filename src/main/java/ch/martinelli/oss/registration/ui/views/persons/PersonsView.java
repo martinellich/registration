@@ -72,22 +72,21 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         binder.forField(lastNameTextField)
                 .asRequired()
                 .bind(PersonRecord::getLastName, PersonRecord::setLastName);
-        TextField firstNameTextField = new TextField(translate("first.name"));
 
+        TextField firstNameTextField = new TextField(translate("first.name"));
         binder.forField(firstNameTextField)
                 .asRequired()
                 .bind(PersonRecord::getFirstName, PersonRecord::setFirstName);
-        EmailField emailTextField = new EmailField(translate("email"));
 
+        EmailField emailTextField = new EmailField(translate("email"));
         binder.forField(emailTextField)
                 .bind(PersonRecord::getEmail, PersonRecord::setEmail);
+
         I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker(translate("date.of.birth"));
-
         binder.forField(dateOfBirthDatePicker)
-                .asRequired()
                 .bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
-        Checkbox active = new Checkbox(translate("active"));
 
+        Checkbox active = new Checkbox(translate("active"));
         active.getElement().getThemeList().add("switch");
         binder.forField(active)
                 .bind(PersonRecord::getActive, PersonRecord::setActive);

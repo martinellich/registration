@@ -53,7 +53,7 @@ class EventsViewTest extends KaribuTest {
         _click(_get(Button.class, spec -> spec.withText("Speichern")));
 
         // Check if save was successful
-        NotificationsKt.expectNotifications("Die Daten wurden gespeichert");
+        NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
         assertThat(GridKt._size(grid)).isEqualTo(6);
 
         // Click new item and check value
