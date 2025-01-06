@@ -80,6 +80,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
     private RegistrationRecord registration;
+    private boolean dirty;
 
     public RegistrationView(RegistrationService registrationService, RegistrationRepository registrationRepository,
                             EventRepository eventRepository, PersonRepository personRepository) {
@@ -197,7 +198,6 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         grid.sort(List.of(new GridSortOrder<>(yearColumn, SortDirection.DESCENDING),
                 new GridSortOrder<>(titleColumn, SortDirection.ASCENDING)));
 
-        // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             RegistrationViewRecord registrationViewRecord = event.getValue();
 
@@ -264,13 +264,21 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                 .asRequired()
                 .bind(RegistrationRecord::getTitle, RegistrationRecord::setTitle);
 
-        TextArea description = new TextArea(translate("remarks"));
-        description.setHeight("100px");
-        binder.forField(description)
+        TextArea remarks = new TextArea(translate("remarks"));
+        remarks.setPlaceholder(translate("remarks.placeholder"));
+        remarks.setHeight("100px");
+        binder.forField(remarks)
                 .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
-        formLayout.setColspan(description, 3);
+        formLayout.setColspan(remarks, 2);
 
-        formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, description);
+        TextArea emailText = new TextArea(translate("email.text"));
+        emailText.setPlaceholder(translate("email.text.placeholder"));
+        emailText.setHeight("100px");
+        binder.forField(emailText)
+                .bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
+        formLayout.setColspan(emailText, 2);
+
+        formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, remarks, emailText);
 
         editorDiv.add(formLayout);
 
@@ -300,7 +308,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         eventListBox.setId("event-list-box");
         eventListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
-        eventListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
+        eventListBox.addValueChangeListener(e -> {
+            setDirty(e.isFromClient());
+        });
 
         Scroller eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
@@ -310,7 +320,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         personListBox.setId("person-list-box");
         personListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
-        personListBox.addValueChangeListener(e -> setButtonState(grid.asSingleSelect().getValue()));
+        personListBox.addValueChangeListener(e -> {
+            setDirty(e.isFromClient());
+        });
 
         Scroller personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
@@ -323,6 +335,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         createButtonLayout(editorLayoutDiv);
 
         return editorLayoutDiv;
+    }
+
+    private void setDirty(boolean fromClient) {
+        if (fromClient) {
+            dirty = true;
+            setButtonState(grid.asSingleSelect().getValue());
+        }
     }
 
     private void createButtonLayout(Div editorLayoutDiv) {
@@ -373,15 +392,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureCreateMailingButton() {
         createMailingButton.addClickListener(e -> {
             if (this.registration != null) {
-                new ConfirmDialog("Versand erstellen",
-                        "Möchtest du den Versand für die Registrierung erstellen?",
+                new ConfirmDialog(translate("create.mailing"),
+                        translate("create.mailing.confirm"),
                         "Ja",
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
-                                Notification.success("Der Versand wurde erstellt");
+                                Notification.success(translate("create.mailing.success"));
                                 refreshGridButPreserveSelection(this.registration.getId());
                             } else {
-                                Notification.error("Es gibt bereits einen Versand");
+                                Notification.error(getTranslation("create.mailing.error"));
                             }
                         },
                         ABBRECHEN,
@@ -408,6 +427,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
                     refreshGridButPreserveSelection(this.registration.getId());
 
+                    dirty = false;
+                    setButtonState(grid.asSingleSelect().getValue());
                     Notification.success("Die Daten wurden gespeichert");
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
@@ -426,7 +447,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private void setButtonState(RegistrationViewRecord registrationViewRecord) {
-        if (binder.hasChanges()) {
+        if (binder.hasChanges() || dirty) {
             createMailingButton.setEnabled(false);
             sendEmailsButton.setEnabled(false);
         } else {

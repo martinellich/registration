@@ -116,7 +116,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         add(new Hr());
 
-        Button registerButton = new Button("Anmelden");
+        Button registerButton = new Button(translate("register"));
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         registerButton.addClickListener(e -> {
             Set<EventRegistrationRecord> eventRegistrations = new HashSet<>();
@@ -129,7 +129,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 eventRegistrations.add(eventRegistration);
             }
             registrationService.register(eventRegistrations);
-            Notification.success("Vielen Dank für die Anmeldung!");
+            Notification.success(translate("registration.success"));
         });
         add(registerButton);
     }

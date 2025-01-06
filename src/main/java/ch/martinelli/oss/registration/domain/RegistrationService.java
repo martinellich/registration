@@ -24,16 +24,20 @@ public class RegistrationService {
     private final RegistrationEmailRepository registrationEmailRepository;
     private final PersonRepository personRepository;
     private final String publicAddress;
+    private final String sender;
 
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
                                EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-                               PersonRepository personRepository, @Value("${public.address}") String publicAddress) {
+                               PersonRepository personRepository,
+                               @Value("${public.address}") String publicAddress,
+                               @Value("${spring.mail.username}") String sender) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
         this.registrationEmailRepository = registrationEmailRepository;
         this.personRepository = personRepository;
         this.publicAddress = publicAddress;
+        this.sender = sender;
     }
 
     @Transactional
@@ -70,6 +74,26 @@ public class RegistrationService {
     }
 
     @Transactional
+    public void register(Set<EventRegistrationRecord> eventRegistrations) {
+        for (EventRegistrationRecord eventRegistration : eventRegistrations) {
+            Optional<EventRegistrationRecord> existingEventRegistration = dslContext
+                    .selectFrom(EVENT_REGISTRATION)
+                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
+                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
+                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
+                    .fetchOptional();
+            if (existingEventRegistration.isPresent()) {
+                EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
+                eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
+                eventRegistrationRecord.store();
+            } else {
+                dslContext.attach(eventRegistration);
+                eventRegistration.store();
+            }
+        }
+    }
+
+    @Transactional
     public boolean sendMails(RegistrationRecord registration) {
         Integer count = dslContext.selectCount()
                 .from(REGISTRATION_EMAIL)
@@ -100,40 +124,11 @@ public class RegistrationService {
 
     private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("jugi@tverlach.ch");
+        message.setFrom(sender);
         message.setTo(registrationEmail.getEmail());
-        message.setSubject("Jugi TV Erlach - Anmeldung für %d".formatted(registration.getYear()));
-        message.setText("""
-                Liebe Jugeler,
-                
-                Ab sofort könnt ihr euch für die Anlässe unter folgendem Link anmelden:
-                
-                %s/public/%s
-                
-                Viele Grüsse
-                Jugi TV Erlach
-                """.formatted(publicAddress, registrationEmail.getLink()));
+        message.setSubject("%s %d".formatted(registration.getTitle(), registration.getYear()));
+        String url = "%s/public/%s".formatted(publicAddress, registrationEmail.getLink());
+        message.setText(registration.getEmailText().formatted(url));
         return message;
     }
-
-    @Transactional
-    public void register(Set<EventRegistrationRecord> eventRegistrations) {
-        for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-            Optional<EventRegistrationRecord> existingEventRegistration = dslContext
-                    .selectFrom(EVENT_REGISTRATION)
-                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
-                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
-                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
-                    .fetchOptional();
-            if (existingEventRegistration.isPresent()) {
-                EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
-                eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
-                eventRegistrationRecord.store();
-            } else {
-                dslContext.attach(eventRegistration);
-                eventRegistration.store();
-            }
-        }
-    }
-
 }
