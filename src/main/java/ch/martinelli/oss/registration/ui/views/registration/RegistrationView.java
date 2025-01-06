@@ -266,14 +266,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         TextArea remarks = new TextArea(translate("remarks"));
         remarks.setPlaceholder(translate("remarks.placeholder"));
-        remarks.setHeight("100px");
+        remarks.setHeight("200px");
         binder.forField(remarks)
                 .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(remarks, 2);
 
         TextArea emailText = new TextArea(translate("email.text"));
         emailText.setPlaceholder(translate("email.text.placeholder"));
-        emailText.setHeight("100px");
+        emailText.setHeight("200px");
         binder.forField(emailText)
                 .bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
         formLayout.setColspan(emailText, 2);
@@ -315,6 +315,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         Scroller eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
         eventListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        eventListBoxScroller.setHeight("400px");
 
         personListBox = new MultiSelectListBox<>();
         personListBox.setId("person-list-box");
@@ -327,6 +328,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         Scroller personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
         personListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        personListBoxScroller.setHeight("400px");
 
         listBoxFormLayout.add(eventListBoxScroller, personListBoxScroller);
 
