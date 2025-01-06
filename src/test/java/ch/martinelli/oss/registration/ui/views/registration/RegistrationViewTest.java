@@ -97,13 +97,13 @@ class RegistrationViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Der Versand wurde erstellt");
 
         // Create mailing
-        _click(_get(Button.class, spec -> spec.withText("Emails verschicken")));
+        _click(_get(Button.class, spec -> spec.withText("E-Mails verschicken")));
 
         // Confirm
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
         // Check if save was successful
-        NotificationsKt.expectNotifications("Die Emails wurden versendet");
+        NotificationsKt.expectNotifications("Die E-Mails wurden versendet");
 
         assertThat(mailcatcherContainer.getAllEmails())
                 .hasSize(1)
@@ -123,7 +123,7 @@ class RegistrationViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Die Einladung wurde gelöscht");
+        NotificationsKt.expectNotifications("Der Datensatz wurde gelöscht");
     }
 
     @Test

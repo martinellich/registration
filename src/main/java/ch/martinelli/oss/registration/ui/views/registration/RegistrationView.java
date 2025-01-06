@@ -166,7 +166,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
             Button showRegistrationsButton = new Button(VaadinIcon.RECORDS.create(), e ->
                     UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
-            showRegistrationsButton.setTooltipText("Anmeldungen anzeigen");
+            showRegistrationsButton.setTooltipText(translate("show.registrations"));
             buttonLayout.add(showRegistrationsButton);
 
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
@@ -174,16 +174,16 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteButton.addClassName(LumoUtility.Margin.Left.SMALL);
             deleteButton.addClickListener(e ->
-                    new ConfirmDialog("Einladung löschen",
-                            "Willst du die Einladung wirklich löschen?",
-                            "Ja",
+                    new ConfirmDialog(translate("delete.record"),
+                            translate("delete.record.question"),
+                            translate("yes"),
                             ce -> {
                                 registrationRepository.deleteById(registrationViewRecord.getId());
 
                                 clearForm();
                                 loadData();
 
-                                Notification.success("Die Einladung wurde gelöscht");
+                                Notification.success(translate("delete.record.success"));
                             },
                             ABBRECHEN,
                             ce -> {
@@ -373,15 +373,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureSendMailsButton() {
         sendEmailsButton.addClickListener(e -> {
             if (this.registration != null) {
-                new ConfirmDialog("Emails versenden",
-                        "Möchtest du die Emails versenden?",
+                new ConfirmDialog(translate("send.emails"),
+                        translate("send.emails.confirm"),
                         "Ja",
                         confirmEvent -> {
                             if (registrationService.sendMails(this.registration)) {
-                                Notification.success("Die Emails wurden versendet");
+                                Notification.success(translate("send.emails.success"));
                                 refreshGridButPreserveSelection(this.registration.getId());
                             } else {
-                                Notification.error("Die Emails wurden bereits versendet");
+                                Notification.error(translate("send.emails.error"));
                             }
                         },
                         ABBRECHEN,
@@ -396,7 +396,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             if (this.registration != null) {
                 new ConfirmDialog(translate("create.mailing"),
                         translate("create.mailing.confirm"),
-                        "Ja",
+                        translate("yes"),
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
                                 Notification.success(translate("create.mailing.success"));
@@ -431,10 +431,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
                     dirty = false;
                     setButtonState(grid.asSingleSelect().getValue());
-                    Notification.success("Die Daten wurden gespeichert");
+                    Notification.success(translate("save.success"));
                 }
             } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
-                Notification.error("Fehler beim Aktualisieren der Daten. Überprüfen Sie, ob alle Werte gültig sind");
+                Notification.error(translate("save.error"));
             }
         });
     }

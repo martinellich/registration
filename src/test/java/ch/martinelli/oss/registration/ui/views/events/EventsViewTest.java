@@ -41,7 +41,7 @@ class EventsViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
 
         // Add new person
-        _click(_get(Button.class, spec -> spec.withId("add-event-button")));
+        _click(_get(Button.class, spec -> spec.withId("add-button")));
 
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugendturntag");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Ort")), "Kallnach");
@@ -68,13 +68,13 @@ class EventsViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Der Anlass wurde gelöscht");
+        NotificationsKt.expectNotifications("Der Datensatz wurde gelöscht");
     }
 
     @Test
     void navigate_to_existing_event() {
         // Navigate to event with id 1
-        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "1"));
+        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.ID, "1"));
 
         // Check if the correct event is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEqualTo("CIS 2023");
@@ -88,7 +88,7 @@ class EventsViewTest extends KaribuTest {
     @Test
     void navigate_to_non_existing_event() {
         // Navigate to event with id 1
-        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.EVENT_ID, "9999"));
+        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.ID, "9999"));
 
         // Check if the no person is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")).getValue()).isEmpty();
@@ -105,7 +105,7 @@ class EventsViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Der Anlass wird noch verwendet und kann nicht gelöscht werden");
+        NotificationsKt.expectNotifications("Der Datensatz wird noch verwendet und kann nicht gelöscht werden");
     }
 
 }
