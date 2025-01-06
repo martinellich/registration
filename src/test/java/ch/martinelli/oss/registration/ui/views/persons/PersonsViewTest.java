@@ -37,6 +37,7 @@ class PersonsViewTest extends KaribuTest {
     @Test
     void add_person() {
         // Check the content of grid
+        @SuppressWarnings("unchecked")
         Grid<PersonRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(12);
         assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Eula");
@@ -96,6 +97,7 @@ class PersonsViewTest extends KaribuTest {
 
     @Test
     void try_to_delete_used_person() {
+        @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
         Component component = GridKt._getCellComponent(grid, 0, "action-column");
         if (component instanceof Button button) {

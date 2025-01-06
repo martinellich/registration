@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EmailSenderTest {
 
     @Container
-    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
 
     @Autowired
     private EmailSender emailSender;

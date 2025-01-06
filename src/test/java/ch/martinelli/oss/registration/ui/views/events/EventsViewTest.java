@@ -35,6 +35,7 @@ class EventsViewTest extends KaribuTest {
     @Test
     void add_and_delete_event() {
         // Check the content of grid
+        @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(5);
         assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
@@ -95,6 +96,7 @@ class EventsViewTest extends KaribuTest {
 
     @Test
     void try_to_delete_used_event() {
+        @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
         Component component = GridKt._getCellComponent(grid, 1, "action-column");
         if (component instanceof Button button) {

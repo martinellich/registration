@@ -24,6 +24,7 @@ class EventRegistrationViewTest extends KaribuTest {
     @Test
     void display_event_registrations() {
         // Check the content of grid
+        @SuppressWarnings("unchecked")
         Grid<EventRegistrationRow> grid = _get(Grid.class);
 
         assertThat(GridKt._size(grid)).isEqualTo(2);

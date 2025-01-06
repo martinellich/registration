@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegistrationViewTest extends KaribuTest {
 
     @Container
-    static MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {

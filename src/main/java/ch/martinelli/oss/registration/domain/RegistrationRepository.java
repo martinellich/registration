@@ -55,6 +55,7 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
                 .fetchInto(EventRecord.class);
     }
 
+    @SuppressWarnings("java:S6809")
     @Transactional
     public void saveWithEventsAndPersons(RegistrationRecord registration, Set<EventRecord> events, Set<PersonRecord> persons) {
         save(registration);

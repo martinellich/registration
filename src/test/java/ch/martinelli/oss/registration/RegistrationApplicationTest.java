@@ -10,7 +10,7 @@ class RegistrationApplicationTest {
 
     @Test
     void contextLoads() {
-        // Just test if the context loads
+        // Test if the context loads
     }
 
 }
