@@ -29,12 +29,12 @@ import java.util.Optional;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>, REPO extends JooqDAO<T, R, Long>> extends Div
+public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>, D extends JooqDAO<T, R, Long>> extends Div
         implements BeforeEnterObserver {
 
-    public final static String ID = "id";
+    public static final String ID = "id";
 
-    protected transient final REPO repository;
+    protected final transient D repository;
     private final T table;
 
     protected Grid<R> grid;
@@ -45,7 +45,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected R currentRecord;
     private FormLayout formLayout;
 
-    protected EditView(REPO repository, T table) {
+    protected EditView(D repository, T table) {
         this.repository = repository;
         this.table = table;
 

@@ -130,6 +130,9 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             }
             registrationService.register(eventRegistrations);
             Notification.success(translate("registration.success"));
+            registerButton.setText(translate("registration.success"));
+            registerButton.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         });
         add(registerButton);
     }

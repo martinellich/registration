@@ -308,9 +308,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         eventListBox.setId("event-list-box");
         eventListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
-        eventListBox.addValueChangeListener(e -> {
-            setDirty(e.isFromClient());
-        });
+        eventListBox.addValueChangeListener(e -> setDirty(e.isFromClient()));
 
         Scroller eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
@@ -321,9 +319,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         personListBox.setId("person-list-box");
         personListBox.addClassName(LumoUtility.Background.CONTRAST_10);
         personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
-        personListBox.addValueChangeListener(e -> {
-            setDirty(e.isFromClient());
-        });
+        personListBox.addValueChangeListener(e -> setDirty(e.isFromClient()));
 
         Scroller personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
