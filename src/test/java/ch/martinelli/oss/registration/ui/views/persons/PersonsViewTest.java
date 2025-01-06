@@ -43,11 +43,11 @@ class PersonsViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Eula");
 
         // Add new person
-        _click(_get(Button.class, spec -> spec.withId("add-person-button")));
+        _click(_get(Button.class, spec -> spec.withId("add-button")));
 
         _setValue(_get(TextField.class, spec -> spec.withLabel("Nachname")), "Martinelli");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Vorname")), "Simon");
-        _setValue(_get(EmailField.class, spec -> spec.withLabel("Email")), "simon@tverlach.ch");
+        _setValue(_get(EmailField.class, spec -> spec.withLabel("E-Mail")), "simon@tverlach.ch");
         _get(I18nDatePicker.class, spec -> spec.withLabel("Geburtsdatum")).setValue(LocalDate.of(2010, 1, 12));
         _get(Checkbox.class, spec -> spec.withLabel("Aktiv")).setValue(true);
 
@@ -70,13 +70,13 @@ class PersonsViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Die Person wurde gelöscht");
+        NotificationsKt.expectNotifications("Der Datensatz wurde gelöscht");
     }
 
     @Test
     void navigate_to_existing_person() {
         // Navigate to person with id 1
-        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "1"));
+        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.ID, "1"));
 
         // Check if the correct person is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Lane");
@@ -89,7 +89,7 @@ class PersonsViewTest extends KaribuTest {
     @Test
     void navigate_to_non_existing_person() {
         // Navigate to person with id 1
-        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.PERSON_ID, "999"));
+        UI.getCurrent().navigate(PersonsView.class, new RouteParam(PersonsView.ID, "999"));
 
         // Check if the no person is displayed
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEmpty();
@@ -106,6 +106,6 @@ class PersonsViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Die Person wird noch verwendet und kann nicht gelöscht werden");
+        NotificationsKt.expectNotifications("Der Datensatz wird noch verwendet und kann nicht gelöscht werden");
     }
 }
