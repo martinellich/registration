@@ -160,7 +160,6 @@ public class PersonsView extends EditView<PersonRecord> implements BeforeEnterOb
         EmailField emailTextField = new EmailField(translate("email"));
 
         binder.forField(emailTextField)
-                .asRequired()
                 .bind(PersonRecord::getEmail, PersonRecord::setEmail);
         I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker(translate("date.of.birth"));
 
