@@ -176,7 +176,7 @@
     </dependencies>
 
     <build>
-        <defaultGoal>spring-boot:run</defaultGoal>
+        <defaultGoal>spring-boot:test-run</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.testcontainers</groupId>
