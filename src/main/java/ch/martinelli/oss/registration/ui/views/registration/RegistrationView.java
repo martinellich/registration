@@ -55,16 +55,17 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
+import static ch.martinelli.oss.registration.ui.views.registration.RegistrationView.ID;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@Route("registrations/:registrationID?")
-@RouteAlias("")
 @RolesAllowed("USER")
+@RouteAlias("")
+@Route("registrations/:" + ID + "?")
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
-    public static final String REGISTRATION_ID = "registrationID";
-    private static final String REGISTRATION_ROUTE_TEMPLATE = "registrations/%s";
+    public static final String ID = "id";
     private static final String ABBRECHEN = "Abbrechen";
+    private static final String CREATE_MAILING = "create.mailing";
 
     private final transient RegistrationService registrationService;
     private final transient RegistrationRepository registrationRepository;
@@ -76,7 +77,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private MultiSelectListBox<PersonRecord> personListBox;
     private final Button saveButton = new Button(translate("save"));
     private final Button cancelButton = new Button(translate(ABBRECHEN));
-    private final Button createMailingButton = new Button(translate("create.mailing"));
+    private final Button createMailingButton = new Button(translate(CREATE_MAILING));
     private final Button sendEmailsButton = new Button(translate("send.emails"));
     private FormLayout formLayout;
 
@@ -105,7 +106,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> eventId = event.getRouteParameters().get(REGISTRATION_ID).map(Long::parseLong);
+        Optional<Long> eventId = event.getRouteParameters().get(ID).map(Long::parseLong);
         if (eventId.isPresent()) {
             Optional<RegistrationRecord> registrationFromBackend = registrationRepository.findById(eventId.get());
             if (registrationFromBackend.isPresent()) {
@@ -204,7 +205,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             RegistrationViewRecord registrationViewRecord = event.getValue();
 
             if (registrationViewRecord != null) {
-                UI.getCurrent().navigate(String.format(REGISTRATION_ROUTE_TEMPLATE, registrationViewRecord.getId()));
+                UI.getCurrent().navigate(RegistrationView.class, new RouteParam(ID, registrationViewRecord.getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(RegistrationView.class);
@@ -394,7 +395,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureCreateMailingButton() {
         createMailingButton.addClickListener(e -> {
             if (this.registration != null) {
-                new ConfirmDialog(translate("create.mailing"),
+                new ConfirmDialog(translate(CREATE_MAILING),
                         translate("create.mailing.confirm"),
                         translate("yes"),
                         confirmEvent -> {
@@ -456,7 +457,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             if (registrationViewRecord != null && registrationViewRecord.getId() != null) {
 
                 createMailingButton.setText(registrationViewRecord.getEmailCreatedCount() > 0
-                        ? translate("update.mailing") : translate("create.mailing"));
+                        ? translate("update.mailing") : translate(CREATE_MAILING));
 
                 createMailingButton.setEnabled(!eventListBox.getSelectedItems().isEmpty()
                         && !personListBox.getSelectedItems().isEmpty());

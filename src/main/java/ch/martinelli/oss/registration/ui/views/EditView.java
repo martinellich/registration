@@ -47,9 +47,10 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected Binder<R> binder;
     protected R currentRecord;
     private FormLayout formLayout;
-    protected Consumer<R> afterNewRecord;
 
-    public EditView(D repository, T table, Grid<R> grid, Binder<R> binder) {
+    protected transient Consumer<R> afterNewRecord;
+
+    protected EditView(D repository, T table, Grid<R> grid, Binder<R> binder) {
         this.repository = repository;
         this.table = table;
         this.grid = grid;

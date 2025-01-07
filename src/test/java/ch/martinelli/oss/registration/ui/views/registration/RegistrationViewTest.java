@@ -130,7 +130,7 @@ class RegistrationViewTest extends KaribuTest {
     @Test
     void navigate_to_non_existing_registration() {
         // 999 doesn't exist
-        UI.getCurrent().navigate(RegistrationView.class, new RouteParam(RegistrationView.REGISTRATION_ID, "9999"));
+        UI.getCurrent().navigate(RegistrationView.class, new RouteParam(RegistrationView.ID, "9999"));
 
         // Form must be empty
         assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
