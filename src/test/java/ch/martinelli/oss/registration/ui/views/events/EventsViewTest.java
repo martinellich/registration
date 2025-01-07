@@ -99,7 +99,7 @@ class EventsViewTest extends KaribuTest {
     void try_to_delete_used_event() {
         @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
-        Component component = GridKt._getCellComponent(grid, 1, "action-column");
+        Component component = GridKt._getCellComponent(grid, 0, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }
