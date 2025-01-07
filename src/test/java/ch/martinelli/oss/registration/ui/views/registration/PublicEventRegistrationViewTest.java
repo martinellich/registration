@@ -2,7 +2,6 @@ package ch.martinelli.oss.registration.ui.views.registration;
 
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.LocatorJ;
-import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -36,8 +35,9 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         List<Checkbox> checkboxes = LocatorJ._find(Checkbox.class);
         checkboxes.forEach(LocatorJ::_click);
 
-        _click(_get(Button.class, spec -> spec.withText("Anmelden")));
+        _click(_get(Button.class, spec -> spec.withText("Anmeldung aktualisieren")));
 
-        NotificationsKt.expectNotifications("Vielen Dank für die Anmeldung!");
+        Button button = _get(Button.class);
+        assertThat(button.getText()).isEqualTo("Die Anmeldung wurde aktualisiert");
     }
 }

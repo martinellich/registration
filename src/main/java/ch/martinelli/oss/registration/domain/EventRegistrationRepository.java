@@ -73,4 +73,11 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
                 .fetch()
                 .map(EventRegistrationRow::fromRecord);
     }
+
+    public int countRegistrationsByEvent(Long registrationId, String event) {
+        return dslContext.fetchCount(dslContext
+                .selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+                .and(EVENT_REGISTRATION.event().TITLE.eq(event)));
+    }
 }

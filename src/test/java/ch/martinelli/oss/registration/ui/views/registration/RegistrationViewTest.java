@@ -4,11 +4,12 @@ import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
+import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
+import com.github.mvysny.kaributesting.v10.LocatorJ;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -63,7 +64,7 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2023);
 
         // Add new registration
-        _click(_get(Button.class, spec -> spec.withId("add-registration-button")));
+        _click(_get(Icon.class, spec -> spec.withId("add-icon")));
 
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugi TV Erlach - Anmeldung");
         _setValue(_get(IntegerField.class, spec -> spec.withLabel("Jahr")), 2025);
@@ -114,12 +115,12 @@ class RegistrationViewTest extends KaribuTest {
                 });
 
         // Delete new item
-        Component actions = GridKt._getCellComponent(grid, 2, "action-column");
-        actions.getChildren()
+        GridKt._getCellComponent(grid, 2, "action-column")
+                .getChildren()
                 .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
                 .findFirst()
-                .map(Button.class::cast)
-                .ifPresent(Button::click);
+                .map(Icon.class::cast)
+                .ifPresent(LocatorJ::_click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 

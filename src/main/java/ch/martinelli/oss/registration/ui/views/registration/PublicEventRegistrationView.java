@@ -5,7 +5,6 @@ import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
-import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -61,8 +60,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         RegistrationRecord registration = registrationRepository.findById(registrationEmail.getRegistrationId()).orElseThrow();
 
         Image logo = new Image("/icons/icon.png", "Logo");
-        logo.setHeight("50px");
-        HorizontalLayout header = new HorizontalLayout(logo, new H1("%s %d".formatted(registration.getTitle(), registration.getYear())));
+        logo.setHeight("40px");
+        HorizontalLayout header = new HorizontalLayout(logo, new H2("%s %d".formatted(registration.getTitle(), registration.getYear())));
         add(header);
         if (registration.getRemarks() != null) {
             add(new Paragraph(registration.getRemarks()));
@@ -72,6 +71,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         add(new H3(translate("registration.for")));
         UnorderedList unorderedList = new UnorderedList();
+        unorderedList.addClassName(LumoUtility.Margin.XSMALL);
         add(unorderedList);
         for (PersonRecord person : persons) {
             ListItem listItem = new ListItem("%s %s".formatted(person.getLastName(), person.getFirstName()));
@@ -116,7 +116,12 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         add(new Hr());
 
-        Button registerButton = new Button(translate("register"));
+        Button registerButton = new Button();
+        if (hasRegistrations()) {
+            registerButton.setText(translate("update.registration"));
+        } else {
+            registerButton.setText(translate("register"));
+        }
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         registerButton.addClickListener(e -> {
             Set<EventRegistrationRecord> eventRegistrations = new HashSet<>();
@@ -129,12 +134,20 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 eventRegistrations.add(eventRegistration);
             }
             registrationService.register(eventRegistrations);
-            Notification.success(translate("registration.success"));
-            registerButton.setText(translate("registration.success"));
-            registerButton.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+            if (hasRegistrations()) {
+                registerButton.setText(translate("registration.updated"));
+            } else {
+                registerButton.setText(translate("registration.success"));
+            }
+
             registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         });
         add(registerButton);
+    }
+
+    private boolean hasRegistrations() {
+        return checkboxMap.keySet().stream().anyMatch(Checkbox::getValue);
     }
 
     @Override

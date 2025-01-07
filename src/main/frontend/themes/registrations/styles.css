@@ -23,3 +23,12 @@ html {
 vaadin-button {
     cursor: pointer;
 }
+
+.delete-icon {
+    cursor: pointer;
+    color: var(--lumo-error-color);
+}
+.action-icon {
+    cursor: pointer;
+}
+

@@ -9,6 +9,7 @@ import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
+import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
@@ -25,8 +26,8 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -42,6 +43,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -57,7 +59,7 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("registrations/:registrationID?")
 @RouteAlias("")
-@RolesAllowed("ADMIN")
+@RolesAllowed("USER")
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String REGISTRATION_ID = "registrationID";
@@ -93,7 +95,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-        splitLayout.setSplitterPosition(30);
+        splitLayout.setSplitterPosition(20);
 
         splitLayout.addToPrimary(createGridLayout());
         splitLayout.addToSecondary(createEditorLayout());
@@ -153,27 +155,24 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
                 .setHeader(translate("emails.sent"));
 
-        Button addButton = new Button(VaadinIcon.PLUS.create());
-        addButton.setId("add-registration-button");
-        addButton.addClickListener(e -> {
+        Icon addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             loadData();
             RegistrationRecord registrationRecord = new RegistrationRecord();
             populateForm(registrationRecord);
         });
+        addIcon.setId("add-icon");
+        addIcon.setClassName("action-icon");
 
         grid.addComponentColumn(registrationViewRecord -> {
-            Div buttonLayout = new Div();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-            Button showRegistrationsButton = new Button(VaadinIcon.RECORDS.create(), e ->
-                    UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
-            showRegistrationsButton.setTooltipText(translate("show.registrations"));
-            buttonLayout.add(showRegistrationsButton);
+            Icon showRegistrationsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
+                    e -> UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
+            showRegistrationsIcon.addClassNames("action-icon");
+            showRegistrationsIcon.setTooltipText(translate("show.registrations"));
 
-            Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.setId("delete-action");
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-            deleteButton.addClassName(LumoUtility.Margin.Left.SMALL);
-            deleteButton.addClickListener(e ->
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
                     new ConfirmDialog(translate("delete.record"),
                             translate("delete.record.question"),
                             translate("yes"),
@@ -188,10 +187,13 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                             ABBRECHEN,
                             ce -> {
                             }).open());
-            buttonLayout.add(deleteButton);
+            deleteIcon.setId("delete-action");
+            deleteIcon.addClassName("delete-icon");
+
+            buttonLayout.add(showRegistrationsIcon, deleteIcon);
 
             return buttonLayout;
-        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
+        }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
 
         loadData();
 
@@ -211,7 +213,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private Component createIcon(long value) {
-        return value > 0 ? VaadinIcon.CHECK.create() : new Span();
+        return value > 0 ? LineAwesomeIcon.CHECK_SOLID.create() : new Span();
     }
 
     private void loadData() {
@@ -233,7 +235,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
-        editorLayoutDiv.add(editorDiv);
+        Scroller editorScroller = new Scroller(editorDiv);
+        editorScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        editorLayoutDiv.add(editorScroller);
 
         formLayout = new FormLayout();
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
@@ -450,11 +454,14 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             sendEmailsButton.setEnabled(false);
         } else {
             if (registrationViewRecord != null && registrationViewRecord.getId() != null) {
+
+                createMailingButton.setText(registrationViewRecord.getEmailCreatedCount() > 0
+                        ? translate("update.mailing") : translate("create.mailing"));
+
                 createMailingButton.setEnabled(!eventListBox.getSelectedItems().isEmpty()
-                        && !personListBox.getSelectedItems().isEmpty()
-                        && registrationViewRecord.getEmailCreatedCount() == 0);
-                sendEmailsButton.setEnabled(registrationViewRecord.getEmailCreatedCount() > 0
-                        && registrationViewRecord.getEmailSentCount() == 0);
+                        && !personListBox.getSelectedItems().isEmpty());
+
+                sendEmailsButton.setEnabled(registrationViewRecord.getEmailCreatedCount() > 0);
             }
         }
     }
@@ -506,7 +513,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     @Override
     public String getPageTitle() {
-        return translate("registrations");
+        return translate("invitations");
     }
 
 }

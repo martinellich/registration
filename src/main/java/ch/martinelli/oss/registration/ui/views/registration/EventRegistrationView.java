@@ -8,26 +8,26 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.List;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("event-registrations")
-@RolesAllowed("ADMIN")
+@RolesAllowed("USER")
 @Uses(Icon.class)
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
@@ -36,6 +36,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
     private Div gridContainer;
+    private Grid<EventRegistrationRow> grid;
 
     private Long registrationId;
 
@@ -62,8 +63,8 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     }
 
     public VerticalLayout createFilter() {
-        registrationSelect.setLabel(translate("year"));
-        registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
+        registrationSelect.setLabel(translate("invitation"));
+        registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
         registrationSelect.addValueChangeListener(e -> {
             if (registrationSelect.getValue() != null) {
@@ -72,7 +73,17 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
             }
         });
 
-        return new VerticalLayout(registrationSelect);
+        Button resetButton = new Button(translate("reset"));
+        resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        resetButton.addClickListener(e -> {
+            registrationSelect.clear();
+            createGrid();
+        });
+
+        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+
+        return new VerticalLayout(formLayout);
     }
 
     private void createGrid() {
@@ -80,32 +91,42 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
         List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
-        Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
-        grid.addColumn(EventRegistrationRow::lastName)
-                .setHeader(translate("last.name")).setAutoWidth(true);
-        grid.addColumn(EventRegistrationRow::firstName)
-                .setHeader(translate("first.name")).setAutoWidth(true);
+        grid = new Grid<>(EventRegistrationRow.class, false);
+        grid.setAllRowsVisible(true);
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.setEmptyStateText(translate("no.registrations"));
 
         if (!eventRegistrationMatrix.isEmpty()) {
+
+            grid.addColumn(EventRegistrationRow::lastName)
+                    .setHeader(translate("last.name"))
+                    .setFooter(translate("total"))
+                    .setAutoWidth(true);
+            grid.addColumn(EventRegistrationRow::firstName)
+                    .setHeader(translate("first.name")).setAutoWidth(true);
+
             EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
             firstRow.registrations().forEach((event, r) ->
                     grid.addComponentColumn(registrationRow -> {
                                 boolean registered = registrationRow.registrations().get(event);
                                 if (registered) {
-                                    return VaadinIcon.CHECK.create();
+                                    return LineAwesomeIcon.CHECK_SOLID.create();
                                 } else {
                                     return new Span();
                                 }
                             })
-                            .setHeader(event).setWidth("20px"));
+                            .setHeader(event)
+                            .setFooter(calculateNumberOfRegistrations(event))
+                            .setWidth("20px"));
         }
-
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
         grid.setItems(eventRegistrationMatrix);
 
-        gridContainer.add(grid);
+        gridContainer.add(new Div(grid));
+    }
+
+    private String calculateNumberOfRegistrations(String event) {
+        return "" + eventRegistrationRepository.countRegistrationsByEvent(registrationId, event);
     }
 
     private void createButtons() {

@@ -47,28 +47,22 @@ public class RegistrationService {
 
     @Transactional
     public boolean createMailing(RegistrationRecord registration) {
-        Integer count = dslContext.selectCount()
-                .from(REGISTRATION_EMAIL)
-                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(registration.getId()))
-                .fetchOneInto(Integer.class);
-        if (count != null && count > 0) {
-            return false;
-        }
-
         List<PersonRecord> persons = personRepository.findByRegistrationIdOrderByEmail(registration.getId());
         RegistrationEmailRecord registrationEmail = null;
         for (PersonRecord person : persons) {
-            if (registrationEmail == null || !registrationEmail.getEmail().equals(person.getEmail())) {
-                registrationEmail = dslContext.newRecord(REGISTRATION_EMAIL);
-                registrationEmail.setEmail(person.getEmail());
-                registrationEmail.setLink(UUID.randomUUID().toString().replace("-", ""));
-                registrationEmail.setRegistrationId(registration.getId());
-                registrationEmail.store();
+            if (!registrationEmailRepository.exitsByRegistrationIdAndEmail(registration.getId(), person.getEmail())) {
+                if (registrationEmail == null || !registrationEmail.getEmail().equals(person.getEmail())) {
+                    registrationEmail = dslContext.newRecord(REGISTRATION_EMAIL);
+                    registrationEmail.setEmail(person.getEmail());
+                    registrationEmail.setLink(UUID.randomUUID().toString().replace("-", ""));
+                    registrationEmail.setRegistrationId(registration.getId());
+                    registrationEmail.store();
+                }
+                RegistrationEmailPersonRecord registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
+                registrationEmailPerson.setRegistrationEmailId(registrationEmail.getId());
+                registrationEmailPerson.setPersonId(person.getId());
+                registrationEmailPerson.store();
             }
-            RegistrationEmailPersonRecord registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
-            registrationEmailPerson.setRegistrationEmailId(registrationEmail.getId());
-            registrationEmailPerson.setPersonId(person.getId());
-            registrationEmailPerson.store();
         }
         return true;
     }
@@ -95,18 +89,9 @@ public class RegistrationService {
 
     @Transactional
     public boolean sendMails(RegistrationRecord registration) {
-        Integer count = dslContext.selectCount()
-                .from(REGISTRATION_EMAIL)
-                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(registration.getId()))
-                .and(REGISTRATION_EMAIL.SENT_AT.isNotNull())
-                .fetchOneInto(Integer.class);
-        if (count != null && count > 0) {
-            return false;
-        }
-
         Set<SimpleMailMessage> mails = new HashSet<>();
 
-        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationId(registration.getId());
+        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationIdAndSentAtIsNull(registration.getId());
         for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
             SimpleMailMessage message = createMailMessage(registration, registrationEmail);
             mails.add(message);

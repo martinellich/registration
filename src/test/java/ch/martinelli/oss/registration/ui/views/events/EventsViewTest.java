@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.ui.views.events;
 
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
+import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -41,7 +42,7 @@ class EventsViewTest extends KaribuTest {
         assertThat(GridKt._get(grid, 0).getTitle()).isEqualTo("CIS 2023");
 
         // Add new person
-        _click(_get(Button.class, spec -> spec.withId("add-button")));
+        _click(_get(Icon.class, spec -> spec.withId("add-icon")));
 
         _setValue(_get(TextField.class, spec -> spec.withLabel("Bezeichnung")), "Jugendturntag");
         _setValue(_get(TextField.class, spec -> spec.withLabel("Ort")), "Kallnach");
@@ -62,8 +63,8 @@ class EventsViewTest extends KaribuTest {
 
         // Delete new item
         Component component = GridKt._getCellComponent(grid, 5, "action-column");
-        if (component instanceof Button button) {
-            _click(button);
+        if (component instanceof Icon icon) {
+            _click(icon);
         }
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
@@ -99,8 +100,8 @@ class EventsViewTest extends KaribuTest {
         @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
         Component component = GridKt._getCellComponent(grid, 1, "action-column");
-        if (component instanceof Button button) {
-            _click(button);
+        if (component instanceof Icon icon) {
+            _click(icon);
         }
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));

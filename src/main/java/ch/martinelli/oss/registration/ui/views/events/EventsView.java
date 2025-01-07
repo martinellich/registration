@@ -8,7 +8,6 @@ import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -23,20 +22,11 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
 @Route("events/:id?")
-@RolesAllowed("ADMIN")
+@RolesAllowed("USER")
 public class EventsView extends EditView<Event, EventRecord, EventRepository> implements BeforeEnterObserver, HasDynamicTitle {
 
     public EventsView(EventRepository eventRepository) {
-        super(eventRepository, EVENT);
-
-        grid = new Grid<>(EventRecord.class, false);
-        binder = new Binder<>(EventRecord.class);
-
-        SplitLayout splitLayout = new SplitLayout();
-        splitLayout.addToPrimary(createGridLayout());
-        splitLayout.addToSecondary(createEditorLayout());
-
-        add(splitLayout);
+        super(eventRepository, EVENT, new Grid<>(EventRecord.class, false), new Binder<>(EventRecord.class));
     }
 
     @Override

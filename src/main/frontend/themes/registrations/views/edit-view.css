@@ -37,6 +37,9 @@
   padding-left: var(--lumo-space-l);
   padding-right: var(--lumo-space-l);
   gap: var(--lumo-space-m);
+
+  position: absolute;
+  bottom: 0;
 }
 
 .edit-view .grid-wrapper {

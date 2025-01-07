@@ -31,7 +31,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REG
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("registration-emails")
-@RolesAllowed("ADMIN")
+@RolesAllowed("USER")
 @Uses(Icon.class)
 public class RegistrationEmailView extends Div implements HasDynamicTitle {
 
@@ -52,12 +52,12 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
     }
 
     public VerticalLayout createFilter() {
-        registrationSelect.setLabel(translate("year"));
-        registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
+        registrationSelect.setLabel(translate("invitation"));
+        registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
-        Button resetButton = new Button(translate("reset"));
 
+        Button resetButton = new Button(translate("reset"));
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetButton.addClickListener(e -> {
             registrationSelect.clear();
@@ -72,6 +72,8 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
 
     private Component createGrid() {
         grid.setHeight("calc(100% - 100px)");
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
@@ -97,17 +99,15 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
                 query.getOffset(), query.getLimit(),
                 VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)
         ).stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
         return grid;
     }
 
     private Condition getFilter() {
-        Condition condition = DSL.noCondition();
+        Condition condition = DSL.falseCondition();
 
         if (registrationSelect.getValue() != null) {
-            condition = condition.and(REGISTRATION_EMAIL_VIEW.YEAR.eq(registrationSelect.getValue().getYear()));
+            condition = REGISTRATION_EMAIL_VIEW.YEAR.eq(registrationSelect.getValue().getYear());
         }
         return condition;
     }

@@ -16,6 +16,7 @@
 .registrations-view .editor-layout {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .registrations-view .editor {
@@ -30,12 +31,15 @@
 .registrations-view .button-layout {
     width: 100%;
     flex-wrap: wrap;
-    background-color: var(--lumo-contrast-5pct);
+    background-color: #F4F5F7;
     padding-bottom: var(--lumo-space-s);
     padding-top: var(--lumo-space-s);
     padding-left: var(--lumo-space-l);
     padding-right: var(--lumo-space-l);
     gap: var(--lumo-space-m);
+
+    position: absolute;
+    bottom: 0;
 }
 
 .registrations-view .grid-wrapper {
