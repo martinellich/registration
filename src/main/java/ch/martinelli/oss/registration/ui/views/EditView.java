@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -26,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
@@ -44,12 +46,21 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected Binder<R> binder;
     protected R currentRecord;
     private FormLayout formLayout;
+    protected Consumer<R> afterNewRecord;
 
-    protected EditView(D repository, T table) {
+    public EditView(D repository, T table, Grid<R> grid, Binder<R> binder) {
         this.repository = repository;
         this.table = table;
+        this.grid = grid;
+        this.binder = binder;
 
         addClassName("edit-view");
+
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.addToPrimary(createGridLayout());
+        splitLayout.addToSecondary(createEditorLayout());
+
+        add(splitLayout);
     }
 
     @Override
@@ -90,6 +101,9 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
             grid.deselectAll();
             grid.getDataProvider().refreshAll();
             R eventRecord = table.newRecord();
+            if (afterNewRecord != null) {
+                afterNewRecord.accept(eventRecord);
+            }
             populateForm(eventRecord);
         });
 

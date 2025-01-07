@@ -11,7 +11,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -29,16 +28,9 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 public class PersonsView extends EditView<Person, PersonRecord, PersonRepository> implements BeforeEnterObserver, HasDynamicTitle {
 
     public PersonsView(PersonRepository personRepository) {
-        super(personRepository, PERSON);
+        super(personRepository, PERSON, new Grid<>(PersonRecord.class, false), new Binder<>(PersonRecord.class));
 
-        grid = new Grid<>(PersonRecord.class, false);
-        binder = new Binder<>(PersonRecord.class);
-
-        SplitLayout splitLayout = new SplitLayout();
-        splitLayout.addToPrimary(createGridLayout());
-        splitLayout.addToSecondary(createEditorLayout());
-
-        add(splitLayout);
+        afterNewRecord = personRecord -> personRecord.setActive(true); // default value
     }
 
     @Override
