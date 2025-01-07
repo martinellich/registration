@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -38,7 +39,7 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository> im
     protected void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        grid.addColumn(EventRecord::getTitle)
+        Grid.Column<EventRecord> titleColumn = grid.addColumn(EventRecord::getTitle)
                 .setSortable(true).setSortProperty(EVENT.TITLE.getName())
                 .setHeader(translate("title")).setAutoWidth(true);
         grid.addColumn(EventRecord::getDescription)
@@ -53,6 +54,8 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository> im
         grid.addColumn(eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
                 .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
                 .setHeader(translate("until")).setAutoWidth(true);
+
+        grid.sort(GridSortOrder.asc(titleColumn).build());
     }
 
     protected void createComponents(FormLayout formLayout) {

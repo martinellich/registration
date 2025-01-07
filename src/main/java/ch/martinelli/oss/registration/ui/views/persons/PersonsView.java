@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -41,10 +42,10 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     protected void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        grid.addColumn(PersonRecord::getLastName)
+        Grid.Column<PersonRecord> lastNameColumn = grid.addColumn(PersonRecord::getLastName)
                 .setSortable(true).setSortProperty(PERSON.LAST_NAME.getName())
                 .setHeader(translate("last.name")).setAutoWidth(true);
-        grid.addColumn(PersonRecord::getFirstName)
+        Grid.Column<PersonRecord> firstNameColumn = grid.addColumn(PersonRecord::getFirstName)
                 .setSortable(true).setSortProperty(PERSON.FIRST_NAME.getName())
                 .setHeader(translate("first.name")).setAutoWidth(true);
         grid.addColumn(PersonRecord::getEmail)
@@ -57,6 +58,8 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
                         personRecord.getActive() != null && personRecord.getActive() ? LineAwesomeIcon.CHECK_SOLID.create() : new Span())
                 .setSortable(true).setSortProperty(PERSON.ACTIVE.getName())
                 .setHeader(translate("active")).setAutoWidth(true);
+
+        grid.sort(GridSortOrder.asc(lastNameColumn).thenAsc(firstNameColumn).build());
     }
 
     protected void createComponents(FormLayout formLayout) {
