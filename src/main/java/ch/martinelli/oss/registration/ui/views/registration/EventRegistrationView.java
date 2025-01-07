@@ -7,13 +7,11 @@ import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -28,7 +26,6 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("event-registrations")
 @RolesAllowed("USER")
-@Uses(Icon.class)
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient EventRegistrationRepository eventRegistrationRepository;

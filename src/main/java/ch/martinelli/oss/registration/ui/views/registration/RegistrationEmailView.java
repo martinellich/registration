@@ -6,16 +6,15 @@ import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.ui.components.DateFormat;
+import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -26,13 +25,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("registration-emails")
 @RolesAllowed("USER")
-@Uses(Icon.class)
 public class RegistrationEmailView extends Div implements HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
@@ -89,7 +88,13 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         grid.addComponentColumn(registrationEmailViewRecord -> {
             RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
-            return link;
+
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> {
+                registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
+                grid.getDataProvider().refreshAll();
+            });
+
+            return new HorizontalLayout(link, deleteIcon);
         });
 
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
