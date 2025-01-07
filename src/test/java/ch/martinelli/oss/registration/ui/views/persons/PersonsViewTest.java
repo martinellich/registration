@@ -41,7 +41,7 @@ class PersonsViewTest extends KaribuTest {
         @SuppressWarnings("unchecked")
         Grid<PersonRecord> grid = _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(12);
-        assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Eula");
+        assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Lettie");
 
         // Add new person
         _click(_get(Icon.class, spec -> spec.withId("add-icon")));
@@ -60,11 +60,11 @@ class PersonsViewTest extends KaribuTest {
         assertThat(GridKt._size(grid)).isEqualTo(13);
 
         // Click new item and check value
-        GridKt._clickItem(grid, 12);
+        GridKt._clickItem(grid, 6);
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Martinelli");
 
         // Delete new item
-        Component component = GridKt._getCellComponent(grid, 5, "action-column");
+        Component component = GridKt._getCellComponent(grid, 6, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }
@@ -100,7 +100,7 @@ class PersonsViewTest extends KaribuTest {
     void try_to_delete_used_person() {
         @SuppressWarnings("unchecked")
         Grid<EventRecord> grid = _get(Grid.class);
-        Component component = GridKt._getCellComponent(grid, 0, "action-column");
+        Component component = GridKt._getCellComponent(grid, 4, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }
