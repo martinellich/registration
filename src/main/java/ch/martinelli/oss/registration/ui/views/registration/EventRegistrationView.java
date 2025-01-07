@@ -25,8 +25,8 @@ import java.util.List;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@Route("event-registrations")
 @RolesAllowed("USER")
+@Route("event-registrations")
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient EventRegistrationRepository eventRegistrationRepository;
@@ -34,7 +34,6 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
     private Div gridContainer;
-    private Grid<EventRegistrationRow> grid;
 
     private Long registrationId;
 
@@ -89,7 +88,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
         List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
-        grid = new Grid<>(EventRegistrationRow.class, false);
+        Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
         grid.setAllRowsVisible(true);
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.setEmptyStateText(translate("no.registrations"));

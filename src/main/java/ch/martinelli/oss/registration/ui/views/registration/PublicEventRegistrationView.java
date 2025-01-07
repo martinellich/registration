@@ -21,8 +21,8 @@ import java.util.*;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@Route(value = "public", autoLayout = false)
 @AnonymousAllowed
+@Route(value = "public", autoLayout = false)
 public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String>, HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
@@ -54,6 +54,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         }
     }
 
+    @SuppressWarnings("java:S3776")
     private void showRegistrationForm() {
         removeAll();
 
