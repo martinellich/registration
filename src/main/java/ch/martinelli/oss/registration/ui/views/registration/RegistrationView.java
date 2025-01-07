@@ -93,7 +93,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
-        splitLayout.setSplitterPosition(30);
+        splitLayout.setSplitterPosition(25);
 
         splitLayout.addToPrimary(createGridLayout());
         splitLayout.addToSecondary(createEditorLayout());
@@ -233,7 +233,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
-        editorLayoutDiv.add(editorDiv);
+        Scroller editorScroller = new Scroller(editorDiv);
+        editorScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        editorLayoutDiv.add(editorScroller);
 
         formLayout = new FormLayout();
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
@@ -506,7 +508,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     @Override
     public String getPageTitle() {
-        return translate("registrations");
+        return translate("invitations");
     }
 
 }

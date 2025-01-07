@@ -62,8 +62,8 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     }
 
     public VerticalLayout createFilter() {
-        registrationSelect.setLabel(translate("year"));
-        registrationSelect.setItemLabelGenerator(r -> r.getYear().toString());
+        registrationSelect.setLabel(translate("invitation"));
+        registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
         registrationSelect.addValueChangeListener(e -> {
             if (registrationSelect.getValue() != null) {

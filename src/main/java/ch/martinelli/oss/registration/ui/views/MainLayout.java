@@ -88,7 +88,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
-            nav.addItem(new SideNavItem(translate("registrations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create()));
+            nav.addItem(new SideNavItem(translate("invitations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create()));
         }
         if (accessAnnotationChecker.hasAccess(EventRegistrationView.class)) {
             nav.addItem(new SideNavItem(translate("event.registrations"), EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
