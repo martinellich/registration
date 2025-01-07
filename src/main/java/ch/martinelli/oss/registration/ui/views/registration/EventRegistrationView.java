@@ -81,8 +81,12 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
         Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
+        grid.setAllRowsVisible(true);
+
         grid.addColumn(EventRegistrationRow::lastName)
-                .setHeader(translate("last.name")).setAutoWidth(true);
+                .setHeader(translate("last.name"))
+                .setFooter(translate("total"))
+                .setAutoWidth(true);
         grid.addColumn(EventRegistrationRow::firstName)
                 .setHeader(translate("first.name")).setAutoWidth(true);
 
@@ -97,7 +101,9 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
                                     return new Span();
                                 }
                             })
-                            .setHeader(event).setWidth("20px"));
+                            .setHeader(event)
+                            .setFooter(calculateNumberOfRegistrations(event))
+                            .setWidth("20px"));
         }
 
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -105,7 +111,11 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
         grid.setItems(eventRegistrationMatrix);
 
-        gridContainer.add(grid);
+        gridContainer.add(new Div(grid));
+    }
+
+    private String calculateNumberOfRegistrations(String event) {
+        return "" + eventRegistrationRepository.countRegistrationsByEvent(registrationId, event);
     }
 
     private void createButtons() {
