@@ -7,13 +7,11 @@ import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -24,11 +22,11 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.List;
 
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("event-registrations")
 @RolesAllowed("USER")
-@Uses(Icon.class)
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient EventRegistrationRepository eventRegistrationRepository;
@@ -65,7 +63,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     public VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> {
             if (registrationSelect.getValue() != null) {
                 this.registrationId = registrationSelect.getValue().getId();

@@ -1,21 +1,23 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
-import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.ui.components.DateFormat;
+import ch.martinelli.oss.registration.ui.components.Icon;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -26,13 +28,16 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.util.List;
+
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("registration-emails")
 @RolesAllowed("USER")
-@Uses(Icon.class)
 public class RegistrationEmailView extends Div implements HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
@@ -54,7 +59,7 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
     public VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
 
         Button resetButton = new Button(translate("reset"));
@@ -74,7 +79,7 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         grid.setHeight("calc(100% - 100px)");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
-        grid.setEmptyStateText(translate("no.data"));
+        grid.setEmptyStateText(translate("no.mailings"));
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
@@ -82,9 +87,6 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         grid.addColumn(RegistrationEmailViewRecord::getEmail)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.EMAIL.getName())
                 .setHeader(translate("email")).setAutoWidth(true);
-        grid.addColumn(RegistrationEmailViewRecord::getLink)
-                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.LINK.getName())
-                .setHeader(translate("link")).setAutoWidth(true);
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
                         ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
@@ -92,13 +94,32 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         grid.addComponentColumn(registrationEmailViewRecord -> {
             RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
-            return link;
-        });
+
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID,
+                    e -> new ConfirmDialog(translate("delete.record"),
+                            translate("delete.record.question"),
+                            translate("yes"),
+                            ce -> {
+                                registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
+                                grid.getDataProvider().refreshAll();
+
+                                Notification.success(translate("delete.record.success"));
+                            },
+                            translate("cancel"),
+                            ce -> {
+                            }).open());
+            deleteIcon.setId("delete-action");
+            deleteIcon.addClassName("delete-icon");
+
+            HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
+            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            return actionLayout;
+        }).setTextAlign(ColumnTextAlign.END).setKey("action-column");
 
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
                 getFilter(),
                 query.getOffset(), query.getLimit(),
-                VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)
+                VaadinJooqUtil.orderFields(REGISTRATION, query)
         ).stream());
 
         return grid;
