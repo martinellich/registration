@@ -38,6 +38,6 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         _click(_get(Button.class, spec -> spec.withText("Anmeldung aktualisieren")));
 
         Button button = _get(Button.class);
-        assertThat(button.getText()).isEqualTo("Die Anmeldung wurde aktualisiert!");
+        assertThat(button.getText()).isEqualTo("Die Anmeldung wurde aktualisiert");
     }
 }
