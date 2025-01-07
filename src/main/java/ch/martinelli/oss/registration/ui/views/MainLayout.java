@@ -88,13 +88,15 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
-            nav.addItem(new SideNavItem(translate("invitations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create()));
-        }
-        if (accessAnnotationChecker.hasAccess(EventRegistrationView.class)) {
-            nav.addItem(new SideNavItem(translate("event.registrations"), EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
-        }
-        if (accessAnnotationChecker.hasAccess(RegistrationEmailView.class)) {
-            nav.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class, LineAwesomeIcon.MAIL_BULK_SOLID.create()));
+            SideNavItem invitationsNavItem = new SideNavItem(translate("invitations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create());
+            invitationsNavItem.setExpanded(true);
+            nav.addItem(invitationsNavItem);
+            if (accessAnnotationChecker.hasAccess(RegistrationEmailView.class)) {
+                invitationsNavItem.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class, LineAwesomeIcon.MAIL_BULK_SOLID.create()));
+            }
+            if (accessAnnotationChecker.hasAccess(EventRegistrationView.class)) {
+                invitationsNavItem.addItem(new SideNavItem(translate("event.registrations"), EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
+            }
         }
         if (accessAnnotationChecker.hasAccess(EventsView.class)) {
             nav.addItem(new SideNavItem(translate("events"), EventsView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));

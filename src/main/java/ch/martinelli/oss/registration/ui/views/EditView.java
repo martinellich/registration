@@ -1,6 +1,7 @@
 package ch.martinelli.oss.registration.ui.views;
 
 import ch.martinelli.oss.jooqspring.JooqDAO;
+import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.HasEnabled;
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.data.binder.Binder;
@@ -24,6 +24,7 @@ import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.UpdatableRecord;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -95,9 +96,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected abstract void configureGrid();
 
     protected void addActionColumn() {
-        Button addButton = new Button(VaadinIcon.PLUS.create());
-        addButton.setId("add-button");
-        addButton.addClickListener(e -> {
+        Icon addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             grid.deselectAll();
             grid.getDataProvider().refreshAll();
             R eventRecord = table.newRecord();
@@ -106,11 +105,11 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
             }
             populateForm(eventRecord);
         });
+        addIcon.setId("add-icon");
+        addIcon.addClassName("action-icon");
 
         grid.addComponentColumn(eventRecord -> {
-            Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-            deleteButton.addClickListener(e ->
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
                     new ConfirmDialog(translate("delete.record"),
                             translate("delete.record.question"),
                             translate("yes"),
@@ -129,8 +128,9 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
                             translate("cancel"),
                             ce -> {
                             }).open());
-            return deleteButton;
-        }).setHeader(addButton).setTextAlign(ColumnTextAlign.END).setKey("action-column");
+            deleteIcon.addClassName("delete-icon");
+            return deleteIcon;
+        }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setKey("action-column");
     }
 
     protected void setItems() {

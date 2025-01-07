@@ -22,7 +22,7 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
 @Route("events/:id?")
-@RolesAllowed("ADMIN")
+@RolesAllowed("USER")
 public class EventsView extends EditView<Event, EventRecord, EventRepository> implements BeforeEnterObserver, HasDynamicTitle {
 
     public EventsView(EventRepository eventRepository) {

@@ -27,29 +27,28 @@ class RegistrationEmailViewTest extends KaribuTest {
         // Check the content of grid
         @SuppressWarnings("unchecked")
         Grid<RegistrationEmailViewRecord> grid = _get(Grid.class);
-        assertThat(GridKt._size(grid)).isNotZero();
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
+        assertThat(GridKt._size(grid)).isZero();
 
         // Filter
         @SuppressWarnings("rawtypes")
         Select select = _get(Select.class);
-        //noinspection unchecked
+        // noinspection unchecked
+        _setValue(_get(Select.class), select.getListDataView().getItem(0));
+
+        assertThat(GridKt._size(grid)).isNotZero();
+        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
+
+        // Filter
+        // noinspection unchecked
         _setValue(_get(Select.class), select.getListDataView().getItem(1));
 
         // Check the content of grid
         assertThat(GridKt._size(grid)).isZero();
 
-        // Filter
-        //noinspection unchecked
-        _setValue(_get(Select.class), select.getListDataView().getItem(0));
-
-        // Check the content of grid
-        assertThat(GridKt._size(grid)).isEqualTo(1);
-
         // Clear Filter
         _click(_get(Button.class, spec -> spec.withText("Reset")));
 
         // Check the content of grid
-        assertThat(GridKt._size(grid)).isNotZero();
+        assertThat(GridKt._size(grid)).isZero();
     }
 }

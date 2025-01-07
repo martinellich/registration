@@ -34,10 +34,11 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .fetch();
     }
 
-    public List<RegistrationEmailViewRecord> findByRegistrationId(Long registrationId) {
+    public List<RegistrationEmailViewRecord> findByRegistrationIdAndSentAtIsNull(Long registrationId) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL_VIEW)
                 .where(REGISTRATION_EMAIL_VIEW.REGISTRATION_ID.eq(registrationId))
+                .and(REGISTRATION_EMAIL_VIEW.SENT_AT.isNull())
                 .fetch();
     }
 
@@ -54,5 +55,12 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .from(REGISTRATION_EMAIL_PERSON)
                 .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.eq(registrationEmailId))
                 .fetchInto(PersonRecord.class);
+    }
+
+    public boolean exitsByRegistrationIdAndEmail(Long id, String email) {
+        return dslContext.fetchExists(dslContext
+                .selectFrom(REGISTRATION_EMAIL)
+                .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(id))
+                .and(REGISTRATION_EMAIL.EMAIL.eq(email)));
     }
 }
