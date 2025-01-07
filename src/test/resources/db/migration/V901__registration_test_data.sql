@@ -30,4 +30,6 @@ insert into event_registration (registration_id,event_id,person_id,registered) v
 insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,2, false);
 
 insert into registration_email (id,registration_id,email,link,sent_at) values (1,1,'jordan.miccinesi@duod.gy','550e8400e29b41d4a716446655440000','2023-01-01 11:00:00');
+insert into registration_email (id,registration_id,email,link,sent_at) values (2,1,'cora.tesi@bivo.yt','2226914588a24213a631dcdd475f81b6',null);
 insert into registration_email_person (registration_email_id,person_id) values (1,1);
+insert into registration_email_person (registration_email_id,person_id) values (2,5);

@@ -75,7 +75,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private MultiSelectListBox<EventRecord> eventListBox;
     private MultiSelectListBox<PersonRecord> personListBox;
     private final Button saveButton = new Button(translate("save"));
-    private final Button cancelButton = new Button(ABBRECHEN);
+    private final Button cancelButton = new Button(translate(ABBRECHEN));
     private final Button createMailingButton = new Button(translate("create.mailing"));
     private final Button sendEmailsButton = new Button(translate("send.emails"));
     private FormLayout formLayout;
@@ -184,7 +184,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
                                 Notification.success(translate("delete.record.success"));
                             },
-                            ABBRECHEN,
+                            translate(ABBRECHEN),
                             ce -> {
                             }).open());
             deleteIcon.setId("delete-action");
@@ -384,7 +384,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                                 Notification.error(translate("send.emails.error"));
                             }
                         },
-                        ABBRECHEN,
+                        translate(ABBRECHEN),
                         cancelEvent -> {
                         }).open();
             }
@@ -405,7 +405,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                                 Notification.error(getTranslation("create.mailing.error"));
                             }
                         },
-                        ABBRECHEN,
+                        translate(ABBRECHEN),
                         cancelEvent -> {
                         }).open();
             }

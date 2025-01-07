@@ -1,20 +1,23 @@
 package ch.martinelli.oss.registration.ui.views.registration;
 
-import ch.martinelli.oss.registration.db.tables.Registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.ui.components.DateFormat;
 import ch.martinelli.oss.registration.ui.components.Icon;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -27,6 +30,9 @@ import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.util.List;
+
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
@@ -53,7 +59,7 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
     public VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
 
         Button resetButton = new Button(translate("reset"));
@@ -89,18 +95,31 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
             RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
 
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> {
-                registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
-                grid.getDataProvider().refreshAll();
-            });
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID,
+                    e -> new ConfirmDialog(translate("delete.record"),
+                            translate("delete.record.question"),
+                            translate("yes"),
+                            ce -> {
+                                registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
+                                grid.getDataProvider().refreshAll();
 
-            return new HorizontalLayout(link, deleteIcon);
-        });
+                                Notification.success(translate("delete.record.success"));
+                            },
+                            translate("cancel"),
+                            ce -> {
+                            }).open());
+            deleteIcon.setId("delete-action");
+            deleteIcon.addClassName("delete-icon");
+
+            HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
+            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            return actionLayout;
+        }).setTextAlign(ColumnTextAlign.END).setKey("action-column");
 
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
                 getFilter(),
                 query.getOffset(), query.getLimit(),
-                VaadinJooqUtil.orderFields(Registration.REGISTRATION, query)
+                VaadinJooqUtil.orderFields(REGISTRATION, query)
         ).stream());
 
         return grid;

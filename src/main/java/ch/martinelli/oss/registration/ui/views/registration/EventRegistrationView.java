@@ -22,6 +22,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.List;
 
+import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @Route("event-registrations")
@@ -62,7 +63,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     public VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition()));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> {
             if (registrationSelect.getValue() != null) {
                 this.registrationId = registrationSelect.getValue().getId();
