@@ -74,6 +74,7 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         grid.setHeight("calc(100% - 100px)");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
+        grid.setEmptyStateText(translate("no.data"));
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
