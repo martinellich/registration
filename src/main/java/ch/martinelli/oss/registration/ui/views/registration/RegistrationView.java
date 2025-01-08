@@ -173,7 +173,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             showRegistrationsIcon.addClassNames("action-icon");
             showRegistrationsIcon.setTooltipText(translate("show.registrations"));
 
-            Icon showMailingsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
+            Icon showMailingsIcon = new Icon(LineAwesomeIcon.MAIL_BULK_SOLID,
                     e -> UI.getCurrent().navigate(RegistrationEmailView.class, registrationViewRecord.getId()));
             showMailingsIcon.addClassNames("action-icon");
             showMailingsIcon.setTooltipText(translate("show.mailings"));
@@ -196,7 +196,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             deleteIcon.setId("delete-action");
             deleteIcon.addClassName("delete-icon");
 
-            buttonLayout.add(showRegistrationsIcon, deleteIcon);
+            buttonLayout.add(showMailingsIcon, showRegistrationsIcon, deleteIcon);
 
             return buttonLayout;
         }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
