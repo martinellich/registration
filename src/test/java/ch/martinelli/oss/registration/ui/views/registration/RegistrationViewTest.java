@@ -104,7 +104,12 @@ class RegistrationViewTest extends KaribuTest {
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
         // Check if save was successful
-        NotificationsKt.expectNotifications("Die E-Mails wurden versendet");
+        NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ignore) {
+        }
 
         assertThat(mailcatcherContainer.getAllEmails())
                 .hasSize(1)

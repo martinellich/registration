@@ -21,9 +21,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.Condition;
@@ -38,7 +36,7 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @RolesAllowed("USER")
 @Route("registration-emails")
-public class RegistrationEmailView extends Div implements HasDynamicTitle {
+public class RegistrationEmailView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
     private final transient RegistrationRepository registrationRepository;
@@ -46,6 +44,7 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
     private final Grid<RegistrationEmailViewRecord> grid = new Grid<>(RegistrationEmailViewRecord.class, false);
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
+    private Long registrationId;
 
     public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository, RegistrationRepository registrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
@@ -56,7 +55,16 @@ public class RegistrationEmailView extends Div implements HasDynamicTitle {
         add(createFilter(), createGrid());
     }
 
-    public VerticalLayout createFilter() {
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter Long registrationId) {
+        this.registrationId = registrationId;
+
+        if (registrationId != null) {
+            registrationSelect.setValue(registrationRepository.findById(registrationId).orElse(null));
+        }
+    }
+
+    private VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
         registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));

@@ -34,6 +34,13 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .fetch();
     }
 
+    public Optional<RegistrationEmailViewRecord> findByIdFromView(Long registrationEmailId) {
+        return dslContext
+                .selectFrom(REGISTRATION_EMAIL_VIEW)
+                .where(REGISTRATION_EMAIL_VIEW.REGISTRATION_EMAIL_ID.eq(registrationEmailId))
+                .fetchOptional();
+    }
+
     public List<RegistrationEmailViewRecord> findByRegistrationIdAndSentAtIsNull(Long registrationId) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL_VIEW)
