@@ -64,7 +64,7 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String ID = "id";
-    private static final String ABBRECHEN = "Abbrechen";
+    private static final String CANCEL = "cancel";
     private static final String CREATE_MAILING = "create.mailing";
 
     private final transient RegistrationService registrationService;
@@ -76,7 +76,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private MultiSelectListBox<EventRecord> eventListBox;
     private MultiSelectListBox<PersonRecord> personListBox;
     private final Button saveButton = new Button(translate("save"));
-    private final Button cancelButton = new Button(translate(ABBRECHEN));
+    private final Button cancelButton = new Button(translate(CANCEL));
     private final Button createMailingButton = new Button(translate(CREATE_MAILING));
     private final Button sendEmailsButton = new Button(translate("send.emails"));
     private FormLayout formLayout;
@@ -173,6 +173,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             showRegistrationsIcon.addClassNames("action-icon");
             showRegistrationsIcon.setTooltipText(translate("show.registrations"));
 
+            Icon showMailingsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
+                    e -> UI.getCurrent().navigate(RegistrationEmailView.class, registrationViewRecord.getId()));
+            showMailingsIcon.addClassNames("action-icon");
+            showMailingsIcon.setTooltipText(translate("show.mailings"));
+
             Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
                     new ConfirmDialog(translate("delete.record"),
                             translate("delete.record.question"),
@@ -185,7 +190,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
                                 Notification.success(translate("delete.record.success"));
                             },
-                            translate(ABBRECHEN),
+                            translate(CANCEL),
                             ce -> {
                             }).open());
             deleteIcon.setId("delete-action");
@@ -378,14 +383,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                         translate("send.emails.confirm"),
                         "Ja",
                         confirmEvent -> {
-                            if (registrationService.sendMails(this.registration)) {
-                                Notification.success(translate("send.emails.success"));
-                                refreshGridButPreserveSelection(this.registration.getId());
-                            } else {
-                                Notification.error(translate("send.emails.error"));
-                            }
+                            registrationService.sendMails(this.registration);
+                            Notification.success(translate("send.emails.success"));
+                            refreshGridButPreserveSelection(this.registration.getId());
                         },
-                        translate(ABBRECHEN),
+                        translate(CANCEL),
                         cancelEvent -> {
                         }).open();
             }
@@ -406,7 +408,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                                 Notification.error(getTranslation("create.mailing.error"));
                             }
                         },
-                        translate(ABBRECHEN),
+                        translate(CANCEL),
                         cancelEvent -> {
                         }).open();
             }

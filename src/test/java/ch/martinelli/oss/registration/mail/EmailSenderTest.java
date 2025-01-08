@@ -1,11 +1,14 @@
 package ch.martinelli.oss.registration.mail;
 
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
+import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -13,7 +16,6 @@ import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 import skydrinker.testcontainers.mailcatcher.MailcatcherMail;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,6 +28,10 @@ class EmailSenderTest {
 
     @Autowired
     private EmailSender emailSender;
+    @Autowired
+    private RegistrationRepository registrationRepository;
+    @Autowired
+    private RegistrationEmailRepository registrationEmailRepository;
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {
@@ -39,20 +45,17 @@ class EmailSenderTest {
 
     @Test
     void send_mails() {
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setFrom("jugi@tverlach.ch");
-        mail.setTo("john@doe.com");
-        mail.setSubject("Test Subject");
-        mail.setText("Test Text");
+        RegistrationRecord registration = registrationRepository.findById(1L).orElseThrow();
+        RegistrationEmailViewRecord registrationEmail = registrationEmailRepository.findByIdFromView(2L).orElseThrow();
 
-        emailSender.send(Set.of(mail));
+        emailSender.sendEmail(registration, registrationEmail);
 
         List<MailcatcherMail> emails = mailcatcherContainer.getAllEmails();
 
         assertThat(emails).hasSize(1).first().satisfies(email -> {
             assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
-            assertThat(email.getSubject()).isEqualTo("Test Subject");
-            assertThat(email.getPlainTextBody()).isEqualTo("Test Text\n");
+            assertThat(email.getSubject()).isEqualTo("Anmeldung 2023");
+            assertThat(email.getPlainTextBody()).isEqualTo("Mail text https://tve-registration.fly.dev/public/2226914588a24213a631dcdd475f81b6\n");
         });
     }
 }
