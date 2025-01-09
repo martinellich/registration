@@ -27,9 +27,11 @@ import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 class RegistrationViewTest extends KaribuTest {
 
@@ -106,10 +108,7 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ignore) {
-        }
+        await().atLeast(2, TimeUnit.SECONDS);
 
         assertThat(mailcatcherContainer.getAllEmails())
                 .hasSize(1)

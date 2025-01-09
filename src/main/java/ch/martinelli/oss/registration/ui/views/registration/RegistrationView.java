@@ -55,6 +55,7 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMAT;
+import static ch.martinelli.oss.registration.ui.views.EditView.ACTION_ICON;
 import static ch.martinelli.oss.registration.ui.views.registration.RegistrationView.ID;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
@@ -162,7 +163,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             populateForm(registrationRecord);
         });
         addIcon.setId("add-icon");
-        addIcon.setClassName("action-icon");
+        addIcon.setClassName(ACTION_ICON);
 
         grid.addComponentColumn(registrationViewRecord -> {
             HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -170,12 +171,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
             Icon showRegistrationsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
                     e -> UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
-            showRegistrationsIcon.addClassNames("action-icon");
+            showRegistrationsIcon.addClassNames(ACTION_ICON);
             showRegistrationsIcon.setTooltipText(translate("show.registrations"));
 
             Icon showMailingsIcon = new Icon(LineAwesomeIcon.MAIL_BULK_SOLID,
                     e -> UI.getCurrent().navigate(RegistrationEmailView.class, registrationViewRecord.getId()));
-            showMailingsIcon.addClassNames("action-icon");
+            showMailingsIcon.addClassNames(ACTION_ICON);
             showMailingsIcon.setTooltipText(translate("show.mailings"));
 
             Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->

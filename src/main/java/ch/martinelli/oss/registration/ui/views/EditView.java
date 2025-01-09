@@ -36,6 +36,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
         implements BeforeEnterObserver {
 
     public static final String ID = "id";
+    public static final String ACTION_ICON = "action-icon";
 
     protected final transient D repository;
     private final T table;
@@ -107,7 +108,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
             populateForm(eventRecord);
         });
         addIcon.setId("add-icon");
-        addIcon.addClassName("action-icon");
+        addIcon.addClassName(ACTION_ICON);
 
         grid.addComponentColumn(eventRecord -> {
             Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
