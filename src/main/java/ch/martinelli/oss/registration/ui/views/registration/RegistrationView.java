@@ -243,6 +243,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         editorDiv.setClassName("editor");
         Scroller editorScroller = new Scroller(editorDiv);
         editorScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        editorScroller.setHeight("calc(100% - 60px)");
         editorLayoutDiv.add(editorScroller);
 
         formLayout = new FormLayout();
