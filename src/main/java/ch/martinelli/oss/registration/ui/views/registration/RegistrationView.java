@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
+import ch.martinelli.oss.registration.security.SecurityContext;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.components.Notification;
@@ -72,6 +73,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private final transient RegistrationRepository registrationRepository;
     private final transient EventRepository eventRepository;
     private final transient PersonRepository personRepository;
+    private final transient SecurityContext securityContext;
 
     private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
     private MultiSelectListBox<EventRecord> eventListBox;
@@ -87,11 +89,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private boolean dirty;
 
     public RegistrationView(RegistrationService registrationService, RegistrationRepository registrationRepository,
-                            EventRepository eventRepository, PersonRepository personRepository) {
+                            EventRepository eventRepository, PersonRepository personRepository, SecurityContext securityContext) {
         this.registrationService = registrationService;
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
         this.personRepository = personRepository;
+        this.securityContext = securityContext;
 
         addClassNames("registrations-view");
 
@@ -385,7 +388,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                         translate("send.emails.confirm"),
                         "Ja",
                         confirmEvent -> {
-                            registrationService.sendMails(this.registration);
+                            registrationService.sendMails(this.registration, securityContext.getUsername());
                             Notification.success(translate("send.emails.success"));
                             refreshGridButPreserveSelection(this.registration.getId());
                         },

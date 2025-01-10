@@ -3,6 +3,8 @@ package ch.martinelli.oss.registration.mail;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
@@ -17,14 +19,15 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTR
 @Component
 public class EmailSender {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailSender.class);
+
     private final JavaMailSender javaMailSender;
     private final DSLContext dslContext;
     private final String publicAddress;
     private final String sender;
 
     public EmailSender(JavaMailSender javaMailSender, DSLContext dslContext,
-                       @Value("${public.address}") String publicAddress,
-                       @Value("${spring.mail.username}") String sender) {
+                       @Value("${public.address}") String publicAddress, @Value("${spring.mail.username}") String sender) {
         this.javaMailSender = javaMailSender;
         this.dslContext = dslContext;
         this.publicAddress = publicAddress;
@@ -32,11 +35,11 @@ public class EmailSender {
     }
 
     @Transactional
-    public void sendEmail(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail) {
-        SimpleMailMessage mailMessage = createMailMessage(registration, registrationEmail);
-
+    public void sendEmail(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail, String replyTo) {
         try {
+            SimpleMailMessage mailMessage = createMailMessage(registration, registrationEmail, replyTo);
             javaMailSender.send(mailMessage);
+            log.info("Email sent to %s with RegistrationEmailId %d".formatted(registrationEmail.getEmail(), registrationEmail.getRegistrationEmailId()));
         } catch (Exception e) {
             throw new MailSendException(
                     "Failed to send email with RegistrationEmailId %d".formatted(registrationEmail.getRegistrationEmailId()),
@@ -49,13 +52,14 @@ public class EmailSender {
                 .execute();
     }
 
-    private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail) {
+    private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail, String replyTo) {
         if (registration.getEmailText() == null) {
             throw new IllegalArgumentException("Email text is missing for registration %d".formatted(registration.getId()));
         }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(sender);
         message.setTo(registrationEmail.getEmail());
+        message.setReplyTo(replyTo);
         message.setSubject("%s %d".formatted(registration.getTitle(), registration.getYear()));
         String url = "%s/public/%s".formatted(publicAddress, registrationEmail.getLink());
         message.setText(registration.getEmailText().formatted(url));

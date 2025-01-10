@@ -48,7 +48,7 @@ class EmailSenderTest {
         RegistrationRecord registration = registrationRepository.findById(1L).orElseThrow();
         RegistrationEmailViewRecord registrationEmail = registrationEmailRepository.findByIdFromView(2L).orElseThrow();
 
-        emailSender.sendEmail(registration, registrationEmail);
+        emailSender.sendEmail(registration, registrationEmail, "jugi@tverlach.ch");
 
         List<MailcatcherMail> emails = mailcatcherContainer.getAllEmails();
 
