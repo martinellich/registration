@@ -86,11 +86,11 @@ public class RegistrationService {
     }
 
     @Async
-    public void sendMails(RegistrationRecord registration) {
+    public void sendMails(RegistrationRecord registration, String replayTo) {
         List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationIdAndSentAtIsNull(registration.getId());
         for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
             try {
-                emailSender.sendEmail(registration, registrationEmail);
+                emailSender.sendEmail(registration, registrationEmail, replayTo);
             } catch (Exception e) {
                 log.error("Error sending email", e);
             }

@@ -44,7 +44,6 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
     private final Grid<RegistrationEmailViewRecord> grid = new Grid<>(RegistrationEmailViewRecord.class, false);
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
-    private Long registrationId;
 
     public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository, RegistrationRepository registrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
@@ -57,8 +56,6 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter Long registrationId) {
-        this.registrationId = registrationId;
-
         if (registrationId != null) {
             registrationSelect.setValue(registrationRepository.findById(registrationId).orElse(null));
         }
