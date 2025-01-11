@@ -88,42 +88,49 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
-                .setHeader(translate("year"));
+                .setHeader(translate("year"))
+                .setWidth("30px");
         grid.addColumn(RegistrationEmailViewRecord::getEmail)
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.EMAIL.getName())
-                .setHeader(translate("email"));
+                .setHeader(translate("email"))
+                .setAutoWidth(true);
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
                         ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
-                .setHeader(translate("sent"));
+                .setHeader(translate("sent"))
+                .setAutoWidth(true);
+        ;
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
                         ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
-                .setHeader(translate("registered.at"));
+                .setHeader(translate("registered.at"))
+                .setAutoWidth(true);
+
         grid.addComponentColumn(registrationEmailViewRecord -> {
-            RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
-            link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
+                    RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
+                    link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
 
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID,
-                    e -> new ConfirmDialog(translate("delete.record"),
-                            translate("delete.record.question"),
-                            translate("yes"),
-                            ce -> {
-                                registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
-                                grid.getDataProvider().refreshAll();
+                    Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID,
+                            e -> new ConfirmDialog(translate("delete.record"),
+                                    translate("delete.record.question"),
+                                    translate("yes"),
+                                    ce -> {
+                                        registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
+                                        grid.getDataProvider().refreshAll();
 
-                                Notification.success(translate("delete.record.success"));
-                            },
-                            translate("cancel"),
-                            ce -> {
-                            }).open());
-            deleteIcon.setId("delete-action");
-            deleteIcon.addClassName("delete-icon");
+                                        Notification.success(translate("delete.record.success"));
+                                    },
+                                    translate("cancel"),
+                                    ce -> {
+                                    }).open());
+                    deleteIcon.setId("delete-action");
+                    deleteIcon.addClassName("delete-icon");
 
-            HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
-            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            return actionLayout;
-        }).setTextAlign(ColumnTextAlign.END).setKey("action-column");
+                    HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
+                    actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+                    return actionLayout;
+                }).setTextAlign(ColumnTextAlign.END).setKey("action-column")
+                .setWidth("200px");
 
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
                 getFilter(),
