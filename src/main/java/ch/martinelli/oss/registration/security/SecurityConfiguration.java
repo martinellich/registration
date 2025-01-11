@@ -15,14 +15,15 @@ public class SecurityConfiguration extends VaadinWebSecurity {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.apply(AadWebApplicationHttpSecurityConfigurer.aadWebApplication());
+        http.with(AadWebApplicationHttpSecurityConfigurer.aadWebApplication(), c -> {
+        });
 
         http.authorizeHttpRequests(
-                authorize -> authorize.requestMatchers(
-                        new AntPathRequestMatcher("/images/*.png"),
-                        new AntPathRequestMatcher("/line-awesome/**/*.svg"),
-                        EndpointRequest.to(HealthEndpoint.class)
-                ).permitAll());
+                authorize -> authorize
+                        .requestMatchers(
+                                new AntPathRequestMatcher("/images/*.png"),
+                                new AntPathRequestMatcher("/line-awesome/**/*.svg"),
+                                EndpointRequest.to(HealthEndpoint.class)).permitAll());
 
         super.configure(http);
     }

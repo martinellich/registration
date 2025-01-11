@@ -5,6 +5,7 @@ import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
+import ch.martinelli.oss.registration.security.SecurityContext;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -31,16 +32,19 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private final transient EventRegistrationRepository eventRegistrationRepository;
 
     private final transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+    private final SecurityContext securityContext;
 
     private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
                                        RegistrationRepository registrationRepository, RegistrationService registrationService,
-                                       EventRegistrationRepository eventRegistrationRepository) {
+                                       EventRegistrationRepository eventRegistrationRepository,
+                                       SecurityContext securityContext) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
         this.registrationService = registrationService;
         this.eventRegistrationRepository = eventRegistrationRepository;
+        this.securityContext = securityContext;
     }
 
     @Override
@@ -145,6 +149,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         });
         add(registerButton);
+
+        securityContext.getUsername();
     }
 
     private boolean hasRegistrations() {

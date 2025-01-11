@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.ui.views;
 
-import ch.martinelli.oss.registration.domain.UserRepository;
 import ch.martinelli.oss.registration.security.SecurityContext;
 import ch.martinelli.oss.registration.ui.views.events.EventsView;
 import ch.martinelli.oss.registration.ui.views.persons.PersonsView;
@@ -40,17 +39,14 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 @AnonymousAllowed
 public class MainLayout extends AppLayout {
 
-    private final transient UserRepository userRepository;
     private final transient SecurityContext securityContext;
     private final AccessAnnotationChecker accessAnnotationChecker;
     private final String applicationVersion;
 
     private H1 viewTitle;
 
-    public MainLayout(UserRepository userRepository, SecurityContext securityContext,
-                      AccessAnnotationChecker accessAnnotationChecker,
+    public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker,
                       @Value("${spring.application.version}") String applicationVersion) {
-        this.userRepository = userRepository;
         this.securityContext = securityContext;
         this.accessAnnotationChecker = accessAnnotationChecker;
         this.applicationVersion = applicationVersion;
@@ -134,9 +130,7 @@ public class MainLayout extends AppLayout {
             userMenu.setThemeName("tertiary-inline contrast");
 
             MenuItem userName = userMenu.addItem("");
-            Div div = new Div();
-            userRepository.findByEmail(securityContext.getUsername())
-                    .ifPresent(user -> div.add(user.getFirstName() + " " + user.getLastName()));
+            Div div = new Div(securityContext.getName());
             div.add(new Icon("lumo", "dropdown"));
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER, LumoUtility.Gap.SMALL);
             userName.add(div);
