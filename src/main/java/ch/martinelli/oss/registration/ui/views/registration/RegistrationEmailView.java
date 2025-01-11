@@ -34,7 +34,7 @@ import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed("USER")
+@RolesAllowed({"ADMIN", "USER"})
 @Route("registration-emails")
 public class RegistrationEmailView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
