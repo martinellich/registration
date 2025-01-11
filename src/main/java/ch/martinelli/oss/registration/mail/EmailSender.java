@@ -39,7 +39,8 @@ public class EmailSender {
         try {
             SimpleMailMessage mailMessage = createMailMessage(registration, registrationEmail, replyTo);
             javaMailSender.send(mailMessage);
-            log.info("Email sent to %s with RegistrationEmailId %d".formatted(registrationEmail.getEmail(), registrationEmail.getRegistrationEmailId()));
+
+            log.info("Email sent to {} with RegistrationEmailId {}", registrationEmail.getEmail(), registrationEmail.getRegistrationEmailId());
         } catch (Exception e) {
             throw new MailSendException(
                     "Failed to send email with RegistrationEmailId %d".formatted(registrationEmail.getRegistrationEmailId()),

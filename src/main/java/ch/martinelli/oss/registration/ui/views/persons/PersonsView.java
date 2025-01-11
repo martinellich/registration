@@ -24,7 +24,7 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
-@RolesAllowed("USER")
+@RolesAllowed({"ADMIN", "USER"})
 @Route("persons/:" + EditView.ID + "?")
 public class PersonsView extends EditView<Person, PersonRecord, PersonRepository> implements BeforeEnterObserver, HasDynamicTitle {
 
