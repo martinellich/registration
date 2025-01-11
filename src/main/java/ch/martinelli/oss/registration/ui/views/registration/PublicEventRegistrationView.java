@@ -105,19 +105,16 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
             Span titleSpan = new Span(event.getTitle());
             titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-            titleSpan.setWidth("300px");
             Span remarksSpan = new Span(event.getDescription());
-            remarksSpan.setWidth("300px");
             Span dateSpan;
             if (event.getToDate() != null) {
                 dateSpan = new Span("%s - %s".formatted(DATE_FORMAT.format(event.getFromDate()), DATE_FORMAT.format(event.getToDate())));
             } else {
                 dateSpan = new Span(DATE_FORMAT.format(event.getFromDate()));
             }
-            dateSpan.setWidth("150px");
 
             FormLayout formLayout = new FormLayout();
-            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("600px", 3));
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("600px", 4));
             formLayout.add(titleSpan, remarksSpan, dateSpan, checkboxes);
             add(formLayout);
         }
