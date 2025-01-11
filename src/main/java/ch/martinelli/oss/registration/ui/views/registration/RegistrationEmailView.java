@@ -138,7 +138,7 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
         Condition condition = DSL.falseCondition();
 
         if (registrationSelect.getValue() != null) {
-            condition = REGISTRATION_EMAIL_VIEW.YEAR.eq(registrationSelect.getValue().getYear());
+            condition = REGISTRATION_EMAIL_VIEW.REGISTRATION_ID.eq(registrationSelect.getValue().getId());
         }
         return condition;
     }
