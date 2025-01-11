@@ -50,7 +50,7 @@ class RegistrationViewTest extends KaribuTest {
 
     @BeforeEach
     void login() {
-        login("simon@martinelli.ch");
+        login("simon@martinelli.ch", "APPROLE_ADMIN");
         UI.getCurrent().getPage().reload();
 
         UI.getCurrent().navigate(RegistrationView.class);

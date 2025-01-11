@@ -21,8 +21,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -36,13 +36,9 @@ public abstract class KaribuTest {
 
     @Autowired
     protected ApplicationContext ctx;
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @BeforeAll
     public static void discoverRoutes() {
-        System.setProperty("logging.level.org.jooq", "debug");
-
         Locale.setDefault(Locale.GERMAN);
         routes = new Routes().autoDiscoverViews("ch.martinelli.oss.registration.ui.views");
     }
@@ -60,25 +56,15 @@ public abstract class KaribuTest {
     }
 
     /**
-     * Login with UserDetailsService
-     *
-     * @param username Username
-     */
-    protected void login(String username) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        setAuthentication(userDetails);
-    }
-
-    /**
      * Login with fake-user
      *
      * @param username Username
      * @param roles    List of roles (without ROLE_ prefix)
      */
-    protected void login(String username, final List<String> roles) {
+    protected void login(String username, final String... roles) {
         // taken from https://www.baeldung.com/manually-set-user-authentication-spring-security
         // also see https://github.com/mvysny/karibu-testing/issues/47 for more details.
-        List<SimpleGrantedAuthority> authorities = roles.stream()
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
                 .map(it -> new SimpleGrantedAuthority(ROLE_PREFIX + it))
                 .toList();
 
