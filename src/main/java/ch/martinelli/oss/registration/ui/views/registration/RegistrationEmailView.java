@@ -96,6 +96,10 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
                         ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
                 .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
                 .setHeader(translate("sent")).setAutoWidth(true);
+        grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
+                        ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
+                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
+                .setHeader(translate("registered.at")).setAutoWidth(true);
         grid.addComponentColumn(registrationEmailViewRecord -> {
             RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
