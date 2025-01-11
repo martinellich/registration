@@ -138,7 +138,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 eventRegistration.setRegistered(entry.getKey().getValue());
                 eventRegistrations.add(eventRegistration);
             }
-            registrationService.register(eventRegistrations);
+            registrationService.register(registrationEmail.getId(), eventRegistrations);
 
             if (hasRegistrations()) {
                 registerButton.setText(translate("registration.updated"));

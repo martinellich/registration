@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,21 +67,29 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void register(Set<EventRegistrationRecord> eventRegistrations) {
-        for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-            Optional<EventRegistrationRecord> existingEventRegistration = dslContext
-                    .selectFrom(EVENT_REGISTRATION)
-                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
-                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
-                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
-                    .fetchOptional();
-            if (existingEventRegistration.isPresent()) {
-                EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
-                eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
-                eventRegistrationRecord.store();
-            } else {
-                dslContext.attach(eventRegistration);
-                eventRegistration.store();
+    public void register(Long registrationEmailId, Set<EventRegistrationRecord> eventRegistrations) {
+        if (!eventRegistrations.isEmpty()) {
+            registrationEmailRepository.findById(registrationEmailId)
+                    .ifPresent(registrationEmail -> {
+                        registrationEmail.setRegisteredAt(LocalDateTime.now());
+                        registrationEmail.store();
+                    });
+
+            for (EventRegistrationRecord eventRegistration : eventRegistrations) {
+                Optional<EventRegistrationRecord> existingEventRegistration = dslContext
+                        .selectFrom(EVENT_REGISTRATION)
+                        .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
+                        .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
+                        .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
+                        .fetchOptional();
+                if (existingEventRegistration.isPresent()) {
+                    EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
+                    eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
+                    eventRegistrationRecord.store();
+                } else {
+                    dslContext.attach(eventRegistration);
+                    eventRegistration.store();
+                }
             }
         }
     }
