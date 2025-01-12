@@ -135,7 +135,7 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
         grid.setItems(query -> registrationEmailRepository.findAllFromView(
                 getFilter(),
                 query.getOffset(), query.getLimit(),
-                VaadinJooqUtil.orderFields(REGISTRATION, query)
+                VaadinJooqUtil.orderFields(REGISTRATION_EMAIL_VIEW, query)
         ).stream());
 
         return grid;
