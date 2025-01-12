@@ -46,17 +46,21 @@ public class RegistrationService {
 
     @Transactional
     public boolean createMailing(RegistrationRecord registration) {
-        List<PersonRecord> persons = personRepository.findByRegistrationIdOrderByEmail(registration.getId());
-        RegistrationEmailRecord registrationEmail = null;
+        List<PersonRecord> persons = personRepository.findByRegistrationId(registration.getId());
         for (PersonRecord person : persons) {
-            if (!registrationEmailRepository.exitsByRegistrationIdAndEmail(registration.getId(), person.getEmail())) {
-                if (registrationEmail == null || !registrationEmail.getEmail().equals(person.getEmail())) {
-                    registrationEmail = dslContext.newRecord(REGISTRATION_EMAIL);
-                    registrationEmail.setEmail(person.getEmail());
-                    registrationEmail.setLink(UUID.randomUUID().toString().replace("-", ""));
-                    registrationEmail.setRegistrationId(registration.getId());
-                    registrationEmail.store();
-                }
+            Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository.findByRegistrationIdAndEmail(registration.getId(), person.getEmail());
+            RegistrationEmailRecord registrationEmail;
+            if (optionalRegistrationEmail.isEmpty()) {
+                registrationEmail = dslContext.newRecord(REGISTRATION_EMAIL);
+                registrationEmail.setEmail(person.getEmail());
+                registrationEmail.setLink(UUID.randomUUID().toString().replace("-", ""));
+                registrationEmail.setRegistrationId(registration.getId());
+                registrationEmail.store();
+            } else {
+                registrationEmail = optionalRegistrationEmail.get();
+            }
+            Optional<RegistrationEmailPersonRecord> optionalRegistrationEmailPerson = registrationEmailRepository.findByRegistrationEmailIdAndPersonId(registrationEmail.getId(), person.getId());
+            if (optionalRegistrationEmailPerson.isEmpty()) {
                 RegistrationEmailPersonRecord registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
                 registrationEmailPerson.setRegistrationEmailId(registrationEmail.getId());
                 registrationEmailPerson.setPersonId(person.getId());

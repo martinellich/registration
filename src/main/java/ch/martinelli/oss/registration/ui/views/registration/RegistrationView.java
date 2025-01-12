@@ -494,7 +494,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         } else {
             if (this.registration.getId() != null) {
                 loadEvents(this.registration.getYear());
-                personListBox.setValue(new HashSet<>(personRepository.findByRegistrationIdOrderByEmail(this.registration.getId())));
+                personListBox.setValue(new HashSet<>(personRepository.findByRegistrationId(this.registration.getId())));
                 eventListBox.setValue(eventRepository.findByRegistrationId(this.registration.getId()));
             }
 
