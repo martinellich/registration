@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.domain;
 import ch.martinelli.oss.jooqspring.JooqDAO;
 import ch.martinelli.oss.registration.db.tables.RegistrationEmail;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
+import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailPersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import org.jooq.Condition;
@@ -64,10 +65,19 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .fetchInto(PersonRecord.class);
     }
 
-    public boolean exitsByRegistrationIdAndEmail(Long id, String email) {
-        return dslContext.fetchExists(dslContext
+    public Optional<RegistrationEmailRecord> findByRegistrationIdAndEmail(Long id, String email) {
+        return dslContext
                 .selectFrom(REGISTRATION_EMAIL)
                 .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(id))
-                .and(REGISTRATION_EMAIL.EMAIL.eq(email)));
+                .and(REGISTRATION_EMAIL.EMAIL.eq(email))
+                .fetchOptional();
+    }
+
+    public Optional<RegistrationEmailPersonRecord> findByRegistrationEmailIdAndPersonId(Long registrationEmailId, Long personId) {
+        return dslContext
+                .selectFrom(REGISTRATION_EMAIL_PERSON)
+                .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.eq(registrationEmailId))
+                .and(REGISTRATION_EMAIL_PERSON.PERSON_ID.eq(personId))
+                .fetchOptional();
     }
 }

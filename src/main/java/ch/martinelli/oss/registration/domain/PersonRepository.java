@@ -17,7 +17,7 @@ public class PersonRepository extends JooqDAO<Person, PersonRecord, Long> {
         super(dslContext, Person.PERSON);
     }
 
-    public List<PersonRecord> findByRegistrationIdOrderByEmail(Long registrationId) {
+    public List<PersonRecord> findByRegistrationId(Long registrationId) {
         return dslContext
                 .select(REGISTRATION_PERSON.person().fields())
                 .from(REGISTRATION_PERSON)
