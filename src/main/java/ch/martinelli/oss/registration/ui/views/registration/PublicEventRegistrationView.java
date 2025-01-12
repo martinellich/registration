@@ -85,7 +85,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         List<EventRecord> events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
         for (EventRecord event : events) {
-            HorizontalLayout checkboxes = new HorizontalLayout();
+            FormLayout checkboxes = new FormLayout();
             for (PersonRecord person : persons) {
                 String text;
                 if (persons.size() > 1) {
@@ -114,8 +114,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             }
 
             FormLayout formLayout = new FormLayout();
-            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("600px", 4));
-            formLayout.add(titleSpan, remarksSpan, dateSpan, checkboxes);
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("1024px", 4));
+            formLayout.add(titleSpan, dateSpan, remarksSpan, checkboxes);
             add(formLayout);
         }
 
