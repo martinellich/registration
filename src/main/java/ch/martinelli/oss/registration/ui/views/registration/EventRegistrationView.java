@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.EventRegistrationRepository;
 import ch.martinelli.oss.registration.domain.EventRegistrationRow;
+import ch.martinelli.oss.registration.domain.EventRegistrationService;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -10,16 +11,19 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.StreamResource;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
@@ -29,6 +33,7 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 @Route("event-registrations")
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
+    private final transient EventRegistrationService eventRegistrationService;
     private final transient EventRegistrationRepository eventRegistrationRepository;
     private final transient RegistrationRepository registrationRepository;
 
@@ -36,9 +41,12 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     private Div gridContainer;
 
     private Long registrationId;
+    private Anchor excelExportAnchor;
 
-    public EventRegistrationView(EventRegistrationRepository eventRegistrationRepository,
+    public EventRegistrationView(EventRegistrationService eventRegistrationService,
+                                 EventRegistrationRepository eventRegistrationRepository,
                                  RegistrationRepository registrationRepository) {
+        this.eventRegistrationService = eventRegistrationService;
         this.eventRegistrationRepository = eventRegistrationRepository;
         this.registrationRepository = registrationRepository;
 
@@ -67,6 +75,9 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
             if (registrationSelect.getValue() != null) {
                 this.registrationId = registrationSelect.getValue().getId();
                 createGrid();
+                excelExportAnchor.setVisible(true);
+            } else {
+                excelExportAnchor.setVisible(false);
             }
         });
 
@@ -94,7 +105,6 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         grid.setEmptyStateText(translate("no.registrations"));
 
         if (!eventRegistrationMatrix.isEmpty()) {
-
             grid.addColumn(EventRegistrationRow::lastName)
                     .setHeader(translate("last.name"))
                     .setFooter(translate("total"))
@@ -133,6 +143,19 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         cancelButton.addClickListener(e -> UI.getCurrent().getPage().getHistory().back());
         buttonLayout.add(cancelButton);
+
+        excelExportAnchor = new Anchor(new StreamResource("event_registrations.xlsx",
+                () -> {
+                    byte[] excel = eventRegistrationService.createEventRegistrationExcel(registrationId);
+                    return new ByteArrayInputStream(excel);
+                }), "");
+        excelExportAnchor.setVisible(false);
+
+        Button excelExportButton = new Button(translate("export"), LineAwesomeIcon.FILE_EXCEL_SOLID.create());
+        excelExportButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        excelExportAnchor.add(excelExportButton);
+        buttonLayout.add(excelExportAnchor);
+
         add(buttonLayout);
     }
 
