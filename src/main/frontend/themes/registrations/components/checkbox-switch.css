@@ -1,3 +1,7 @@
+vaadin-checkbox[theme~="switch"] {
+    text-wrap: nowrap;
+}
+
 vaadin-checkbox[theme~="switch"]::part(checkbox) {
     width: var(--lumo-size-m);
     border-radius: 9999px;
