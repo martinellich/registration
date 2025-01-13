@@ -21,13 +21,11 @@ class EventRegistrationRepositoryTest {
     void getEventRegistrationMatrix() {
         List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(1L);
 
-        assertThat(eventRegistrationMatrix).isNotEmpty()
-                .first()
-                .satisfies(eventRegistrationRow -> {
-                    assertThat(eventRegistrationRow.lastName()).isEqualTo("Lane");
-                    assertThat(eventRegistrationRow.firstName()).isEqualTo("Eula");
-                    assertThat(eventRegistrationRow.registrations()).hasSize(2);
-                });
+        assertThat(eventRegistrationMatrix).isNotEmpty().first().satisfies(eventRegistrationRow -> {
+            assertThat(eventRegistrationRow.lastName()).isEqualTo("Lane");
+            assertThat(eventRegistrationRow.firstName()).isEqualTo("Eula");
+            assertThat(eventRegistrationRow.registrations()).hasSize(2);
+        });
     }
 
 }

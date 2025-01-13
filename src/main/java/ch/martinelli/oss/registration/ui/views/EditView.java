@@ -32,21 +32,27 @@ import java.util.function.Consumer;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>, D extends JooqDAO<T, R, Long>> extends Div
-        implements BeforeEnterObserver {
+public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>, D extends JooqDAO<T, R, Long>>
+        extends Div implements BeforeEnterObserver {
 
     public static final String ID = "id";
+
     public static final String ACTION_ICON = "action-icon";
 
     protected final transient D repository;
+
     private final T table;
 
     protected Grid<R> grid;
+
     protected final Button cancelButton = new Button(translate("cancel"));
+
     protected final Button saveButton = new Button(translate("save"));
 
     protected Binder<R> binder;
+
     protected R currentRecord;
+
     private FormLayout formLayout;
 
     protected transient Consumer<R> afterNewRecord;
@@ -73,11 +79,13 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
             Optional<R> personFromBackend = repository.findById(personId.get());
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
-            } else {
+            }
+            else {
                 grid.getDataProvider().refreshAll();
                 event.forwardTo(this.getClass());
             }
-        } else {
+        }
+        else {
             populateForm(null);
         }
     }
@@ -111,35 +119,31 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
         addIcon.addClassName(ACTION_ICON);
 
         grid.addComponentColumn(eventRecord -> {
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
-                    new ConfirmDialog(translate("delete.record"),
-                            translate("delete.record.question"),
-                            translate("yes"),
-                            ce -> {
-                                try {
-                                    repository.delete(eventRecord);
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+                    translate("delete.record.question"), translate("yes"), ce -> {
+                        try {
+                            repository.delete(eventRecord);
 
-                                    clearForm();
-                                    grid.getDataProvider().refreshAll();
+                            clearForm();
+                            grid.getDataProvider().refreshAll();
 
-                                    Notification.success(translate("delete.record.success"));
-                                } catch (DataIntegrityViolationException ex) {
-                                    Notification.error(translate("delete.record.error"));
-                                }
-                            },
-                            translate("cancel"),
-                            ce -> {
-                            }).open());
+                            Notification.success(translate("delete.record.success"));
+                        }
+                        catch (DataIntegrityViolationException ex) {
+                            Notification.error(translate("delete.record.error"));
+                        }
+                    }, translate("cancel"), ce -> {
+                    })
+                .open());
             deleteIcon.addClassName("delete-icon");
             return deleteIcon;
         }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setKey("action-column");
     }
 
     protected void setItems() {
-        grid.setItems(query -> repository.findAll(
-                        query.getOffset(), query.getLimit(),
-                        VaadinJooqUtil.orderFields(table, query))
-                .stream());
+        grid.setItems(query -> repository
+            .findAll(query.getOffset(), query.getLimit(), VaadinJooqUtil.orderFields(table, query))
+            .stream());
     }
 
     protected void addSelectionListener() {
@@ -148,7 +152,8 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
                 TableField<R, ?> idField = Objects.requireNonNull(table.getPrimaryKey()).getFields().getFirst();
                 Long id = (Long) event.getValue().get(idField);
                 UI.getCurrent().navigate(this.getClass(), new RouteParam(ID, id));
-            } else {
+            }
+            else {
                 clearForm();
                 UI.getCurrent().navigate(this.getClass());
             }
@@ -199,14 +204,16 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
 
                     if (isNew) {
                         grid.getDataProvider().refreshAll();
-                    } else {
+                    }
+                    else {
                         grid.getDataProvider().refreshItem(this.currentRecord);
                     }
 
                     Notification.success(translate("save.success"));
                     UI.getCurrent().navigate(this.getClass());
                 }
-            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
+            }
+            catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
                 Notification.error(translate("save.error"));
             }
         });
@@ -230,7 +237,8 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
             enableComponents(false);
             cancelButton.setEnabled(false);
             saveButton.setEnabled(false);
-        } else {
+        }
+        else {
             enableComponents(true);
             cancelButton.setEnabled(true);
             saveButton.setEnabled(true);
@@ -239,9 +247,9 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
 
     private void enableComponents(boolean enable) {
         formLayout.getChildren()
-                .filter(HasEnabled.class::isInstance)
-                .map(HasEnabled.class::cast)
-                .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
+            .filter(HasEnabled.class::isInstance)
+            .map(HasEnabled.class::cast)
+            .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
     }
 
 }

@@ -109,4 +109,5 @@ class PersonsViewTest extends KaribuTest {
 
         NotificationsKt.expectNotifications("Der Datensatz wird noch verwendet und kann nicht gelöscht werden");
     }
+
 }

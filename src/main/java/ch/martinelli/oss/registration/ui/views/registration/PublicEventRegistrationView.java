@@ -27,19 +27,22 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 public class PublicEventRegistrationView extends VerticalLayout implements HasUrlParameter<String>, HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
+
     private final transient RegistrationRepository registrationRepository;
+
     private final transient RegistrationService registrationService;
+
     private final transient EventRegistrationRepository eventRegistrationRepository;
 
     private final transient Map<Checkbox, EventWithPerson> checkboxMap = new HashMap<>();
+
     private final SecurityContext securityContext;
 
     private RegistrationEmailRecord registrationEmail;
 
     public PublicEventRegistrationView(RegistrationEmailRepository registrationEmailRepository,
-                                       RegistrationRepository registrationRepository, RegistrationService registrationService,
-                                       EventRegistrationRepository eventRegistrationRepository,
-                                       SecurityContext securityContext) {
+            RegistrationRepository registrationRepository, RegistrationService registrationService,
+            EventRegistrationRepository eventRegistrationRepository, SecurityContext securityContext) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
         this.registrationService = registrationService;
@@ -53,7 +56,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         if (optionalRegistrationEmail.isPresent()) {
             registrationEmail = optionalRegistrationEmail.get();
             showRegistrationForm();
-        } else {
+        }
+        else {
             event.rerouteToError(NotFoundException.class);
         }
     }
@@ -62,17 +66,20 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
     private void showRegistrationForm() {
         removeAll();
 
-        RegistrationRecord registration = registrationRepository.findById(registrationEmail.getRegistrationId()).orElseThrow();
+        RegistrationRecord registration = registrationRepository.findById(registrationEmail.getRegistrationId())
+            .orElseThrow();
 
         Image logo = new Image("/icons/icon.png", "Logo");
         logo.setHeight("40px");
-        HorizontalLayout header = new HorizontalLayout(logo, new H2("%s %d".formatted(registration.getTitle(), registration.getYear())));
+        HorizontalLayout header = new HorizontalLayout(logo,
+                new H2("%s %d".formatted(registration.getTitle(), registration.getYear())));
         add(header);
         if (registration.getRemarks() != null) {
             add(new Paragraph(registration.getRemarks()));
         }
 
-        List<PersonRecord> persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmail.getId());
+        List<PersonRecord> persons = registrationEmailRepository
+            .findPersonsByRegistrationEmailId(registrationEmail.getId());
 
         add(new H3(translate("registration.for")));
         UnorderedList unorderedList = new UnorderedList();
@@ -86,7 +93,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         add(new Hr());
         add(new H2(translate("events")));
 
-        List<EventRecord> events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
+        List<EventRecord> events = registrationRepository
+            .findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
         for (EventRecord event : events) {
             HorizontalLayout checkboxes = new HorizontalLayout();
@@ -94,7 +102,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 String text;
                 if (persons.size() > 1) {
                     text = person.getLastName() + " " + person.getFirstName();
-                } else {
+                }
+                else {
                     text = translate("participates");
                 }
                 Checkbox checkbox = new Checkbox(text);
@@ -104,7 +113,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 checkboxMap.put(checkbox, new EventWithPerson(event, person));
 
                 eventRegistrationRepository.findByEventIdAndPersonId(event.getId(), person.getId())
-                        .ifPresent(eventRegistration -> checkbox.setValue(eventRegistration.getRegistered()));
+                    .ifPresent(eventRegistration -> checkbox.setValue(eventRegistration.getRegistered()));
             }
 
             Span titleSpan = new Span(event.getTitle());
@@ -114,7 +123,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             dateSpan.setWidth("150px");
 
             FormLayout formLayout = new FormLayout();
-            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1), new FormLayout.ResponsiveStep("600px", 3));
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
+                    new FormLayout.ResponsiveStep("600px", 3));
             formLayout.add(titleSpan, dateSpan, checkboxes);
             add(formLayout);
         }
@@ -124,7 +134,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         Button registerButton = new Button();
         if (hasRegistrations()) {
             registerButton.setText(translate("update.registration"));
-        } else {
+        }
+        else {
             registerButton.setText(translate("register"));
         }
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -142,7 +153,8 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
             if (hasRegistrations()) {
                 registerButton.setText(translate("registration.updated"));
-            } else {
+            }
+            else {
                 registerButton.setText(translate("registration.success"));
             }
 
@@ -164,4 +176,5 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
     public record EventWithPerson(EventRecord event, PersonRecord person) {
     }
+
 }

@@ -2,7 +2,6 @@ package ch.martinelli.oss.registration.ui.components;
 
 import com.vaadin.flow.component.notification.NotificationVariant;
 
-
 public class Notification {
 
     private Notification() {
@@ -21,6 +20,8 @@ public class Notification {
     }
 
     private static com.vaadin.flow.component.notification.Notification createNotification(String message) {
-        return new com.vaadin.flow.component.notification.Notification(message, 3000, com.vaadin.flow.component.notification.Notification.Position.TOP_END);
+        return new com.vaadin.flow.component.notification.Notification(message, 3000,
+                com.vaadin.flow.component.notification.Notification.Position.TOP_END);
     }
+
 }

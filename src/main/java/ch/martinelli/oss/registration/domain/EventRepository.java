@@ -20,11 +20,10 @@ public class EventRepository extends JooqDAO<Event, EventRecord, Long> {
     }
 
     public Set<EventRecord> findByRegistrationId(Long registrationId) {
-        List<EventRecord> events = dslContext
-                .select(REGISTRATION_EVENT.event().fields())
-                .from(REGISTRATION_EVENT)
-                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
-                .fetchInto(EventRecord.class);
+        List<EventRecord> events = dslContext.select(REGISTRATION_EVENT.event().fields())
+            .from(REGISTRATION_EVENT)
+            .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
+            .fetchInto(EventRecord.class);
         return new HashSet<>(events);
     }
 

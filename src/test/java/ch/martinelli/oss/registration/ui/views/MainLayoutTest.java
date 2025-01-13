@@ -25,7 +25,8 @@ class MainLayoutTest extends KaribuTest {
     void logout_user() {
         MenuItem menuItem = _get(MenuItem.class, spec -> spec.withId("sign-out"));
         _click(menuItem);
-        // This is just necessary for the test to pass, as the logout doesn't redirect to the login page because of the FakeUI
+        // This is just necessary for the test to pass, as the logout doesn't redirect to
+        // the login page because of the FakeUI
         menuItem = _get(MenuItem.class, spec -> spec.withId("sign-out"));
         assertThat(menuItem).isNotNull();
     }
@@ -44,4 +45,5 @@ class MainLayoutTest extends KaribuTest {
         languageSelector = _get(Button.class, spec -> spec.withText("EN"));
         assertThat(languageSelector.getText()).isEqualTo("EN");
     }
+
 }

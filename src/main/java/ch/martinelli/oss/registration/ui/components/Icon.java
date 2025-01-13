@@ -10,8 +10,8 @@ public class Icon extends SvgIcon {
     public Icon(LineAwesomeIcon lineAwesomeIcon, ComponentEventListener<ClickEvent<SvgIcon>> listener) {
         super(lineAwesomeIcon.create().getSrc());
 
-        getElement()
-                .addEventListener("click", event -> listener.onComponentEvent(new ClickEvent<>(this)))
-                .addEventData("event.stopPropagation()");
+        getElement().addEventListener("click", event -> listener.onComponentEvent(new ClickEvent<>(this)))
+            .addEventData("event.stopPropagation()");
     }
+
 }

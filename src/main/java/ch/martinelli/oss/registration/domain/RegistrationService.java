@@ -22,15 +22,20 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.R
 public class RegistrationService {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
+
     private final RegistrationRepository registrationRepository;
+
     private final DSLContext dslContext;
+
     private final EmailSender emailSender;
+
     private final RegistrationEmailRepository registrationEmailRepository;
+
     private final PersonRepository personRepository;
 
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
-                               EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-                               PersonRepository personRepository) {
+            EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
+            PersonRepository personRepository) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
@@ -68,17 +73,17 @@ public class RegistrationService {
     @Transactional
     public void register(Set<EventRegistrationRecord> eventRegistrations) {
         for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-            Optional<EventRegistrationRecord> existingEventRegistration = dslContext
-                    .selectFrom(EVENT_REGISTRATION)
-                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
-                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
-                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
-                    .fetchOptional();
+            Optional<EventRegistrationRecord> existingEventRegistration = dslContext.selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
+                .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
+                .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
+                .fetchOptional();
             if (existingEventRegistration.isPresent()) {
                 EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
                 eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
                 eventRegistrationRecord.store();
-            } else {
+            }
+            else {
                 dslContext.attach(eventRegistration);
                 eventRegistration.store();
             }
@@ -87,13 +92,16 @@ public class RegistrationService {
 
     @Async
     public void sendMails(RegistrationRecord registration, String replayTo) {
-        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationIdAndSentAtIsNull(registration.getId());
+        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository
+            .findByRegistrationIdAndSentAtIsNull(registration.getId());
         for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
             try {
                 emailSender.sendEmail(registration, registrationEmail, replayTo);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 log.error("Error sending email", e);
             }
         }
     }
+
 }

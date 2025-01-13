@@ -40,13 +40,15 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 public class MainLayout extends AppLayout {
 
     private final transient SecurityContext securityContext;
+
     private final AccessAnnotationChecker accessAnnotationChecker;
+
     private final String applicationVersion;
 
     private H1 viewTitle;
 
     public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker,
-                      @Value("${spring.application.version}") String applicationVersion) {
+            @Value("${spring.application.version}") String applicationVersion) {
         this.securityContext = securityContext;
         this.accessAnnotationChecker = accessAnnotationChecker;
         this.applicationVersion = applicationVersion;
@@ -84,18 +86,22 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
-            SideNavItem invitationsNavItem = new SideNavItem(translate("invitations"), RegistrationView.class, LineAwesomeIcon.LIST_SOLID.create());
+            SideNavItem invitationsNavItem = new SideNavItem(translate("invitations"), RegistrationView.class,
+                    LineAwesomeIcon.LIST_SOLID.create());
             invitationsNavItem.setExpanded(true);
             nav.addItem(invitationsNavItem);
             if (accessAnnotationChecker.hasAccess(RegistrationEmailView.class)) {
-                invitationsNavItem.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class, LineAwesomeIcon.MAIL_BULK_SOLID.create()));
+                invitationsNavItem.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class,
+                        LineAwesomeIcon.MAIL_BULK_SOLID.create()));
             }
             if (accessAnnotationChecker.hasAccess(EventRegistrationView.class)) {
-                invitationsNavItem.addItem(new SideNavItem(translate("event.registrations"), EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
+                invitationsNavItem.addItem(new SideNavItem(translate("event.registrations"),
+                        EventRegistrationView.class, LineAwesomeIcon.TH_LIST_SOLID.create()));
             }
         }
         if (accessAnnotationChecker.hasAccess(EventsView.class)) {
-            nav.addItem(new SideNavItem(translate("events"), EventsView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));
+            nav.addItem(
+                    new SideNavItem(translate("events"), EventsView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));
         }
         if (accessAnnotationChecker.hasAccess(PersonsView.class)) {
             nav.addItem(new SideNavItem(translate("persons"), PersonsView.class, LineAwesomeIcon.USERS_SOLID.create()));
@@ -138,7 +144,8 @@ public class MainLayout extends AppLayout {
             signOut.setId("sign-out");
 
             layout.add(userMenu);
-        } else {
+        }
+        else {
             Anchor loginLink = new Anchor("login", "Sign in");
             layout.add(loginLink);
         }
@@ -155,4 +162,5 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         return MenuConfiguration.getPageHeader(getContent()).orElse("");
     }
+
 }

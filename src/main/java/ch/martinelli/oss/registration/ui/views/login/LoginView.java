@@ -43,4 +43,5 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
         setError(event.getLocation().getQueryParameters().getParameters().containsKey("error"));
     }
+
 }

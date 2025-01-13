@@ -57,31 +57,32 @@ public abstract class KaribuTest {
 
     /**
      * Login with fake-user
-     *
      * @param username Username
-     * @param roles    List of roles (without ROLE_ prefix)
+     * @param roles List of roles (without ROLE_ prefix)
      */
     protected void login(String username, final String... roles) {
-        // taken from https://www.baeldung.com/manually-set-user-authentication-spring-security
+        // taken from
+        // https://www.baeldung.com/manually-set-user-authentication-spring-security
         // also see https://github.com/mvysny/karibu-testing/issues/47 for more details.
         List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
-                .map(it -> new SimpleGrantedAuthority(ROLE_PREFIX + it))
-                .toList();
+            .map(it -> new SimpleGrantedAuthority(ROLE_PREFIX + it))
+            .toList();
 
         User user = new User(username, "pass", authorities);
         setAuthentication(user);
     }
 
     private static void setAuthentication(UserDetails userDetails) {
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(),
-                userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(userDetails,
+                userDetails.getPassword(), userDetails.getAuthorities());
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authReq);
 
         FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
         request.setUserPrincipalInt(authReq);
-        request.setUserInRole((principal, role) -> userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(role) || a.getAuthority().equals(ROLE_PREFIX + role)));
+        request.setUserInRole((principal, role) -> userDetails.getAuthorities()
+            .stream()
+            .anyMatch(a -> a.getAuthority().equals(role) || a.getAuthority().equals(ROLE_PREFIX + role)));
     }
 
     protected void logout() {
@@ -92,7 +93,8 @@ public abstract class KaribuTest {
                 request.setUserPrincipalInt(null);
                 request.setUserInRole((principal, role) -> false);
             }
-        } catch (IllegalStateException e) {
+        }
+        catch (IllegalStateException e) {
             // Ignored
         }
     }

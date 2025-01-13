@@ -25,20 +25,22 @@ import java.util.List;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({"APPROLE_USER", "APPROLE_ADMIN"})
+@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
 @Route("event-registrations")
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient EventRegistrationRepository eventRegistrationRepository;
+
     private final transient RegistrationRepository registrationRepository;
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
+
     private Div gridContainer;
 
     private Long registrationId;
 
     public EventRegistrationView(EventRegistrationRepository eventRegistrationRepository,
-                                 RegistrationRepository registrationRepository) {
+            RegistrationRepository registrationRepository) {
         this.eventRegistrationRepository = eventRegistrationRepository;
         this.registrationRepository = registrationRepository;
 
@@ -62,7 +64,8 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     public VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(),
+                List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> {
             if (registrationSelect.getValue() != null) {
                 this.registrationId = registrationSelect.getValue().getId();
@@ -86,7 +89,8 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     private void createGrid() {
         gridContainer.removeAll();
 
-        List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
+        List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository
+            .getEventRegistrationMatrix(registrationId);
 
         Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
         grid.setAllRowsVisible(true);
@@ -96,25 +100,21 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         if (!eventRegistrationMatrix.isEmpty()) {
 
             grid.addColumn(EventRegistrationRow::lastName)
-                    .setHeader(translate("last.name"))
-                    .setFooter(translate("total"))
-                    .setAutoWidth(true);
-            grid.addColumn(EventRegistrationRow::firstName)
-                    .setHeader(translate("first.name")).setAutoWidth(true);
+                .setHeader(translate("last.name"))
+                .setFooter(translate("total"))
+                .setAutoWidth(true);
+            grid.addColumn(EventRegistrationRow::firstName).setHeader(translate("first.name")).setAutoWidth(true);
 
             EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
-            firstRow.registrations().forEach((event, r) ->
-                    grid.addComponentColumn(registrationRow -> {
-                                boolean registered = registrationRow.registrations().get(event);
-                                if (registered) {
-                                    return LineAwesomeIcon.CHECK_SOLID.create();
-                                } else {
-                                    return new Span();
-                                }
-                            })
-                            .setHeader(event)
-                            .setFooter(calculateNumberOfRegistrations(event))
-                            .setWidth("20px"));
+            firstRow.registrations().forEach((event, r) -> grid.addComponentColumn(registrationRow -> {
+                boolean registered = registrationRow.registrations().get(event);
+                if (registered) {
+                    return LineAwesomeIcon.CHECK_SOLID.create();
+                }
+                else {
+                    return new Span();
+                }
+            }).setHeader(event).setFooter(calculateNumberOfRegistrations(event)).setWidth("20px"));
         }
 
         grid.setItems(eventRegistrationMatrix);
@@ -140,4 +140,5 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     public String getPageTitle() {
         return translate("event.registrations");
     }
+
 }
