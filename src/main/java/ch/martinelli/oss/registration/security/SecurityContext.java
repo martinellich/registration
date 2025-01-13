@@ -24,12 +24,15 @@ public final class SecurityContext {
     }
 
     public String getUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return switch (principal) {
-            case UserDetails userDetails -> userDetails.getUsername();
-            case DefaultOidcUser oidcUser -> oidcUser.getPreferredUsername();
-            case null, default -> ""; // Anonymous or no authentication.
-        };
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return switch (principal) {
+                case DefaultOidcUser oidcUser -> oidcUser.getPreferredUsername();
+                case null, default -> ""; // Anonymous or no authentication.
+            };
+        } else {
+            return "";
+        }
     }
 
     public String getName() {

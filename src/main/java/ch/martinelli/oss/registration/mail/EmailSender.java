@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.mail;
 
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,9 @@ public class EmailSender {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(sender);
         message.setTo(registrationEmail.getEmail());
-        message.setReplyTo(replyTo);
+        if (StringUtils.isNotBlank(replyTo)) {
+            message.setReplyTo(replyTo);
+        }
         message.setSubject("%s %d".formatted(registration.getTitle(), registration.getYear()));
         String url = "%s/public/%s".formatted(publicAddress, registrationEmail.getLink());
         message.setText(registration.getEmailText().formatted(url));

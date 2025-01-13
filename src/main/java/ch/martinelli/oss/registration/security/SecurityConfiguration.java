@@ -1,5 +1,6 @@
 package ch.martinelli.oss.registration.security;
 
+import ch.martinelli.oss.registration.ui.views.login.LoginView;
 import com.azure.spring.cloud.autoconfigure.implementation.aad.security.AadWebApplicationHttpSecurityConfigurer;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
@@ -26,6 +27,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                                 EndpointRequest.to(HealthEndpoint.class)).permitAll());
 
         super.configure(http);
+
+        setLoginView(http, LoginView.class);
     }
 
 }
