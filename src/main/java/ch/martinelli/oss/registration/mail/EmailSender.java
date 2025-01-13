@@ -22,12 +22,15 @@ public class EmailSender {
     private static final Logger log = LoggerFactory.getLogger(EmailSender.class);
 
     private final JavaMailSender javaMailSender;
+
     private final DSLContext dslContext;
+
     private final String publicAddress;
+
     private final String sender;
 
     public EmailSender(JavaMailSender javaMailSender, DSLContext dslContext,
-                       @Value("${public.address}") String publicAddress, @Value("${spring.mail.username}") String sender) {
+            @Value("${public.address}") String publicAddress, @Value("${spring.mail.username}") String sender) {
         this.javaMailSender = javaMailSender;
         this.dslContext = dslContext;
         this.publicAddress = publicAddress;
@@ -35,27 +38,31 @@ public class EmailSender {
     }
 
     @Transactional
-    public void sendEmail(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail, String replyTo) {
+    public void sendEmail(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail,
+            String replyTo) {
         try {
             SimpleMailMessage mailMessage = createMailMessage(registration, registrationEmail, replyTo);
             javaMailSender.send(mailMessage);
 
-            log.info("Email sent to {} with RegistrationEmailId {}", registrationEmail.getEmail(), registrationEmail.getRegistrationEmailId());
-        } catch (Exception e) {
-            throw new MailSendException(
-                    "Failed to send email with RegistrationEmailId %d".formatted(registrationEmail.getRegistrationEmailId()),
-                    e);
+            log.info("Email sent to {} with RegistrationEmailId {}", registrationEmail.getEmail(),
+                    registrationEmail.getRegistrationEmailId());
+        }
+        catch (Exception e) {
+            throw new MailSendException("Failed to send email with RegistrationEmailId %d"
+                .formatted(registrationEmail.getRegistrationEmailId()), e);
         }
 
         dslContext.update(REGISTRATION_EMAIL)
-                .set(REGISTRATION_EMAIL.SENT_AT, LocalDateTime.now())
-                .where(REGISTRATION_EMAIL.ID.eq(registrationEmail.getRegistrationEmailId()))
-                .execute();
+            .set(REGISTRATION_EMAIL.SENT_AT, LocalDateTime.now())
+            .where(REGISTRATION_EMAIL.ID.eq(registrationEmail.getRegistrationEmailId()))
+            .execute();
     }
 
-    private SimpleMailMessage createMailMessage(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail, String replyTo) {
+    private SimpleMailMessage createMailMessage(RegistrationRecord registration,
+            RegistrationEmailViewRecord registrationEmail, String replyTo) {
         if (registration.getEmailText() == null) {
-            throw new IllegalArgumentException("Email text is missing for registration %d".formatted(registration.getId()));
+            throw new IllegalArgumentException(
+                    "Email text is missing for registration %d".formatted(registration.getId()));
         }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(sender);
@@ -66,4 +73,5 @@ public class EmailSender {
         message.setText(registration.getEmailText().formatted(url));
         return message;
     }
+
 }

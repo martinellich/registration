@@ -16,9 +16,9 @@ public class UserRepository extends JooqDAO<SecurityUser, SecurityUserRecord, Lo
     }
 
     public Optional<SecurityUserRecord> findByEmail(String username) {
-        return dslContext
-                .selectFrom(SecurityUser.SECURITY_USER)
-                .where(SecurityUser.SECURITY_USER.EMAIL.eq(username))
-                .fetchOptional();
+        return dslContext.selectFrom(SecurityUser.SECURITY_USER)
+            .where(SecurityUser.SECURITY_USER.EMAIL.eq(username))
+            .fetchOptional();
     }
+
 }

@@ -31,7 +31,8 @@ public class EventRegistrationService {
             Sheet sheet = workbook.createSheet(translate("event.registrations"));
 
             // First, collect all possible registration types (Map keys)
-            Set<String> allRegistrationTypes = new TreeSet<>(); // Using TreeSet for sorted columns
+            Set<String> allRegistrationTypes = new TreeSet<>(); // Using TreeSet for
+                                                                // sorted columns
             for (EventRegistrationRow row : rows) {
                 allRegistrationTypes.addAll(row.registrations().keySet());
             }
@@ -73,8 +74,10 @@ public class EventRegistrationService {
                 workbook.write(fileOut);
                 return fileOut.toByteArray();
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

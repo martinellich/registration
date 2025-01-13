@@ -22,9 +22,10 @@ import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMA
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
-@RolesAllowed({"ADMIN", "USER"})
+@RolesAllowed({ "ADMIN", "USER" })
 @Route("events/:" + EditView.ID + "?")
-public class EventsView extends EditView<Event, EventRecord, EventRepository> implements BeforeEnterObserver, HasDynamicTitle {
+public class EventsView extends EditView<Event, EventRecord, EventRepository>
+        implements BeforeEnterObserver, HasDynamicTitle {
 
     public EventsView(EventRepository eventRepository) {
         super(eventRepository, EVENT, new Grid<>(EventRecord.class, false), new Binder<>(EventRecord.class));
@@ -40,47 +41,50 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository> im
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         Grid.Column<EventRecord> titleColumn = grid.addColumn(EventRecord::getTitle)
-                .setSortable(true).setSortProperty(EVENT.TITLE.getName())
-                .setHeader(translate("title")).setAutoWidth(true);
+            .setSortable(true)
+            .setSortProperty(EVENT.TITLE.getName())
+            .setHeader(translate("title"))
+            .setAutoWidth(true);
         grid.addColumn(EventRecord::getDescription)
-                .setSortable(true).setSortProperty(EVENT.DESCRIPTION.getName())
-                .setHeader(translate("description")).setAutoWidth(true);
+            .setSortable(true)
+            .setSortProperty(EVENT.DESCRIPTION.getName())
+            .setHeader(translate("description"))
+            .setAutoWidth(true);
         grid.addColumn(EventRecord::getLocation)
-                .setSortable(true).setSortProperty(EVENT.LOCATION.getName())
-                .setHeader(translate("location")).setAutoWidth(true);
+            .setSortable(true)
+            .setSortProperty(EVENT.LOCATION.getName())
+            .setHeader(translate("location"))
+            .setAutoWidth(true);
         grid.addColumn(eventRecord -> DATE_FORMAT.format(eventRecord.getFromDate()))
-                .setSortable(true).setSortProperty(EVENT.FROM_DATE.getName())
-                .setHeader(translate("from")).setAutoWidth(true);
-        grid.addColumn(eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
-                .setSortable(true).setSortProperty(EVENT.TO_DATE.getName())
-                .setHeader(translate("until")).setAutoWidth(true);
+            .setSortable(true)
+            .setSortProperty(EVENT.FROM_DATE.getName())
+            .setHeader(translate("from"))
+            .setAutoWidth(true);
+        grid.addColumn(
+                eventRecord -> eventRecord.getToDate() != null ? DATE_FORMAT.format(eventRecord.getToDate()) : "")
+            .setSortable(true)
+            .setSortProperty(EVENT.TO_DATE.getName())
+            .setHeader(translate("until"))
+            .setAutoWidth(true);
 
         grid.sort(GridSortOrder.asc(titleColumn).build());
     }
 
     protected void createComponents(FormLayout formLayout) {
         TextField titleTextField = new TextField(translate("title"));
-        binder.forField(titleTextField)
-                .asRequired()
-                .bind(EventRecord::getTitle, EventRecord::setTitle);
+        binder.forField(titleTextField).asRequired().bind(EventRecord::getTitle, EventRecord::setTitle);
         TextField locationTextField = new TextField(translate("location"));
 
-        binder.forField(locationTextField)
-                .asRequired()
-                .bind(EventRecord::getLocation, EventRecord::setLocation);
+        binder.forField(locationTextField).asRequired().bind(EventRecord::getLocation, EventRecord::setLocation);
         TextArea descriptionTextArea = new TextArea(translate("description"));
 
-        binder.forField(descriptionTextArea)
-                .bind(EventRecord::getDescription, EventRecord::setDescription);
+        binder.forField(descriptionTextArea).bind(EventRecord::getDescription, EventRecord::setDescription);
         I18nDatePicker fromDatePicker = new I18nDatePicker(translate("from"));
 
-        binder.forField(fromDatePicker)
-                .asRequired()
-                .bind(EventRecord::getFromDate, EventRecord::setFromDate);
+        binder.forField(fromDatePicker).asRequired().bind(EventRecord::getFromDate, EventRecord::setFromDate);
         I18nDatePicker toDatePicker = new I18nDatePicker(translate("until"));
 
-        binder.forField(toDatePicker)
-                .bind(EventRecord::getToDate, EventRecord::setToDate);
+        binder.forField(toDatePicker).bind(EventRecord::getToDate, EventRecord::setToDate);
 
         formLayout.add(titleTextField, locationTextField, descriptionTextArea, fromDatePicker, toDatePicker);
     }

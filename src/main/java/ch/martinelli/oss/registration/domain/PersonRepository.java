@@ -18,11 +18,10 @@ public class PersonRepository extends JooqDAO<Person, PersonRecord, Long> {
     }
 
     public List<PersonRecord> findByRegistrationId(Long registrationId) {
-        return dslContext
-                .select(REGISTRATION_PERSON.person().fields())
-                .from(REGISTRATION_PERSON)
-                .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registrationId))
-                .fetchInto(PersonRecord.class);
+        return dslContext.select(REGISTRATION_PERSON.person().fields())
+            .from(REGISTRATION_PERSON)
+            .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registrationId))
+            .fetchInto(PersonRecord.class);
     }
 
 }

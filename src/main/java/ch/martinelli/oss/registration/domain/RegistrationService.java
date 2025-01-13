@@ -23,15 +23,20 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.R
 public class RegistrationService {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
+
     private final RegistrationRepository registrationRepository;
+
     private final DSLContext dslContext;
+
     private final EmailSender emailSender;
+
     private final RegistrationEmailRepository registrationEmailRepository;
+
     private final PersonRepository personRepository;
 
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
-                               EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-                               PersonRepository personRepository) {
+            EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
+            PersonRepository personRepository) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
@@ -48,7 +53,8 @@ public class RegistrationService {
     public boolean createMailing(RegistrationRecord registration) {
         List<PersonRecord> persons = personRepository.findByRegistrationId(registration.getId());
         for (PersonRecord person : persons) {
-            Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository.findByRegistrationIdAndEmail(registration.getId(), person.getEmail());
+            Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository
+                .findByRegistrationIdAndEmail(registration.getId(), person.getEmail());
             RegistrationEmailRecord registrationEmail;
             if (optionalRegistrationEmail.isEmpty()) {
                 registrationEmail = dslContext.newRecord(REGISTRATION_EMAIL);
@@ -56,10 +62,12 @@ public class RegistrationService {
                 registrationEmail.setLink(UUID.randomUUID().toString().replace("-", ""));
                 registrationEmail.setRegistrationId(registration.getId());
                 registrationEmail.store();
-            } else {
+            }
+            else {
                 registrationEmail = optionalRegistrationEmail.get();
             }
-            Optional<RegistrationEmailPersonRecord> optionalRegistrationEmailPerson = registrationEmailRepository.findByRegistrationEmailIdAndPersonId(registrationEmail.getId(), person.getId());
+            Optional<RegistrationEmailPersonRecord> optionalRegistrationEmailPerson = registrationEmailRepository
+                .findByRegistrationEmailIdAndPersonId(registrationEmail.getId(), person.getId());
             if (optionalRegistrationEmailPerson.isEmpty()) {
                 RegistrationEmailPersonRecord registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
                 registrationEmailPerson.setRegistrationEmailId(registrationEmail.getId());
@@ -73,24 +81,23 @@ public class RegistrationService {
     @Transactional
     public void register(Long registrationEmailId, Set<EventRegistrationRecord> eventRegistrations) {
         if (!eventRegistrations.isEmpty()) {
-            registrationEmailRepository.findById(registrationEmailId)
-                    .ifPresent(registrationEmail -> {
-                        registrationEmail.setRegisteredAt(LocalDateTime.now());
-                        registrationEmail.store();
-                    });
+            registrationEmailRepository.findById(registrationEmailId).ifPresent(registrationEmail -> {
+                registrationEmail.setRegisteredAt(LocalDateTime.now());
+                registrationEmail.store();
+            });
 
             for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-                Optional<EventRegistrationRecord> existingEventRegistration = dslContext
-                        .selectFrom(EVENT_REGISTRATION)
-                        .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
-                        .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
-                        .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
-                        .fetchOptional();
+                Optional<EventRegistrationRecord> existingEventRegistration = dslContext.selectFrom(EVENT_REGISTRATION)
+                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
+                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
+                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
+                    .fetchOptional();
                 if (existingEventRegistration.isPresent()) {
                     EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
                     eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
                     eventRegistrationRecord.store();
-                } else {
+                }
+                else {
                     dslContext.attach(eventRegistration);
                     eventRegistration.store();
                 }
@@ -100,13 +107,16 @@ public class RegistrationService {
 
     @Async
     public void sendMails(RegistrationRecord registration, String replayTo) {
-        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository.findByRegistrationIdAndSentAtIsNull(registration.getId());
+        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository
+            .findByRegistrationIdAndSentAtIsNull(registration.getId());
         for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
             try {
                 emailSender.sendEmail(registration, registrationEmail, replayTo);
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 log.error("Error sending email", e);
             }
         }
     }
+
 }

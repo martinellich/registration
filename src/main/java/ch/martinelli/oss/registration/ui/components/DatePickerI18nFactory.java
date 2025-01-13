@@ -12,11 +12,13 @@ class DatePickerI18nFactory {
     }
 
     /**
-     * Creates and configures a {@link DatePicker.DatePickerI18n} instance based on the provided {@link Locale}.
-     * This method initializes localized month names, weekdays, short weekdays, and sets the first day of the week.
-     *
-     * @param locale the {@link Locale} to configure the date picker internationalization settings
-     * @return a {@link DatePicker.DatePickerI18n} instance with locale-specific configurations
+     * Creates and configures a {@link DatePicker.DatePickerI18n} instance based on the
+     * provided {@link Locale}. This method initializes localized month names, weekdays,
+     * short weekdays, and sets the first day of the week.
+     * @param locale the {@link Locale} to configure the date picker internationalization
+     * settings
+     * @return a {@link DatePicker.DatePickerI18n} instance with locale-specific
+     * configurations
      */
     static DatePicker.DatePickerI18n createDatePickerI18n(Locale locale) {
         DateFormatSymbols symbols = new DateFormatSymbols(locale);

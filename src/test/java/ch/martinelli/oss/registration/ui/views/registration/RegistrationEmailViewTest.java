@@ -19,6 +19,7 @@ import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RegistrationEmailViewTest extends KaribuTest {
+
     @BeforeEach
     void login() {
         login("simon@martinelli.ch");
@@ -75,14 +76,15 @@ class RegistrationEmailViewTest extends KaribuTest {
 
         // Delete new item
         GridKt._getCellComponent(grid, 1, "action-column")
-                .getChildren()
-                .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
-                .findFirst()
-                .map(Icon.class::cast)
-                .ifPresent(LocatorJ::_click);
+            .getChildren()
+            .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
+            .findFirst()
+            .map(Icon.class::cast)
+            .ifPresent(LocatorJ::_click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
         NotificationsKt.expectNotifications("Der Datensatz wurde gelöscht");
     }
+
 }

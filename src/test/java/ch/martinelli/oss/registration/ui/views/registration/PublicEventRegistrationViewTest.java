@@ -21,8 +21,9 @@ class PublicEventRegistrationViewTest extends KaribuTest {
     void navigation_without_parameter() {
         UI ui = UI.getCurrent();
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> ui.navigate(PublicEventRegistrationView.class))
-                .withMessage("Navigation target 'ch.martinelli.oss.registration.ui.views.registration.PublicEventRegistrationView' requires a parameter.");
+            .isThrownBy(() -> ui.navigate(PublicEventRegistrationView.class))
+            .withMessage(
+                    "Navigation target 'ch.martinelli.oss.registration.ui.views.registration.PublicEventRegistrationView' requires a parameter.");
     }
 
     @Test
@@ -40,4 +41,5 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         Button button = _get(Button.class);
         assertThat(button.getText()).isEqualTo("Die Anmeldung wurde aktualisiert");
     }
+
 }
