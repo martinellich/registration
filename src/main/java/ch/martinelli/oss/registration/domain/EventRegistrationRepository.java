@@ -21,6 +21,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTR
 import static org.jooq.impl.DSL.boolOr;
 import static org.jooq.impl.DSL.when;
 
+// @formatter:off
 @Repository
 public class EventRegistrationRepository extends JooqDAO<EventRegistration, EventRegistrationRecord, Long> {
 
@@ -29,19 +30,21 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
     }
 
     public Optional<EventRegistrationRecord> findByEventIdAndPersonId(Long eventId, Long personId) {
-        return dslContext.selectFrom(EVENT_REGISTRATION)
-            .where(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
-            .fetchOptional();
+        return dslContext
+                .selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
+                .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
+                .fetchOptional();
     }
 
     public List<EventRegistrationRow> getEventRegistrationMatrix(Long registrationId) {
         // First get all events ordered by date and title
-        List<EventRecord> events = dslContext.select(REGISTRATION_EVENT.event().fields())
-            .from(REGISTRATION_EVENT)
-            .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
-            .orderBy(REGISTRATION_EVENT.event().FROM_DATE, REGISTRATION_EVENT.event().TITLE)
-            .fetchInto(EventRecord.class);
+        List<EventRecord> events = dslContext
+                .select(REGISTRATION_EVENT.event().fields())
+                .from(REGISTRATION_EVENT)
+                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
+                .orderBy(REGISTRATION_EVENT.event().FROM_DATE, REGISTRATION_EVENT.event().TITLE)
+                .fetchInto(EventRecord.class);
 
         // Create select fields starting with person info
         List<SelectField<?>> fields = new ArrayList<>();
@@ -57,23 +60,30 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
             fields.add(registrationField);
         }
 
-        return dslContext.select(fields)
-            .from(PERSON)
-            .join(EVENT_REGISTRATION)
-            .on(EVENT_REGISTRATION.PERSON_ID.eq(PERSON.ID))
-            .join(EVENT)
-            .on(EVENT.ID.eq(EVENT_REGISTRATION.EVENT_ID))
-            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
-            .groupBy(PERSON.ID, PERSON.LAST_NAME, PERSON.FIRST_NAME)
-            .orderBy(PERSON.LAST_NAME, PERSON.FIRST_NAME)
-            .fetch()
-            .map(EventRegistrationRow::fromRecord);
+        return dslContext
+                .select(fields)
+                .from(PERSON)
+                .join(EVENT_REGISTRATION).on(EVENT_REGISTRATION.PERSON_ID.eq(PERSON.ID))
+                .join(EVENT).on(EVENT.ID.eq(EVENT_REGISTRATION.EVENT_ID))
+                .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+                .groupBy(PERSON.ID, PERSON.LAST_NAME, PERSON.FIRST_NAME)
+                .orderBy(PERSON.LAST_NAME, PERSON.FIRST_NAME)
+                .fetch()
+                .map(EventRegistrationRow::fromRecord);
     }
 
     public int countRegistrationsByEvent(Long registrationId, String event) {
-        return dslContext.fetchCount(dslContext.selectFrom(EVENT_REGISTRATION)
-            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
-            .and(EVENT_REGISTRATION.event().TITLE.eq(event)));
+        return dslContext
+                .fetchCount(dslContext.selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+                .and(EVENT_REGISTRATION.event().TITLE.eq(event)));
     }
 
-}
+public Optional<EventRegistrationRecord> findByRegistrationIdAndEventIdAndPersonId(Long registrationId, Long eventId, Long personId) {
+    return dslContext
+            .selectFrom(EVENT_REGISTRATION)
+            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+            .and(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
+            .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
+            .fetchOptional();
+}}

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
 
+// @formatter:off
 @Repository
 public class EventRepository extends JooqDAO<Event, EventRecord, Long> {
 
@@ -20,10 +21,11 @@ public class EventRepository extends JooqDAO<Event, EventRecord, Long> {
     }
 
     public Set<EventRecord> findByRegistrationId(Long registrationId) {
-        List<EventRecord> events = dslContext.select(REGISTRATION_EVENT.event().fields())
-            .from(REGISTRATION_EVENT)
-            .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
-            .fetchInto(EventRecord.class);
+        List<EventRecord> events = dslContext
+                .select(REGISTRATION_EVENT.event().fields())
+                .from(REGISTRATION_EVENT)
+                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
+                .fetchInto(EventRecord.class);
         return new HashSet<>(events);
     }
 

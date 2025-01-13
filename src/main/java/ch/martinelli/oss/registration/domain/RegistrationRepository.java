@@ -20,6 +20,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTR
 import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
+// @formatter:off
 @Repository
 public class RegistrationRepository extends JooqDAO<Registration, RegistrationRecord, Long> {
 
@@ -29,12 +30,13 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
 
     public List<RegistrationViewRecord> findAllFromView(Condition condition, int offset, int limit,
             List<OrderField<?>> orderBy) {
-        return dslContext.selectFrom(REGISTRATION_VIEW)
-            .where(condition)
-            .orderBy(orderBy)
-            .offset(offset)
-            .limit(limit)
-            .fetch();
+        return dslContext
+                .selectFrom(REGISTRATION_VIEW)
+                .where(condition)
+                .orderBy(orderBy)
+                .offset(offset)
+                .limit(limit)
+                .fetch();
     }
 
     public int countFromView(Condition condition) {
@@ -42,15 +44,19 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
     }
 
     public Optional<RegistrationViewRecord> findByIdFromView(Long registrationId) {
-        return dslContext.selectFrom(REGISTRATION_VIEW).where(REGISTRATION_VIEW.ID.eq(registrationId)).fetchOptional();
+        return dslContext
+                .selectFrom(REGISTRATION_VIEW)
+                .where(REGISTRATION_VIEW.ID.eq(registrationId))
+                .fetchOptional();
     }
 
     public List<EventRecord> findAllEventsByRegistrationId(Long registrationId) {
-        return dslContext.select(REGISTRATION_EVENT.event().fields())
-            .from(REGISTRATION_EVENT)
-            .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
-            .orderBy(REGISTRATION_EVENT.event().FROM_DATE)
-            .fetchInto(EventRecord.class);
+        return dslContext
+                .select(REGISTRATION_EVENT.event().fields())
+                .from(REGISTRATION_EVENT)
+                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
+                .orderBy(REGISTRATION_EVENT.event().FROM_DATE)
+                .fetchInto(EventRecord.class);
     }
 
     @Transactional
@@ -59,23 +65,25 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
             Set<PersonRecord> persons) {
         save(registration);
 
-        dslContext.deleteFrom(REGISTRATION_EVENT)
-            .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registration.getId()))
-            .execute();
+        dslContext
+                .deleteFrom(REGISTRATION_EVENT)
+                .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registration.getId()))
+                .execute();
 
         events.forEach(event -> dslContext
-            .insertInto(REGISTRATION_EVENT, REGISTRATION_EVENT.REGISTRATION_ID, REGISTRATION_EVENT.EVENT_ID)
-            .values(registration.getId(), event.getId())
-            .execute());
+                .insertInto(REGISTRATION_EVENT, REGISTRATION_EVENT.REGISTRATION_ID, REGISTRATION_EVENT.EVENT_ID)
+                .values(registration.getId(), event.getId())
+                .execute());
 
-        dslContext.deleteFrom(REGISTRATION_PERSON)
-            .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registration.getId()))
-            .execute();
+        dslContext
+                .deleteFrom(REGISTRATION_PERSON)
+                .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registration.getId()))
+                .execute();
 
         persons.forEach(person -> dslContext
-            .insertInto(REGISTRATION_PERSON, REGISTRATION_PERSON.REGISTRATION_ID, REGISTRATION_PERSON.PERSON_ID)
-            .values(registration.getId(), person.getId())
-            .execute());
+                .insertInto(REGISTRATION_PERSON, REGISTRATION_PERSON.REGISTRATION_ID, REGISTRATION_PERSON.PERSON_ID)
+                .values(registration.getId(), person.getId())
+                .execute());
     }
 
 }

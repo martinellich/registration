@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 
@@ -34,14 +33,17 @@ public class RegistrationService {
 
     private final PersonRepository personRepository;
 
+    private final EventRegistrationRepository eventRegistrationRepository;
+
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
             EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-            PersonRepository personRepository) {
+            PersonRepository personRepository, EventRegistrationRepository eventRegistrationRepository) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
         this.registrationEmailRepository = registrationEmailRepository;
         this.personRepository = personRepository;
+        this.eventRegistrationRepository = eventRegistrationRepository;
     }
 
     @Transactional
@@ -87,11 +89,9 @@ public class RegistrationService {
             });
 
             for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-                Optional<EventRegistrationRecord> existingEventRegistration = dslContext.selectFrom(EVENT_REGISTRATION)
-                    .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(eventRegistration.getRegistrationId()))
-                    .and(EVENT_REGISTRATION.EVENT_ID.eq(eventRegistration.getEventId()))
-                    .and(EVENT_REGISTRATION.PERSON_ID.eq(eventRegistration.getPersonId()))
-                    .fetchOptional();
+                Optional<EventRegistrationRecord> existingEventRegistration = eventRegistrationRepository
+                    .findByRegistrationIdAndEventIdAndPersonId(eventRegistration.getRegistrationId(),
+                            eventRegistration.getEventId(), eventRegistration.getPersonId());
                 if (existingEventRegistration.isPresent()) {
                     EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
                     eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());

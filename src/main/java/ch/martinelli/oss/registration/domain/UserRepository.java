@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// @formatter:off
 @Repository
 public class UserRepository extends JooqDAO<SecurityUser, SecurityUserRecord, Long> {
 
@@ -16,9 +17,10 @@ public class UserRepository extends JooqDAO<SecurityUser, SecurityUserRecord, Lo
     }
 
     public Optional<SecurityUserRecord> findByEmail(String username) {
-        return dslContext.selectFrom(SecurityUser.SECURITY_USER)
-            .where(SecurityUser.SECURITY_USER.EMAIL.eq(username))
-            .fetchOptional();
+        return dslContext
+                .selectFrom(SecurityUser.SECURITY_USER)
+                .where(SecurityUser.SECURITY_USER.EMAIL.eq(username))
+                .fetchOptional();
     }
 
 }
