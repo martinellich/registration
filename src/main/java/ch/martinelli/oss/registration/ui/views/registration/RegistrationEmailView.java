@@ -105,7 +105,6 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
             .setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
             .setHeader(translate("sent"))
             .setAutoWidth(true);
-        ;
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getRegisteredAt() != null
                 ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getRegisteredAt()) : "")
             .setSortable(true)

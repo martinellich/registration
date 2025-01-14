@@ -24,6 +24,7 @@ public class EventRegistrationService {
         this.eventRegistrationRepository = eventRegistrationRepository;
     }
 
+    @SuppressWarnings("java:S112")
     public byte[] createEventRegistrationExcel(Long registrationId) {
         List<EventRegistrationRow> rows = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 

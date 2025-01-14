@@ -79,11 +79,13 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
                 .and(EVENT_REGISTRATION.event().TITLE.eq(event)));
     }
 
-public Optional<EventRegistrationRecord> findByRegistrationIdAndEventIdAndPersonId(Long registrationId, Long eventId, Long personId) {
-    return dslContext
-            .selectFrom(EVENT_REGISTRATION)
-            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
-            .and(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
-            .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
-            .fetchOptional();
-}}
+    public Optional<EventRegistrationRecord> findByRegistrationIdAndEventIdAndPersonId(Long registrationId, Long eventId, Long personId) {
+        return dslContext
+                .selectFrom(EVENT_REGISTRATION)
+                .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+                .and(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
+                .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
+                .fetchOptional();
+    }
+
+}
