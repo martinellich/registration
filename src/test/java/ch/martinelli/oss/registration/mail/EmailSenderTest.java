@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.mail;
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
+import ch.martinelli.oss.registration.domain.EmailSender;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import org.junit.jupiter.api.Test;

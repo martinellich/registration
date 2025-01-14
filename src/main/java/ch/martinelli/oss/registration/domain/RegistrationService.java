@@ -1,7 +1,6 @@
 package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.db.tables.records.*;
-import ch.martinelli.oss.registration.mail.EmailSender;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package ch.martinelli.oss.registration.mail;
+package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
