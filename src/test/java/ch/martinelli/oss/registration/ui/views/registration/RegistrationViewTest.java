@@ -74,10 +74,12 @@ class RegistrationViewTest extends KaribuTest {
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
 
         @SuppressWarnings("unchecked")
-        MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class, spec -> spec.withId("event-list-box"));
+        MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class,
+                spec -> spec.withId("event-list-box"));
         eventListBox.setValue(Set.of(eventListBox.getListDataView().getItem(0)));
         @SuppressWarnings("unchecked")
-        MultiSelectListBox<PersonRecord> personListBox = _get(MultiSelectListBox.class, spec -> spec.withId("person-list-box"));
+        MultiSelectListBox<PersonRecord> personListBox = _get(MultiSelectListBox.class,
+                spec -> spec.withId("person-list-box"));
         personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
 
         _click(_get(Button.class, spec -> spec.withText("Speichern")));
@@ -110,21 +112,18 @@ class RegistrationViewTest extends KaribuTest {
 
         await().atLeast(2, TimeUnit.SECONDS);
 
-        assertThat(mailcatcherContainer.getAllEmails())
-                .hasSize(1)
-                .first()
-                .satisfies(mail -> {
-                    assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
-                    assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
-                });
+        assertThat(mailcatcherContainer.getAllEmails()).hasSize(1).first().satisfies(mail -> {
+            assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
+            assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
+        });
 
         // Delete new item
         GridKt._getCellComponent(grid, 2, "action-column")
-                .getChildren()
-                .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
-                .findFirst()
-                .map(Icon.class::cast)
-                .ifPresent(LocatorJ::_click);
+            .getChildren()
+            .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
+            .findFirst()
+            .map(Icon.class::cast)
+            .ifPresent(LocatorJ::_click);
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
@@ -139,4 +138,5 @@ class RegistrationViewTest extends KaribuTest {
         // Form must be empty
         assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
     }
+
 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 
+// @formatter:off
 @Repository
 public class PersonRepository extends JooqDAO<Person, PersonRecord, Long> {
 

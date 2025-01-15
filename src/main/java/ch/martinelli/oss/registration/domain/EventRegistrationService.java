@@ -24,19 +24,21 @@ public class EventRegistrationService {
         this.eventRegistrationRepository = eventRegistrationRepository;
     }
 
+    @SuppressWarnings("java:S112")
     public byte[] createEventRegistrationExcel(Long registrationId) {
         List<EventRegistrationRow> rows = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(translate("event.registrations"));
 
-            // First, collect all possible registration types (Map keys)
-            Set<String> allRegistrationTypes = new TreeSet<>(); // Using TreeSet for sorted columns
+            // First, collect all possible registration types (Map keys).
+            // Using TreeSet for sorted columns
+            Set<String> allRegistrationTypes = new TreeSet<>();
+
             for (EventRegistrationRow row : rows) {
                 allRegistrationTypes.addAll(row.registrations().keySet());
             }
 
-            // Create header row
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue(translate("last.name"));
             headerRow.createCell(1).setCellValue(translate("first.name"));
@@ -45,7 +47,6 @@ public class EventRegistrationService {
                 headerRow.createCell(columnIndex++).setCellValue(registrationType);
             }
 
-            // Fill data rows
             int rowIndex = 1;
             for (EventRegistrationRow row : rows) {
                 Row dataRow = sheet.createRow(rowIndex++);
@@ -63,18 +64,18 @@ public class EventRegistrationService {
                 }
             }
 
-            // Auto-size columns
             for (int i = 0; i < allRegistrationTypes.size() + 2; i++) {
                 sheet.autoSizeColumn(i);
             }
 
-            // Write the workbook to file
             try (ByteArrayOutputStream fileOut = new ByteArrayOutputStream()) {
                 workbook.write(fileOut);
                 return fileOut.toByteArray();
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

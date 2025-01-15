@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// @formatter:off
 @Repository
 public class UserRepository extends JooqDAO<SecurityUser, SecurityUserRecord, Long> {
 
@@ -21,4 +22,5 @@ public class UserRepository extends JooqDAO<SecurityUser, SecurityUserRecord, Lo
                 .where(SecurityUser.SECURITY_USER.EMAIL.eq(username))
                 .fetchOptional();
     }
+
 }

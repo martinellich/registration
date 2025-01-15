@@ -18,6 +18,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTR
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 
+// @formatter:off
 @Repository
 public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, RegistrationEmailRecord, Long> {
 
@@ -25,7 +26,8 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
         super(dslContext, REGISTRATION_EMAIL);
     }
 
-    public List<RegistrationEmailViewRecord> findAllFromView(Condition filter, int offset, int limit, List<OrderField<?>> orderFields) {
+    public List<RegistrationEmailViewRecord> findAllFromView(Condition filter, int offset, int limit,
+            List<OrderField<?>> orderFields) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL_VIEW)
                 .where(filter)
@@ -73,11 +75,13 @@ public class RegistrationEmailRepository extends JooqDAO<RegistrationEmail, Regi
                 .fetchOptional();
     }
 
-    public Optional<RegistrationEmailPersonRecord> findByRegistrationEmailIdAndPersonId(Long registrationEmailId, Long personId) {
+    public Optional<RegistrationEmailPersonRecord> findByRegistrationEmailIdAndPersonId(Long registrationEmailId,
+            Long personId) {
         return dslContext
                 .selectFrom(REGISTRATION_EMAIL_PERSON)
                 .where(REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID.eq(registrationEmailId))
                 .and(REGISTRATION_EMAIL_PERSON.PERSON_ID.eq(personId))
                 .fetchOptional();
     }
+
 }

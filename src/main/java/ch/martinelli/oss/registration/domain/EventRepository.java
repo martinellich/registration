@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
 
+// @formatter:off
 @Repository
 public class EventRepository extends JooqDAO<Event, EventRecord, Long> {
 

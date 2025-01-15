@@ -21,6 +21,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTR
 import static org.jooq.impl.DSL.boolOr;
 import static org.jooq.impl.DSL.when;
 
+// @formatter:off
 @Repository
 public class EventRegistrationRepository extends JooqDAO<EventRegistration, EventRegistrationRecord, Long> {
 
@@ -53,8 +54,7 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
         // Add a field for each event
         for (EventRecord event : events) {
             Field<Boolean> registrationField = boolOr(
-                    when(EVENT.TITLE.eq(event.getTitle()), EVENT_REGISTRATION.REGISTERED)
-                            .otherwise(false)
+                    when(EVENT.TITLE.eq(event.getTitle()), EVENT_REGISTRATION.REGISTERED).otherwise(false)
             ).as(DSL.name(event.getTitle()));
 
             fields.add(registrationField);
@@ -73,9 +73,20 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
     }
 
     public int countRegistrationsByEvent(Long registrationId, String event) {
-        return dslContext.fetchCount(dslContext
+        return dslContext
+                .fetchCount(dslContext.selectFrom(EVENT_REGISTRATION)
+                        .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
+                        .and(EVENT_REGISTRATION.event().TITLE.eq(event))
+                        .and(EVENT_REGISTRATION.REGISTERED.isTrue()));
+    }
+
+    public Optional<EventRegistrationRecord> findByRegistrationIdAndEventIdAndPersonId(Long registrationId, Long eventId, Long personId) {
+        return dslContext
                 .selectFrom(EVENT_REGISTRATION)
                 .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(registrationId))
-                .and(EVENT_REGISTRATION.event().TITLE.eq(event)));
+                .and(EVENT_REGISTRATION.EVENT_ID.eq(eventId))
+                .and(EVENT_REGISTRATION.PERSON_ID.eq(personId))
+                .fetchOptional();
     }
+
 }

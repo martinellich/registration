@@ -60,36 +60,51 @@ import static ch.martinelli.oss.registration.ui.views.EditView.ACTION_ICON;
 import static ch.martinelli.oss.registration.ui.views.registration.RegistrationView.ID;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({"ADMIN", "USER"})
+@RolesAllowed({ "ADMIN", "USER" })
 @RouteAlias("")
 @Route("registrations/:" + ID + "?")
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
     public static final String ID = "id";
+
     private static final String CANCEL = "cancel";
+
     private static final String CREATE_MAILING = "create.mailing";
 
     private final transient RegistrationService registrationService;
+
     private final transient RegistrationRepository registrationRepository;
+
     private final transient EventRepository eventRepository;
+
     private final transient PersonRepository personRepository;
+
     private final transient SecurityContext securityContext;
 
     private final Grid<RegistrationViewRecord> grid = new Grid<>(RegistrationViewRecord.class, false);
+
     private MultiSelectListBox<EventRecord> eventListBox;
+
     private MultiSelectListBox<PersonRecord> personListBox;
+
     private final Button saveButton = new Button(translate("save"));
+
     private final Button cancelButton = new Button(translate(CANCEL));
+
     private final Button createMailingButton = new Button(translate(CREATE_MAILING));
+
     private final Button sendEmailsButton = new Button(translate("send.emails"));
+
     private FormLayout formLayout;
 
     private final Binder<RegistrationRecord> binder = new Binder<>(RegistrationRecord.class);
+
     private RegistrationRecord registration;
+
     private boolean dirty;
 
     public RegistrationView(RegistrationService registrationService, RegistrationRepository registrationRepository,
-                            EventRepository eventRepository, PersonRepository personRepository, SecurityContext securityContext) {
+            EventRepository eventRepository, PersonRepository personRepository, SecurityContext securityContext) {
         this.registrationService = registrationService;
         this.registrationRepository = registrationRepository;
         this.eventRepository = eventRepository;
@@ -119,12 +134,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                     grid.select(registrationViewRecord);
                     setButtonState(registrationViewRecord);
                 });
-            } else {
-                // when a row is selected but the data is no longer available, refresh grid
+            }
+            else {
+                // when a row is selected but the data is no longer available, refresh
+                // grid
                 loadData();
                 event.forwardTo(RegistrationView.class);
             }
-        } else {
+        }
+        else {
             setButtonState(null);
             clearForm();
         }
@@ -144,21 +162,23 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         Grid.Column<RegistrationViewRecord> titleColumn = grid.addColumn(RegistrationViewRecord::getTitle)
-                .setSortable(true).setSortProperty(REGISTRATION.TITLE.getName())
-                .setHeader(translate("title"));
+            .setSortable(true)
+            .setSortProperty(REGISTRATION.TITLE.getName())
+            .setHeader(translate("title"));
         Grid.Column<RegistrationViewRecord> yearColumn = grid.addColumn(RegistrationViewRecord::getYear)
-                .setSortable(true).setSortProperty(REGISTRATION.YEAR.getName())
-                .setHeader(translate("year"));
+            .setSortable(true)
+            .setSortProperty(REGISTRATION.YEAR.getName())
+            .setHeader(translate("year"));
         grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenFrom()))
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_FROM.getName())
-                .setHeader(translate("open.from"));
+            .setSortable(true)
+            .setSortProperty(REGISTRATION.OPEN_FROM.getName())
+            .setHeader(translate("open.from"));
         grid.addColumn(registrationViewRecord -> DATE_FORMAT.format(registrationViewRecord.getOpenUntil()))
-                .setSortable(true).setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
-                .setHeader(translate("open.until"));
-        grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount()))
-                .setHeader(translate("mailing.created"));
-        grid.addComponentColumn(r -> createIcon(r.getEmailSentCount()))
-                .setHeader(translate("emails.sent"));
+            .setSortable(true)
+            .setSortProperty(REGISTRATION.OPEN_UNTIL.getName())
+            .setHeader(translate("open.until"));
+        grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount())).setHeader(translate("mailing.created"));
+        grid.addComponentColumn(r -> createIcon(r.getEmailSentCount())).setHeader(translate("emails.sent"));
 
         Icon addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             loadData();
@@ -182,28 +202,29 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             showMailingsIcon.addClassNames(ACTION_ICON);
             showMailingsIcon.setTooltipText(translate("show.mailings"));
 
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e ->
-                    new ConfirmDialog(translate("delete.record"),
-                            translate("delete.record.question"),
-                            translate("yes"),
-                            ce -> {
-                                registrationRepository.deleteById(registrationViewRecord.getId());
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+                    translate("delete.record.question"), translate("yes"), ce -> {
+                        registrationRepository.deleteById(registrationViewRecord.getId());
 
-                                clearForm();
-                                loadData();
+                        clearForm();
+                        loadData();
 
-                                Notification.success(translate("delete.record.success"));
-                            },
-                            translate(CANCEL),
-                            ce -> {
-                            }).open());
+                        Notification.success(translate("delete.record.success"));
+                    }, translate(CANCEL), ce -> {
+                    })
+                .open());
             deleteIcon.setId("delete-action");
             deleteIcon.addClassName("delete-icon");
 
             buttonLayout.add(showMailingsIcon, showRegistrationsIcon, deleteIcon);
 
             return buttonLayout;
-        }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setWidth("140px").setFlexGrow(0).setKey("action-column");
+        })
+            .setHeader(addIcon)
+            .setTextAlign(ColumnTextAlign.END)
+            .setWidth("140px")
+            .setFlexGrow(0)
+            .setKey("action-column");
 
         loadData();
 
@@ -215,7 +236,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
             if (registrationViewRecord != null) {
                 UI.getCurrent().navigate(RegistrationView.class, new RouteParam(ID, registrationViewRecord.getId()));
-            } else {
+            }
+            else {
                 clearForm();
                 UI.getCurrent().navigate(RegistrationView.class);
             }
@@ -228,14 +250,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     private void loadData() {
         CallbackDataProvider<RegistrationViewRecord, Void> dataProvider = new CallbackDataProvider<>(
-                query -> registrationRepository.findAllFromView(
-                                DSL.noCondition(),
-                                query.getOffset(), query.getLimit(),
-                                VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
-                        .stream(),
-                query -> registrationRepository.countFromView(DSL.noCondition()),
-                RegistrationViewRecord::getId
-        );
+                query -> registrationRepository
+                    .findAllFromView(DSL.noCondition(), query.getOffset(), query.getLimit(),
+                            VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
+                    .stream(),
+                query -> registrationRepository.countFromView(DSL.noCondition()), RegistrationViewRecord::getId);
         grid.setDataProvider(dataProvider);
     }
 
@@ -254,9 +273,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
         IntegerField yearIntegerField = new IntegerField(translate("year"));
 
-        binder.forField(yearIntegerField)
-                .asRequired()
-                .bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
+        binder.forField(yearIntegerField).asRequired().bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
         yearIntegerField.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 loadEvents(yearIntegerField.getValue());
@@ -266,31 +283,27 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         I18nDatePicker openFromDatePicker = new I18nDatePicker(translate("open.from"));
 
         binder.forField(openFromDatePicker)
-                .asRequired()
-                .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
+            .asRequired()
+            .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
         I18nDatePicker openUntilDatePicker = new I18nDatePicker(translate("open.until"));
 
         binder.forField(openUntilDatePicker)
-                .asRequired()
-                .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
+            .asRequired()
+            .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
 
         TextField titleTextField = new TextField(translate("title"));
-        binder.forField(titleTextField)
-                .asRequired()
-                .bind(RegistrationRecord::getTitle, RegistrationRecord::setTitle);
+        binder.forField(titleTextField).asRequired().bind(RegistrationRecord::getTitle, RegistrationRecord::setTitle);
 
         TextArea remarks = new TextArea(translate("remarks"));
         remarks.setPlaceholder(translate("remarks.placeholder"));
         remarks.setHeight("200px");
-        binder.forField(remarks)
-                .bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
+        binder.forField(remarks).bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(remarks, 2);
 
         TextArea emailText = new TextArea(translate("email.text"));
         emailText.setPlaceholder(translate("email.text.placeholder"));
         emailText.setHeight("200px");
-        binder.forField(emailText)
-                .bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
+        binder.forField(emailText).bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
         formLayout.setColspan(emailText, 2);
 
         formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, remarks, emailText);
@@ -312,7 +325,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         HorizontalLayout eventButtons = new HorizontalLayout(selectAllEvents, selectNoEvents);
         Button selectAllPersons = new Button(translate("select.all.persons"));
 
-        selectAllPersons.addClickListener(e -> personListBox.select(personListBox.getListDataView().getItems().toList()));
+        selectAllPersons
+            .addClickListener(e -> personListBox.select(personListBox.getListDataView().getItems().toList()));
         Button selectNoPersons = new Button(translate("select.no.persons"));
         selectNoPersons.addClickListener(e -> personListBox.deselectAll());
         HorizontalLayout personButtons = new HorizontalLayout(selectAllPersons, selectNoPersons);
@@ -384,17 +398,12 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureSendMailsButton() {
         sendEmailsButton.addClickListener(e -> {
             if (this.registration != null) {
-                new ConfirmDialog(translate("send.emails"),
-                        translate("send.emails.confirm"),
-                        "Ja",
-                        confirmEvent -> {
-                            registrationService.sendMails(this.registration, securityContext.getUsername());
-                            Notification.success(translate("send.emails.success"));
-                            refreshGridButPreserveSelection(this.registration.getId());
-                        },
-                        translate(CANCEL),
-                        cancelEvent -> {
-                        }).open();
+                new ConfirmDialog(translate("send.emails"), translate("send.emails.confirm"), "Ja", confirmEvent -> {
+                    registrationService.sendMails(this.registration, securityContext.getUsername());
+                    Notification.success(translate("send.emails.success"));
+                    refreshGridButPreserveSelection(this.registration.getId());
+                }, translate(CANCEL), cancelEvent -> {
+                }).open();
             }
         });
     }
@@ -402,20 +411,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureCreateMailingButton() {
         createMailingButton.addClickListener(e -> {
             if (this.registration != null) {
-                new ConfirmDialog(translate(CREATE_MAILING),
-                        translate("create.mailing.confirm"),
-                        translate("yes"),
+                new ConfirmDialog(translate(CREATE_MAILING), translate("create.mailing.confirm"), translate("yes"),
                         confirmEvent -> {
                             if (registrationService.createMailing(this.registration)) {
                                 Notification.success(translate("create.mailing.success"));
                                 refreshGridButPreserveSelection(this.registration.getId());
-                            } else {
+                            }
+                            else {
                                 Notification.error(getTranslation("create.mailing.error"));
                             }
-                        },
-                        translate(CANCEL),
-                        cancelEvent -> {
-                        }).open();
+                        }, translate(CANCEL), cancelEvent -> {
+                        })
+                    .open();
             }
         });
     }
@@ -432,8 +439,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             try {
                 if (binder.validate().isOk()) {
                     binder.writeBean(this.registration);
-                    registrationService.save(this.registration,
-                            this.eventListBox.getSelectedItems(), this.personListBox.getSelectedItems());
+                    registrationService.save(this.registration, this.eventListBox.getSelectedItems(),
+                            this.personListBox.getSelectedItems());
 
                     refreshGridButPreserveSelection(this.registration.getId());
 
@@ -441,7 +448,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                     setButtonState(grid.asSingleSelect().getValue());
                     Notification.success(translate("save.success"));
                 }
-            } catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
+            }
+            catch (DataIntegrityViolationException | ValidationException dataIntegrityViolationException) {
                 Notification.error(translate("save.error"));
             }
         });
@@ -460,14 +468,15 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         if (binder.hasChanges() || dirty) {
             createMailingButton.setEnabled(false);
             sendEmailsButton.setEnabled(false);
-        } else {
+        }
+        else {
             if (registrationViewRecord != null && registrationViewRecord.getId() != null) {
 
                 createMailingButton.setText(registrationViewRecord.getEmailCreatedCount() > 0
                         ? translate("update.mailing") : translate(CREATE_MAILING));
 
-                createMailingButton.setEnabled(!eventListBox.getSelectedItems().isEmpty()
-                        && !personListBox.getSelectedItems().isEmpty());
+                createMailingButton.setEnabled(
+                        !eventListBox.getSelectedItems().isEmpty() && !personListBox.getSelectedItems().isEmpty());
 
                 sendEmailsButton.setEnabled(registrationViewRecord.getEmailCreatedCount() > 0);
             }
@@ -482,7 +491,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         this.registration = value;
         binder.readBean(this.registration);
 
-        personListBox.setItems(personRepository.findAll(PERSON.ACTIVE.isTrue(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
+        personListBox
+            .setItems(personRepository.findAll(PERSON.ACTIVE.isTrue(), List.of(PERSON.LAST_NAME, PERSON.FIRST_NAME)));
 
         if (value == null) {
             eventListBox.clear();
@@ -491,7 +501,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
             enableComponents(false);
             cancelButton.setEnabled(false);
             saveButton.setEnabled(false);
-        } else {
+        }
+        else {
             if (this.registration.getId() != null) {
                 loadEvents(this.registration.getYear());
                 personListBox.setValue(new HashSet<>(personRepository.findByRegistrationId(this.registration.getId())));
@@ -506,11 +517,10 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     private void enableComponents(boolean enable) {
         formLayout.getChildren()
-                .filter(HasEnabled.class::isInstance)
-                .map(HasEnabled.class::cast)
-                .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
+            .filter(HasEnabled.class::isInstance)
+            .map(HasEnabled.class::cast)
+            .forEach(hasEnabled -> hasEnabled.setEnabled(enable));
     }
-
 
     private void loadEvents(Integer year) {
         LocalDate fromDate = LocalDate.of(year, 1, 1);

@@ -16,6 +16,7 @@ import static ch.martinelli.oss.registration.db.Tables.SECURITY_GROUP;
 import static ch.martinelli.oss.registration.db.tables.SecurityUser.SECURITY_USER;
 import static ch.martinelli.oss.registration.db.tables.UserGroup.USER_GROUP;
 
+// @formatter:off
 @Service
 @Primary
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -41,11 +42,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .fetch();
 
             return new User(securityUserRecord.getEmail(), securityUserRecord.getSecret(),
-                groups.stream()
-                    .map(group -> new SimpleGrantedAuthority("ROLE_" + group.getValue(SECURITY_GROUP.NAME)))
-                    .toList());
-        } else {
+                    groups.stream()
+                            .map(group -> new SimpleGrantedAuthority("ROLE_" + group.getValue(SECURITY_GROUP.NAME)))
+                            .toList());
+        }
+        else {
             throw new UsernameNotFoundException(username);
         }
     }
+
 }

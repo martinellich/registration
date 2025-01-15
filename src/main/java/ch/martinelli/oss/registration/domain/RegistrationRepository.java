@@ -20,6 +20,7 @@ import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTR
 import static ch.martinelli.oss.registration.db.tables.RegistrationPerson.REGISTRATION_PERSON;
 import static ch.martinelli.oss.registration.db.tables.RegistrationView.REGISTRATION_VIEW;
 
+// @formatter:off
 @Repository
 public class RegistrationRepository extends JooqDAO<Registration, RegistrationRecord, Long> {
 
@@ -27,8 +28,10 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
         super(dslContext, Registration.REGISTRATION);
     }
 
-    public List<RegistrationViewRecord> findAllFromView(Condition condition, int offset, int limit, List<OrderField<?>> orderBy) {
-        return dslContext.selectFrom(REGISTRATION_VIEW)
+    public List<RegistrationViewRecord> findAllFromView(Condition condition, int offset, int limit,
+            List<OrderField<?>> orderBy) {
+        return dslContext
+                .selectFrom(REGISTRATION_VIEW)
                 .where(condition)
                 .orderBy(orderBy)
                 .offset(offset)
@@ -41,14 +44,15 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
     }
 
     public Optional<RegistrationViewRecord> findByIdFromView(Long registrationId) {
-        return dslContext.selectFrom(REGISTRATION_VIEW)
+        return dslContext
+                .selectFrom(REGISTRATION_VIEW)
                 .where(REGISTRATION_VIEW.ID.eq(registrationId))
                 .fetchOptional();
     }
 
     public List<EventRecord> findAllEventsByRegistrationId(Long registrationId) {
-        return dslContext.
-                select(REGISTRATION_EVENT.event().fields())
+        return dslContext
+                .select(REGISTRATION_EVENT.event().fields())
                 .from(REGISTRATION_EVENT)
                 .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
                 .orderBy(REGISTRATION_EVENT.event().FROM_DATE)
@@ -57,7 +61,8 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
 
     @Transactional
     @SuppressWarnings("java:S6809")
-    public void saveWithEventsAndPersons(RegistrationRecord registration, Set<EventRecord> events, Set<PersonRecord> persons) {
+    public void saveWithEventsAndPersons(RegistrationRecord registration, Set<EventRecord> events,
+            Set<PersonRecord> persons) {
         save(registration);
 
         dslContext
@@ -65,8 +70,8 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
                 .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registration.getId()))
                 .execute();
 
-        events.forEach(event -> dslContext.insertInto(REGISTRATION_EVENT,
-                        REGISTRATION_EVENT.REGISTRATION_ID, REGISTRATION_EVENT.EVENT_ID)
+        events.forEach(event -> dslContext
+                .insertInto(REGISTRATION_EVENT, REGISTRATION_EVENT.REGISTRATION_ID, REGISTRATION_EVENT.EVENT_ID)
                 .values(registration.getId(), event.getId())
                 .execute());
 
@@ -75,11 +80,10 @@ public class RegistrationRepository extends JooqDAO<Registration, RegistrationRe
                 .where(REGISTRATION_PERSON.REGISTRATION_ID.eq(registration.getId()))
                 .execute();
 
-        persons.forEach(person ->
-                dslContext.insertInto(REGISTRATION_PERSON,
-                                REGISTRATION_PERSON.REGISTRATION_ID, REGISTRATION_PERSON.PERSON_ID)
-                        .values(registration.getId(), person.getId())
-                        .execute());
+        persons.forEach(person -> dslContext
+                .insertInto(REGISTRATION_PERSON, REGISTRATION_PERSON.REGISTRATION_ID, REGISTRATION_PERSON.PERSON_ID)
+                .values(registration.getId(), person.getId())
+                .execute());
     }
 
 }

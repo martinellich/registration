@@ -12,11 +12,11 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registrations</artifactId>
-    <version>1.7.3</version>
+    <version>1.8.0</version>
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.6.1</vaadin.version>
+        <vaadin.version>24.6.2</vaadin.version>
         <jooq-version>3.19.14</jooq-version>
         <jooq-spring.version>0.4.0</jooq-spring.version>
         <jooq-utilities.version>1.1.2</jooq-utilities.version>
@@ -27,6 +27,7 @@
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
         <mailcatcher.version>0.9.3</mailcatcher.version>
 
+        <spring-javaformat-maven-plugin.version>0.0.43</spring-javaformat-maven-plugin.version>
         <jacoco.version>0.8.12</jacoco.version>
         <karibu-testing.version>2.2.0</karibu-testing.version>
 
@@ -250,6 +251,20 @@
                     <execution>
                         <goals>
                             <goal>prepare-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.spring.javaformat</groupId>
+                <artifactId>spring-javaformat-maven-plugin</artifactId>
+                <version>${spring-javaformat-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <inherited>true</inherited>
+                        <goals>
+                            <goal>validate</goal>
                         </goals>
                     </execution>
                 </executions>

@@ -34,18 +34,20 @@ import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailView.REGISTRATION_EMAIL_VIEW;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({"ADMIN", "USER"})
+@RolesAllowed({ "ADMIN", "USER" })
 @Route("registration-emails")
 public class RegistrationEmailView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private final transient RegistrationEmailRepository registrationEmailRepository;
+
     private final transient RegistrationRepository registrationRepository;
 
     private final Grid<RegistrationEmailViewRecord> grid = new Grid<>(RegistrationEmailViewRecord.class, false);
 
     private final Select<RegistrationRecord> registrationSelect = new Select<>();
 
-    public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository, RegistrationRepository registrationRepository) {
+    public RegistrationEmailView(RegistrationEmailRepository registrationEmailRepository,
+            RegistrationRepository registrationRepository) {
         this.registrationEmailRepository = registrationEmailRepository;
         this.registrationRepository = registrationRepository;
 
@@ -64,7 +66,8 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
     private VerticalLayout createFilter() {
         registrationSelect.setLabel(translate("invitation"));
         registrationSelect.setItemLabelGenerator(r -> "%s %s".formatted(r.getTitle(), r.getYear().toString()));
-        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(), List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
+        registrationSelect.setItems(registrationRepository.findAll(DSL.noCondition(),
+                List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
 
         Button resetButton = new Button(translate("reset"));
@@ -87,56 +90,54 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
         grid.setEmptyStateText(translate("no.mailings"));
 
         grid.addColumn(RegistrationEmailViewRecord::getYear)
-                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
-                .setHeader(translate("year"))
-                .setWidth("30px");
+            .setSortable(true)
+            .setSortProperty(REGISTRATION_EMAIL_VIEW.YEAR.getName())
+            .setHeader(translate("year"))
+            .setWidth("30px");
         grid.addColumn(RegistrationEmailViewRecord::getEmail)
-                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.EMAIL.getName())
-                .setHeader(translate("email"))
-                .setAutoWidth(true);
+            .setSortable(true)
+            .setSortProperty(REGISTRATION_EMAIL_VIEW.EMAIL.getName())
+            .setHeader(translate("email"))
+            .setAutoWidth(true);
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getSentAt() != null
-                        ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
-                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
-                .setHeader(translate("sent"))
-                .setAutoWidth(true);
-        ;
+                ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getSentAt()) : "")
+            .setSortable(true)
+            .setSortProperty(REGISTRATION_EMAIL_VIEW.SENT_AT.getName())
+            .setHeader(translate("sent"))
+            .setAutoWidth(true);
         grid.addColumn(registrationEmailViewRecord -> registrationEmailViewRecord.getRegisteredAt() != null
-                        ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getRegisteredAt()) : "")
-                .setSortable(true).setSortProperty(REGISTRATION_EMAIL_VIEW.REGISTERED_AT.getName())
-                .setHeader(translate("registered.at"))
-                .setAutoWidth(true);
+                ? DateFormat.DATE_TIME_FORMAT.format(registrationEmailViewRecord.getRegisteredAt()) : "")
+            .setSortable(true)
+            .setSortProperty(REGISTRATION_EMAIL_VIEW.REGISTERED_AT.getName())
+            .setHeader(translate("registered.at"))
+            .setAutoWidth(true);
 
         grid.addComponentColumn(registrationEmailViewRecord -> {
-                    RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class, registrationEmailViewRecord.getLink());
-                    link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
+            RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class,
+                    registrationEmailViewRecord.getLink());
+            link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
 
-                    Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID,
-                            e -> new ConfirmDialog(translate("delete.record"),
-                                    translate("delete.record.question"),
-                                    translate("yes"),
-                                    ce -> {
-                                        registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
-                                        grid.getDataProvider().refreshAll();
+            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+                    translate("delete.record.question"), translate("yes"), ce -> {
+                        registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
+                        grid.getDataProvider().refreshAll();
 
-                                        Notification.success(translate("delete.record.success"));
-                                    },
-                                    translate("cancel"),
-                                    ce -> {
-                                    }).open());
-                    deleteIcon.setId("delete-action");
-                    deleteIcon.addClassName("delete-icon");
+                        Notification.success(translate("delete.record.success"));
+                    }, translate("cancel"), ce -> {
+                    })
+                .open());
+            deleteIcon.setId("delete-action");
+            deleteIcon.addClassName("delete-icon");
 
-                    HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
-                    actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-                    return actionLayout;
-                }).setTextAlign(ColumnTextAlign.END).setKey("action-column")
-                .setWidth("200px");
+            HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
+            actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            return actionLayout;
+        }).setTextAlign(ColumnTextAlign.END).setKey("action-column").setWidth("200px");
 
-        grid.setItems(query -> registrationEmailRepository.findAllFromView(
-                getFilter(),
-                query.getOffset(), query.getLimit(),
-                VaadinJooqUtil.orderFields(REGISTRATION_EMAIL_VIEW, query)
-        ).stream());
+        grid.setItems(query -> registrationEmailRepository
+            .findAllFromView(getFilter(), query.getOffset(), query.getLimit(),
+                    VaadinJooqUtil.orderFields(REGISTRATION_EMAIL_VIEW, query))
+            .stream());
 
         return grid;
     }
@@ -154,4 +155,5 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
     public String getPageTitle() {
         return translate("mailing");
     }
+
 }
