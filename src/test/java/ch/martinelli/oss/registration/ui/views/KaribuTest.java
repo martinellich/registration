@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -41,9 +40,6 @@ public abstract class KaribuTest {
 
     @Autowired
     protected ApplicationContext ctx;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @BeforeAll
     public static void discoverRoutes() {
