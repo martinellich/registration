@@ -9,8 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -24,10 +23,23 @@ public final class SecurityContext {
     }
 
     public String getUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return switch (principal) {
+                case    DefaultOidcUser oidcUser -> oidcUser.getPreferredUsername();
+                case null, default -> ""; // Anonymous or no authentication.
+            };
+        }
+        else {
+            return "";
+        }
+    }
+
+    public String getName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
         return switch (principal) {
-            case UserDetails userDetails -> userDetails.getUsername();
-            case Jwt jwt -> jwt.getSubject();
+            case DefaultOidcUser oidcUser -> oidcUser.getName();
             case null, default -> ""; // Anonymous or no authentication.
         };
     }
