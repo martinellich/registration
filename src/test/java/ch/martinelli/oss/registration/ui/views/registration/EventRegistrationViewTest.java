@@ -15,9 +15,6 @@ class EventRegistrationViewTest extends KaribuTest {
 
     @BeforeEach
     void login() {
-        login("simon@martinelli.ch");
-        UI.getCurrent().getPage().reload();
-
         UI.getCurrent().navigate(EventRegistrationView.class, 1L);
     }
 

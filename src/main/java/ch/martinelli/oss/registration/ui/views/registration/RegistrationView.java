@@ -60,7 +60,7 @@ import static ch.martinelli.oss.registration.ui.views.EditView.ACTION_ICON;
 import static ch.martinelli.oss.registration.ui.views.registration.RegistrationView.ID;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({ "ADMIN", "USER" })
+@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
 @RouteAlias("")
 @Route("registrations/:" + ID + "?")
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {

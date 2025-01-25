@@ -29,7 +29,7 @@ import java.util.List;
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({ "ADMIN", "USER" })
+@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
 @Route("event-registrations")
 public class EventRegistrationView extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 

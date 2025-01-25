@@ -22,7 +22,7 @@ import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMA
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
-@RolesAllowed({ "ADMIN", "USER" })
+@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
 @Route("events/:" + EditView.ID + "?")
 public class EventsView extends EditView<Event, EventRecord, EventRepository>
         implements BeforeEnterObserver, HasDynamicTitle {
