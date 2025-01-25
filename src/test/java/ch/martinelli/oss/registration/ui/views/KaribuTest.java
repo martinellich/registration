@@ -33,8 +33,6 @@ public abstract class KaribuTest {
 
     protected static Routes routes;
 
-    private static OAuth2AuthenticationToken oAuth2AuthenticationToken;
-
     protected static String username = "test@test.ch";
 
     protected static String role = "APPROLE_ADMIN";
@@ -49,13 +47,6 @@ public abstract class KaribuTest {
 
     @BeforeAll
     public static void discoverRoutes() {
-        // Create a fake OAuth2AuthenticationToken
-        OidcIdToken oidcIdToken = new OidcIdToken("tokenValue", null, null,
-                Map.of("sub", "-", "preferred_username", username, "name", name));
-        DefaultOidcUser defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)), oidcIdToken);
-        oAuth2AuthenticationToken = new OAuth2AuthenticationToken(defaultOidcUser, defaultOidcUser.getAuthorities(),
-                "oidc");
-
         Locale.setDefault(Locale.GERMAN);
         routes = new Routes().autoDiscoverViews("ch.martinelli.oss.registration.ui.views");
     }
@@ -80,6 +71,12 @@ public abstract class KaribuTest {
     }
 
     private static void fakeLogin() {
+        OidcIdToken oidcIdToken = new OidcIdToken("tokenValue", null, null,
+                Map.of("sub", "-", "preferred_username", username, "name", name));
+        DefaultOidcUser defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)), oidcIdToken);
+        OAuth2AuthenticationToken oAuth2AuthenticationToken = new OAuth2AuthenticationToken(defaultOidcUser,
+                defaultOidcUser.getAuthorities(), "oidc");
+
         SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
 
         FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
