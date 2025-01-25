@@ -26,7 +26,7 @@ public final class SecurityContext {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return switch (principal) {
-                case    DefaultOidcUser oidcUser -> oidcUser.getPreferredUsername();
+                case DefaultOidcUser oidcUser -> oidcUser.getPreferredUsername();
                 case null, default -> ""; // Anonymous or no authentication.
             };
         }
