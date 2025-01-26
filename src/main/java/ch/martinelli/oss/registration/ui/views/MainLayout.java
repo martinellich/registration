@@ -42,7 +42,7 @@ public class MainLayout extends AppLayout {
 
     private final transient SecurityContext securityContext;
 
-    private final AuthenticationContext authenticationContext;
+    private final transient AuthenticationContext authenticationContext;
 
     private final AccessAnnotationChecker accessAnnotationChecker;
 

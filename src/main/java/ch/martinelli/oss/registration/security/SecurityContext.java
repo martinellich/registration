@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.security;
 
-import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,12 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class SecurityContext {
-
-    private final AuthenticationContext authenticationContext;
-
-    public SecurityContext(AuthenticationContext authenticationContext) {
-        this.authenticationContext = authenticationContext;
-    }
 
     public String getUsername() {
         if (SecurityContextHolder.getContext().getAuthentication() != null && SecurityContextHolder.getContext()
