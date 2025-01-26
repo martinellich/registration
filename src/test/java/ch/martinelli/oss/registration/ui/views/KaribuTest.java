@@ -82,10 +82,10 @@ public abstract class KaribuTest {
 
         FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
         request.setUserPrincipalInt(oAuth2AuthenticationToken);
-        request.setUserInRole((principal, role) -> oAuth2AuthenticationToken.getPrincipal()
+        request.setUserInRole((principal, roleName) -> oAuth2AuthenticationToken.getPrincipal()
             .getAuthorities()
             .stream()
-            .anyMatch(a -> a.getAuthority().equals(role)));
+            .anyMatch(a -> a.getAuthority().equals(roleName)));
     }
 
     private void createOAuth2AuthenticationToken() {
@@ -105,7 +105,7 @@ public abstract class KaribuTest {
             if (VaadinServletRequest.getCurrent() != null) {
                 FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
                 request.setUserPrincipalInt(null);
-                request.setUserInRole((principal, role) -> false);
+                request.setUserInRole((principal, roleName) -> false);
             }
         }
         catch (IllegalStateException e) {
