@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.registration;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.db.tables.records.RegistrationViewRecord;
+import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
@@ -50,6 +51,7 @@ class RegistrationViewTest extends KaribuTest {
 
     @BeforeEach
     void login() {
+        login("user@test.com", Roles.USER);
         UI.getCurrent().navigate(RegistrationView.class);
     }
 

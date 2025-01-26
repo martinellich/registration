@@ -24,6 +24,7 @@ import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.beans.factory.annotation.Value;
 import org.vaadin.lineawesome.LineAwesomeIcon;
@@ -41,15 +42,19 @@ public class MainLayout extends AppLayout {
 
     private final transient SecurityContext securityContext;
 
+    private final transient AuthenticationContext authenticationContext;
+
     private final AccessAnnotationChecker accessAnnotationChecker;
 
     private final String applicationVersion;
 
     private H1 viewTitle;
 
-    public MainLayout(SecurityContext securityContext, AccessAnnotationChecker accessAnnotationChecker,
+    public MainLayout(SecurityContext securityContext, AuthenticationContext authenticationContext,
+            AccessAnnotationChecker accessAnnotationChecker,
             @Value("${spring.application.version}") String applicationVersion) {
         this.securityContext = securityContext;
+        this.authenticationContext = authenticationContext;
         this.accessAnnotationChecker = accessAnnotationChecker;
         this.applicationVersion = applicationVersion;
 
@@ -142,7 +147,7 @@ public class MainLayout extends AppLayout {
             div.add(new Icon("lumo", "dropdown"));
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER, LumoUtility.Gap.SMALL);
             userName.add(div);
-            MenuItem signOut = userName.getSubMenu().addItem("Sign out", e -> securityContext.logout());
+            MenuItem signOut = userName.getSubMenu().addItem("Sign out", e -> authenticationContext.logout());
             signOut.setId("sign-out");
 
             layout.add(userMenu);

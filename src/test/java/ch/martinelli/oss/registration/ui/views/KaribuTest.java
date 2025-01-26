@@ -1,6 +1,7 @@
 package ch.martinelli.oss.registration.ui.views;
 
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
+import ch.martinelli.oss.registration.security.Roles;
 import com.github.mvysny.fakeservlet.FakeRequest;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
@@ -30,16 +31,18 @@ import java.util.Map;
 @SpringBootTest
 public abstract class KaribuTest {
 
-    protected static Routes routes;
+    private static Routes routes;
 
-    protected static String username = "test@test.ch";
+    private String username = "john.doe@test.com";
 
-    protected static String role = "APPROLE_ADMIN";
+    private String name = "John Doe";
 
-    protected static String name = "John Doe";
+    private String role = Roles.ADMIN;
 
     @Autowired
     protected ApplicationContext ctx;
+
+    private OAuth2AuthenticationToken oAuth2AuthenticationToken;
 
     @BeforeAll
     public static void discoverRoutes() {
@@ -52,7 +55,7 @@ public abstract class KaribuTest {
         MockVaadin.INSTANCE.setMockRequestFactory(session -> new FakeRequest(session) {
             @Override
             public Principal getUserPrincipal() {
-                KaribuTest.fakeLogin();
+                createAuthentication();
                 return SecurityContextHolder.getContext().getAuthentication();
             }
         });
@@ -66,21 +69,34 @@ public abstract class KaribuTest {
         MockVaadin.tearDown();
     }
 
-    private static void fakeLogin() {
-        OidcIdToken oidcIdToken = new OidcIdToken("tokenValue", null, null,
-                Map.of("sub", "-", "preferred_username", username, "name", name));
-        DefaultOidcUser defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)), oidcIdToken);
-        OAuth2AuthenticationToken oAuth2AuthenticationToken = new OAuth2AuthenticationToken(defaultOidcUser,
-                defaultOidcUser.getAuthorities(), "oidc");
+    protected void login(String username, String role) {
+        this.username = username;
+        this.role = role;
+        oAuth2AuthenticationToken = null;
+        createOAuth2AuthenticationToken();
+    }
 
+    private void createAuthentication() {
+        createOAuth2AuthenticationToken();
         SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
 
         FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
         request.setUserPrincipalInt(oAuth2AuthenticationToken);
-        request.setUserInRole((principal, role) -> oAuth2AuthenticationToken.getPrincipal()
+        request.setUserInRole((principal, roleName) -> oAuth2AuthenticationToken.getPrincipal()
             .getAuthorities()
             .stream()
-            .anyMatch(a -> a.getAuthority().equals(role)));
+            .anyMatch(a -> a.getAuthority().equals(roleName)));
+    }
+
+    private void createOAuth2AuthenticationToken() {
+        if (oAuth2AuthenticationToken == null) {
+            OidcIdToken oidcIdToken = new OidcIdToken("tokenValue", null, null,
+                    Map.of("sub", "-", "preferred_username", username, "name", name));
+            DefaultOidcUser defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)),
+                    oidcIdToken);
+            oAuth2AuthenticationToken = new OAuth2AuthenticationToken(defaultOidcUser, defaultOidcUser.getAuthorities(),
+                    "oidc");
+        }
     }
 
     protected void logout() {
@@ -89,7 +105,7 @@ public abstract class KaribuTest {
             if (VaadinServletRequest.getCurrent() != null) {
                 FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
                 request.setUserPrincipalInt(null);
-                request.setUserInRole((principal, role) -> false);
+                request.setUserInRole((principal, roleName) -> false);
             }
         }
         catch (IllegalStateException e) {

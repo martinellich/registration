@@ -9,7 +9,7 @@ public class RolePrefixConfiguration {
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults(""); // Remove the ROLE_ prefix
+        return new GrantedAuthorityDefaults("APPROLE_");
     }
 
 }

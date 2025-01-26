@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.domain.EventRepository;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
 import ch.martinelli.oss.registration.domain.RegistrationService;
+import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.security.SecurityContext;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
@@ -60,7 +61,7 @@ import static ch.martinelli.oss.registration.ui.views.EditView.ACTION_ICON;
 import static ch.martinelli.oss.registration.ui.views.registration.RegistrationView.ID;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
-@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
+@RolesAllowed({ Roles.USER, Roles.ADMIN })
 @RouteAlias("")
 @Route("registrations/:" + ID + "?")
 public class RegistrationView extends Div implements BeforeEnterObserver, HasDynamicTitle {
