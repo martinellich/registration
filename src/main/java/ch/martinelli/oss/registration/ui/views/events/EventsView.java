@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.events;
 import ch.martinelli.oss.registration.db.tables.Event;
 import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.domain.EventRepository;
+import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -22,7 +23,7 @@ import static ch.martinelli.oss.registration.ui.components.DateFormat.DATE_FORMA
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
-@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
+@RolesAllowed({ Roles.USER, Roles.ADMIN })
 @Route("events/:" + EditView.ID + "?")
 public class EventsView extends EditView<Event, EventRecord, EventRepository>
         implements BeforeEnterObserver, HasDynamicTitle {

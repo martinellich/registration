@@ -3,6 +3,7 @@ package ch.martinelli.oss.registration.ui.views.persons;
 import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
+import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -24,7 +25,7 @@ import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
-@RolesAllowed({ "APPROLE_USER", "APPROLE_ADMIN" })
+@RolesAllowed({ Roles.USER, Roles.ADMIN })
 @Route("persons/:" + EditView.ID + "?")
 public class PersonsView extends EditView<Person, PersonRecord, PersonRepository>
         implements BeforeEnterObserver, HasDynamicTitle {
