@@ -64,6 +64,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
 
         removeAll();
         gridContainer = new Div();
+        gridContainer.addClassName("grid-container");
         gridContainer.setHeightFull();
         add(createFilter(), gridContainer);
         createButtons();
