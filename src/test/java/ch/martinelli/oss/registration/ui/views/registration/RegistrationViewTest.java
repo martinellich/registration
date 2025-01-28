@@ -20,7 +20,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -56,7 +55,6 @@ class RegistrationViewTest extends KaribuTest {
         UI.getCurrent().navigate(RegistrationView.class);
     }
 
-    @Disabled
     @Test
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
