@@ -20,7 +20,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -56,7 +55,6 @@ class RegistrationViewTest extends KaribuTest {
         UI.getCurrent().navigate(RegistrationView.class);
     }
 
-    @Disabled
     @Test
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
@@ -112,7 +110,6 @@ class RegistrationViewTest extends KaribuTest {
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
         await().until(() -> mailcatcherContainer.getAllEmails().size(), equalTo(1));
-
         assertThat(mailcatcherContainer.getAllEmails()).first().satisfies(mail -> {
             assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
             assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
