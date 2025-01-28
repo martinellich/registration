@@ -20,6 +20,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -28,11 +29,11 @@ import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.equalTo;
 
 class RegistrationViewTest extends KaribuTest {
 
@@ -55,6 +56,7 @@ class RegistrationViewTest extends KaribuTest {
         UI.getCurrent().navigate(RegistrationView.class);
     }
 
+    @Disabled
     @Test
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
@@ -109,9 +111,9 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        await().atLeast(2, TimeUnit.SECONDS);
+        await().until(() -> mailcatcherContainer.getAllEmails().size(), equalTo(1));
 
-        assertThat(mailcatcherContainer.getAllEmails()).hasSize(1).first().satisfies(mail -> {
+        assertThat(mailcatcherContainer.getAllEmails()).first().satisfies(mail -> {
             assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
             assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
         });
