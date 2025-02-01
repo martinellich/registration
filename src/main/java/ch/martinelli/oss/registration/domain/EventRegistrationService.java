@@ -58,7 +58,7 @@ public class EventRegistrationService {
                 }
             }
 
-            for (int i = 0; i < allRegistrationTypes.size() + 2; i++) {
+            for (var i = 0; i < allRegistrationTypes.size() + 2; i++) {
                 sheet.autoSizeColumn(i);
             }
 

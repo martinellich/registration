@@ -182,7 +182,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         var addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             loadData();
-            RegistrationRecord registrationRecord = new RegistrationRecord();
+            var registrationRecord = new RegistrationRecord();
             populateForm(registrationRecord);
         });
         addIcon.setId("add-icon");
@@ -265,7 +265,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         var editorDiv = new Div();
         editorDiv.setClassName("editor");
 
-        Scroller editorScroller = new Scroller(editorDiv);
+        var editorScroller = new Scroller(editorDiv);
         editorScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
         editorScroller.setHeight("calc(100% - 60px)");
         editorLayoutDiv.add(editorScroller);

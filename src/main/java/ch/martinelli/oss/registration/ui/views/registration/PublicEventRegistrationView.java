@@ -87,7 +87,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         add(unorderedList);
 
         for (var person : persons) {
-            ListItem listItem = new ListItem("%s %s".formatted(person.getLastName(), person.getFirstName()));
+            var listItem = new ListItem("%s %s".formatted(person.getLastName(), person.getFirstName()));
             unorderedList.add(listItem);
         }
 
