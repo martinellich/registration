@@ -1,8 +1,6 @@
 package ch.martinelli.oss.registration.mail;
 
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
-import ch.martinelli.oss.registration.db.tables.records.RegistrationEmailViewRecord;
-import ch.martinelli.oss.registration.db.tables.records.RegistrationRecord;
 import ch.martinelli.oss.registration.domain.EmailSender;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
@@ -14,9 +12,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
-import skydrinker.testcontainers.mailcatcher.MailcatcherMail;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,12 +43,12 @@ class EmailSenderTest {
 
     @Test
     void send_mails() {
-        RegistrationRecord registration = registrationRepository.findById(1L).orElseThrow();
-        RegistrationEmailViewRecord registrationEmail = registrationEmailRepository.findByIdFromView(2L).orElseThrow();
+        var registration = registrationRepository.findById(1L).orElseThrow();
+        var registrationEmail = registrationEmailRepository.findByIdFromView(2L).orElseThrow();
 
         emailSender.sendEmail(registration, registrationEmail, "jugi@tverlach.ch");
 
-        List<MailcatcherMail> emails = mailcatcherContainer.getAllEmails();
+        var emails = mailcatcherContainer.getAllEmails();
 
         assertThat(emails).hasSize(1).first().satisfies(email -> {
             assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");

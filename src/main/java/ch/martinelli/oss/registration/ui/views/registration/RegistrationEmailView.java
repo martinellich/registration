@@ -71,14 +71,14 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
                 List.of(REGISTRATION.YEAR.desc(), REGISTRATION.TITLE)));
         registrationSelect.addValueChangeListener(e -> grid.getDataProvider().refreshAll());
 
-        Button resetButton = new Button(translate("reset"));
+        var resetButton = new Button(translate("reset"));
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetButton.addClickListener(e -> {
             registrationSelect.clear();
             grid.getDataProvider().refreshAll();
         });
 
-        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
+        var formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 
         return new VerticalLayout(formLayout);
@@ -114,11 +114,11 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
             .setAutoWidth(true);
 
         grid.addComponentColumn(registrationEmailViewRecord -> {
-            RouterLink link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class,
+            var link = new RouterLink(translate("registration.form"), PublicEventRegistrationView.class,
                     registrationEmailViewRecord.getLink());
             link.getElement().setAttribute("onclick", "window.open(this.href, '_blank'); return false;");
 
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+            var deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
                     translate("delete.record.question"), translate("yes"), ce -> {
                         registrationEmailRepository.deleteById(registrationEmailViewRecord.getRegistrationEmailId());
                         grid.getDataProvider().refreshAll();
@@ -130,7 +130,7 @@ public class RegistrationEmailView extends Div implements HasUrlParameter<Long>,
             deleteIcon.setId("delete-action");
             deleteIcon.addClassName("delete-icon");
 
-            HorizontalLayout actionLayout = new HorizontalLayout(link, deleteIcon);
+            var actionLayout = new HorizontalLayout(link, deleteIcon);
             actionLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
             return actionLayout;
         }).setTextAlign(ColumnTextAlign.END).setKey("action-column").setWidth("200px");

@@ -44,12 +44,12 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     protected void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        Grid.Column<PersonRecord> lastNameColumn = grid.addColumn(PersonRecord::getLastName)
+        var lastNameColumn = grid.addColumn(PersonRecord::getLastName)
             .setSortable(true)
             .setSortProperty(PERSON.LAST_NAME.getName())
             .setHeader(translate("last.name"))
             .setAutoWidth(true);
-        Grid.Column<PersonRecord> firstNameColumn = grid.addColumn(PersonRecord::getFirstName)
+        var firstNameColumn = grid.addColumn(PersonRecord::getFirstName)
             .setSortable(true)
             .setSortProperty(PERSON.FIRST_NAME.getName())
             .setHeader(translate("first.name"))
@@ -75,19 +75,19 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     }
 
     protected void createComponents(FormLayout formLayout) {
-        TextField lastNameTextField = new TextField(translate("last.name"));
+        var lastNameTextField = new TextField(translate("last.name"));
         binder.forField(lastNameTextField).asRequired().bind(PersonRecord::getLastName, PersonRecord::setLastName);
 
-        TextField firstNameTextField = new TextField(translate("first.name"));
+        var firstNameTextField = new TextField(translate("first.name"));
         binder.forField(firstNameTextField).asRequired().bind(PersonRecord::getFirstName, PersonRecord::setFirstName);
 
-        EmailField emailTextField = new EmailField(translate("email"));
+        var emailTextField = new EmailField(translate("email"));
         binder.forField(emailTextField).bind(PersonRecord::getEmail, PersonRecord::setEmail);
 
-        I18nDatePicker dateOfBirthDatePicker = new I18nDatePicker(translate("date.of.birth"));
+        var dateOfBirthDatePicker = new I18nDatePicker(translate("date.of.birth"));
         binder.forField(dateOfBirthDatePicker).bind(PersonRecord::getDateOfBirth, PersonRecord::setDateOfBirth);
 
-        Checkbox active = new Checkbox(translate("active"));
+        var active = new Checkbox(translate("active"));
         active.getElement().getThemeList().add("switch");
         binder.forField(active).bind(PersonRecord::getActive, PersonRecord::setActive);
 

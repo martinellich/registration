@@ -8,7 +8,6 @@ import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -36,7 +35,7 @@ class PersonsViewTest extends KaribuTest {
     void add_person() {
         // Check the content of grid
         @SuppressWarnings("unchecked")
-        Grid<PersonRecord> grid = _get(Grid.class);
+        var grid = (Grid<PersonRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(12);
         assertThat(GridKt._get(grid, 0).getFirstName()).isEqualTo("Lettie");
 
@@ -61,7 +60,7 @@ class PersonsViewTest extends KaribuTest {
         assertThat(_get(TextField.class, spec -> spec.withLabel("Nachname")).getValue()).isEqualTo("Martinelli");
 
         // Delete new item
-        Component component = GridKt._getCellComponent(grid, 6, "action-column");
+        var component = GridKt._getCellComponent(grid, 6, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }
@@ -96,8 +95,8 @@ class PersonsViewTest extends KaribuTest {
     @Test
     void try_to_delete_used_person() {
         @SuppressWarnings("unchecked")
-        Grid<EventRecord> grid = _get(Grid.class);
-        Component component = GridKt._getCellComponent(grid, 4, "action-column");
+        var grid = (Grid<EventRecord>) _get(Grid.class);
+        var component = GridKt._getCellComponent(grid, 4, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }

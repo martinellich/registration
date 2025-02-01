@@ -21,13 +21,11 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.RouteParam;
 import org.jooq.Table;
-import org.jooq.TableField;
 import org.jooq.UpdatableRecord;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
@@ -65,7 +63,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
 
         addClassName("edit-view");
 
-        SplitLayout splitLayout = new SplitLayout();
+        var splitLayout = new SplitLayout();
         splitLayout.addToPrimary(createGridLayout());
         splitLayout.addToSecondary(createEditorLayout());
 
@@ -74,9 +72,9 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> personId = event.getRouteParameters().get(ID).map(Long::parseLong);
+        var personId = event.getRouteParameters().get(ID).map(Long::parseLong);
         if (personId.isPresent()) {
-            Optional<R> personFromBackend = repository.findById(personId.get());
+            var personFromBackend = repository.findById(personId.get());
             if (personFromBackend.isPresent()) {
                 populateForm(personFromBackend.get());
             }
@@ -91,7 +89,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     }
 
     protected Div createGridLayout() {
-        Div wrapper = new Div();
+        var wrapper = new Div();
         wrapper.setClassName("grid-wrapper");
         wrapper.add(grid);
 
@@ -106,10 +104,10 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected abstract void configureGrid();
 
     protected void addActionColumn() {
-        Icon addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
+        var addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             grid.deselectAll();
             grid.getDataProvider().refreshAll();
-            R eventRecord = table.newRecord();
+            var eventRecord = table.newRecord();
             if (afterNewRecord != null) {
                 afterNewRecord.accept(eventRecord);
             }
@@ -119,7 +117,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
         addIcon.addClassName(ACTION_ICON);
 
         grid.addComponentColumn(eventRecord -> {
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+            var deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
                     translate("delete.record.question"), translate("yes"), ce -> {
                         try {
                             repository.delete(eventRecord);
@@ -149,8 +147,8 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected void addSelectionListener() {
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                TableField<R, ?> idField = Objects.requireNonNull(table.getPrimaryKey()).getFields().getFirst();
-                Long id = (Long) event.getValue().get(idField);
+                var idField = Objects.requireNonNull(table.getPrimaryKey()).getFields().getFirst();
+                var id = (Long) event.getValue().get(idField);
                 UI.getCurrent().navigate(this.getClass(), new RouteParam(ID, id));
             }
             else {
@@ -161,10 +159,10 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     }
 
     protected Div createEditorLayout() {
-        Div editorLayoutDiv = new Div();
+        var editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
-        Div editorDiv = new Div();
+        var editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
 
@@ -180,7 +178,7 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
     protected abstract void createComponents(FormLayout formLayout);
 
     protected void createButtonLayout(Div editorLayoutDiv) {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
+        var buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
 
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -196,8 +194,8 @@ public abstract class EditView<T extends Table<R>, R extends UpdatableRecord<R>,
         saveButton.addClickListener(e -> {
             try {
                 if (binder.validate().isOk()) {
-                    TableField<R, ?> idField = Objects.requireNonNull(table.getPrimaryKey()).getFields().getFirst();
-                    boolean isNew = this.currentRecord.get(idField) == null;
+                    var idField = Objects.requireNonNull(table.getPrimaryKey()).getFields().getFirst();
+                    var isNew = this.currentRecord.get(idField) == null;
 
                     binder.writeBean(this.currentRecord);
                     repository.save(this.currentRecord);

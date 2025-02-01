@@ -29,12 +29,12 @@ class RegistrationEmailViewTest extends KaribuTest {
     void display_registration_emails() {
         // Check the content of grid
         @SuppressWarnings("unchecked")
-        Grid<RegistrationEmailViewRecord> grid = _get(Grid.class);
+        var grid = (Grid<RegistrationEmailViewRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isZero();
 
         // Filter
         @SuppressWarnings("rawtypes")
-        Select select = _get(Select.class);
+        var select = _get(Select.class);
         // noinspection unchecked
         _setValue(_get(Select.class), select.getListDataView().getItem(1));
 
@@ -59,12 +59,12 @@ class RegistrationEmailViewTest extends KaribuTest {
     void delete_registration_email() {
         // Check the content of grid
         @SuppressWarnings("unchecked")
-        Grid<RegistrationEmailViewRecord> grid = _get(Grid.class);
+        var grid = (Grid<RegistrationEmailViewRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isZero();
 
         // Filter
         @SuppressWarnings("rawtypes")
-        Select select = _get(Select.class);
+        var select = _get(Select.class);
         // noinspection unchecked
         _setValue(_get(Select.class), select.getListDataView().getItem(1));
 

@@ -88,14 +88,14 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
             }
         });
 
-        Button resetButton = new Button(translate("reset"));
+        var resetButton = new Button(translate("reset"));
         resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetButton.addClickListener(e -> {
             registrationSelect.clear();
             createGrid();
         });
 
-        FormLayout formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
+        var formLayout = new FormLayout(registrationSelect, new HorizontalLayout(resetButton));
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
 
         return new VerticalLayout(formLayout);
@@ -104,10 +104,9 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     private void createGrid() {
         gridContainer.removeAll();
 
-        List<EventRegistrationRow> eventRegistrationMatrix = eventRegistrationRepository
-            .getEventRegistrationMatrix(registrationId);
+        var eventRegistrationMatrix = eventRegistrationRepository.getEventRegistrationMatrix(registrationId);
 
-        Grid<EventRegistrationRow> grid = new Grid<>(EventRegistrationRow.class, false);
+        var grid = new Grid<>(EventRegistrationRow.class, false);
         grid.setAllRowsVisible(true);
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.setEmptyStateText(translate("no.registrations"));
@@ -119,7 +118,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
                 .setAutoWidth(true);
             grid.addColumn(EventRegistrationRow::firstName).setHeader(translate("first.name")).setAutoWidth(true);
 
-            EventRegistrationRow firstRow = eventRegistrationMatrix.getFirst();
+            var firstRow = eventRegistrationMatrix.getFirst();
             firstRow.registrations().forEach((event, r) -> grid.addComponentColumn(registrationRow -> {
                 boolean registered = registrationRow.registrations().get(event);
                 if (registered) {
@@ -141,9 +140,10 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
     }
 
     private void createButtons() {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
+        var buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
-        Button cancelButton = new Button(translate("back"));
+
+        var cancelButton = new Button(translate("back"));
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         cancelButton.addClickListener(e -> UI.getCurrent().getPage().getHistory().back());
         buttonLayout.add(cancelButton);
@@ -154,7 +154,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         }), "");
         excelExportAnchor.setVisible(false);
 
-        Button excelExportButton = new Button(translate("export"), LineAwesomeIcon.FILE_EXCEL_SOLID.create());
+        var excelExportButton = new Button(translate("export"), LineAwesomeIcon.FILE_EXCEL_SOLID.create());
         excelExportButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         excelExportAnchor.add(excelExportButton);
         buttonLayout.add(excelExportAnchor);

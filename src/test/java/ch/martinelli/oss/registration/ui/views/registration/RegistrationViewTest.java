@@ -59,7 +59,7 @@ class RegistrationViewTest extends KaribuTest {
     void add_registration_create_mailing_send_emails() {
         // Check the content of grid
         @SuppressWarnings("unchecked")
-        Grid<RegistrationViewRecord> grid = _get(Grid.class);
+        var grid = (Grid<RegistrationViewRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isEqualTo(2);
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2024);
         assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2023);
@@ -73,11 +73,11 @@ class RegistrationViewTest extends KaribuTest {
         _get(I18nDatePicker.class, spec -> spec.withLabel("Offen bis")).setValue(LocalDate.of(2025, 2, 28));
 
         @SuppressWarnings("unchecked")
-        MultiSelectListBox<EventRecord> eventListBox = _get(MultiSelectListBox.class,
+        var eventListBox = (MultiSelectListBox<EventRecord>) _get(MultiSelectListBox.class,
                 spec -> spec.withId("event-list-box"));
         eventListBox.setValue(Set.of(eventListBox.getListDataView().getItem(0)));
         @SuppressWarnings("unchecked")
-        MultiSelectListBox<PersonRecord> personListBox = _get(MultiSelectListBox.class,
+        var personListBox = (MultiSelectListBox<PersonRecord>) _get(MultiSelectListBox.class,
                 spec -> spec.withId("person-list-box"));
         personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
 
@@ -88,7 +88,7 @@ class RegistrationViewTest extends KaribuTest {
         assertThat(GridKt._size(grid)).isEqualTo(3);
 
         // Select newly created record
-        RegistrationViewRecord registrationViewRecord = GridKt._get(grid, 0);
+        var registrationViewRecord = GridKt._get(grid, 0);
         assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
 
         // Create mailing

@@ -11,7 +11,6 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -64,37 +63,37 @@ public class MainLayout extends AppLayout {
     }
 
     private void addHeaderContent() {
-        DrawerToggle toggle = new DrawerToggle();
-        toggle.setAriaLabel("Menu toggle");
+        var drawerToggle = new DrawerToggle();
+        drawerToggle.setAriaLabel("Menu toggle");
 
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        addToNavbar(true, toggle, viewTitle);
+        addToNavbar(true, drawerToggle, viewTitle);
     }
 
     private void addDrawerContent() {
-        Span appName = new Span(translate("application.title"));
+        var appName = new Span(translate("application.title"));
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-        Header header = new Header(appName);
+        var header = new Header(appName);
 
-        Scroller scroller = new Scroller(createNavigation());
+        var scroller = new Scroller(createNavigation());
 
         addToDrawer(header, scroller, createFooter());
     }
 
     private VerticalLayout createNavigation() {
-        VerticalLayout verticalLayout = new VerticalLayout();
+        var verticalLayout = new VerticalLayout();
         verticalLayout.setPadding(false);
         verticalLayout.setSpacing(false);
 
-        SideNav nav = new SideNav();
+        var sideNav = new SideNav();
 
         if (accessAnnotationChecker.hasAccess(RegistrationView.class)) {
-            SideNavItem invitationsNavItem = new SideNavItem(translate("invitations"), RegistrationView.class,
+            var invitationsNavItem = new SideNavItem(translate("invitations"), RegistrationView.class,
                     LineAwesomeIcon.LIST_SOLID.create());
             invitationsNavItem.setExpanded(true);
-            nav.addItem(invitationsNavItem);
+            sideNav.addItem(invitationsNavItem);
             if (accessAnnotationChecker.hasAccess(RegistrationEmailView.class)) {
                 invitationsNavItem.addItem(new SideNavItem(translate("mailing"), RegistrationEmailView.class,
                         LineAwesomeIcon.MAIL_BULK_SOLID.create()));
@@ -105,28 +104,29 @@ public class MainLayout extends AppLayout {
             }
         }
         if (accessAnnotationChecker.hasAccess(EventsView.class)) {
-            nav.addItem(
+            sideNav.addItem(
                     new SideNavItem(translate("events"), EventsView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));
         }
         if (accessAnnotationChecker.hasAccess(PersonsView.class)) {
-            nav.addItem(new SideNavItem(translate("persons"), PersonsView.class, LineAwesomeIcon.USERS_SOLID.create()));
+            sideNav.addItem(
+                    new SideNavItem(translate("persons"), PersonsView.class, LineAwesomeIcon.USERS_SOLID.create()));
         }
 
-        verticalLayout.add(nav);
+        verticalLayout.add(sideNav);
 
-        Locale locale = UI.getCurrent().getSession().getLocale();
-        Button languageSwitch = new Button(locale.equals(Locale.ENGLISH) ? "DE" : "EN");
+        var locale = UI.getCurrent().getSession().getLocale();
+        var languageSwitch = new Button(locale.equals(Locale.ENGLISH) ? "DE" : "EN");
         languageSwitch.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         languageSwitch.addClickListener(e -> {
             UI.getCurrent().getSession().setLocale(locale.equals(Locale.ENGLISH) ? Locale.GERMAN : Locale.ENGLISH);
             UI.getCurrent().getPage().reload();
         });
 
-        HorizontalLayout languageLayout = new HorizontalLayout(languageSwitch);
+        var languageLayout = new HorizontalLayout(languageSwitch);
         languageLayout.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
         verticalLayout.add(languageLayout);
 
-        Span version = new Span(applicationVersion);
+        var version = new Span(applicationVersion);
         version.addClassNames(LumoUtility.Margin.SMALL, LumoUtility.Margin.Top.XLARGE);
         verticalLayout.add(version);
 
@@ -134,26 +134,26 @@ public class MainLayout extends AppLayout {
     }
 
     private Footer createFooter() {
-        Footer layout = new Footer();
+        var layout = new Footer();
 
         if (securityContext.isUserLoggedIn()) {
-            MenuBar userMenu = new MenuBar();
+            var userMenu = new MenuBar();
             userMenu.setThemeName("tertiary-inline contrast");
 
-            MenuItem userName = userMenu.addItem("");
-            Div div = new Div();
+            var userName = userMenu.addItem("");
+            var div = new Div();
 
             div.add(securityContext.getName());
             div.add(new Icon("lumo", "dropdown"));
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER, LumoUtility.Gap.SMALL);
             userName.add(div);
-            MenuItem signOut = userName.getSubMenu().addItem("Sign out", e -> authenticationContext.logout());
+            var signOut = userName.getSubMenu().addItem("Sign out", e -> authenticationContext.logout());
             signOut.setId("sign-out");
 
             layout.add(userMenu);
         }
         else {
-            Anchor loginLink = new Anchor("login", "Sign in");
+            var loginLink = new Anchor("login", "Sign in");
             layout.add(loginLink);
         }
 

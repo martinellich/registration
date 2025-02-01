@@ -8,13 +8,13 @@ public class Notification {
     }
 
     public static void success(String message) {
-        com.vaadin.flow.component.notification.Notification notification = createNotification(message);
+        var notification = createNotification(message);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.open();
     }
 
     public static void error(String message) {
-        com.vaadin.flow.component.notification.Notification notification = createNotification(message);
+        var notification = createNotification(message);
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         notification.open();
     }
