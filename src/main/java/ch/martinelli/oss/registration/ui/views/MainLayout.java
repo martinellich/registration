@@ -115,10 +115,12 @@ public class MainLayout extends AppLayout {
         verticalLayout.add(sideNav);
 
         var locale = UI.getCurrent().getSession().getLocale();
-        var languageSwitch = new Button(locale.equals(Locale.ENGLISH) ? "DE" : "EN");
+        var languageSwitch = new Button(locale.getLanguage().equals(Locale.ENGLISH.getLanguage()) ? "DE" : "EN");
         languageSwitch.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         languageSwitch.addClickListener(e -> {
-            UI.getCurrent().getSession().setLocale(locale.equals(Locale.ENGLISH) ? Locale.GERMAN : Locale.ENGLISH);
+            UI.getCurrent()
+                .getSession()
+                .setLocale(locale.getLanguage().equals(Locale.ENGLISH.getLanguage()) ? Locale.GERMAN : Locale.ENGLISH);
             UI.getCurrent().getPage().reload();
         });
 
