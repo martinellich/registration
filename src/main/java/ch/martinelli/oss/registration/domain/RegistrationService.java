@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,9 +50,9 @@ public class RegistrationService {
 
     @Transactional
     public boolean createMailing(RegistrationRecord registration) {
-        List<PersonRecord> persons = personRepository.findByRegistrationId(registration.getId());
-        for (PersonRecord person : persons) {
-            Optional<RegistrationEmailRecord> optionalRegistrationEmail = registrationEmailRepository
+        var persons = personRepository.findByRegistrationId(registration.getId());
+        for (var person : persons) {
+            var optionalRegistrationEmail = registrationEmailRepository
                 .findByRegistrationIdAndEmail(registration.getId(), person.getEmail());
             RegistrationEmailRecord registrationEmail;
             if (optionalRegistrationEmail.isEmpty()) {
@@ -67,10 +65,10 @@ public class RegistrationService {
             else {
                 registrationEmail = optionalRegistrationEmail.get();
             }
-            Optional<RegistrationEmailPersonRecord> optionalRegistrationEmailPerson = registrationEmailRepository
+            var optionalRegistrationEmailPerson = registrationEmailRepository
                 .findByRegistrationEmailIdAndPersonId(registrationEmail.getId(), person.getId());
             if (optionalRegistrationEmailPerson.isEmpty()) {
-                RegistrationEmailPersonRecord registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
+                var registrationEmailPerson = dslContext.newRecord(REGISTRATION_EMAIL_PERSON);
                 registrationEmailPerson.setRegistrationEmailId(registrationEmail.getId());
                 registrationEmailPerson.setPersonId(person.getId());
                 registrationEmailPerson.store();
@@ -87,12 +85,12 @@ public class RegistrationService {
                 registrationEmail.store();
             });
 
-            for (EventRegistrationRecord eventRegistration : eventRegistrations) {
-                Optional<EventRegistrationRecord> existingEventRegistration = eventRegistrationRepository
-                    .findByRegistrationIdAndEventIdAndPersonId(eventRegistration.getRegistrationId(),
-                            eventRegistration.getEventId(), eventRegistration.getPersonId());
+            for (var eventRegistration : eventRegistrations) {
+                var existingEventRegistration = eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
+                        eventRegistration.getRegistrationId(), eventRegistration.getEventId(),
+                        eventRegistration.getPersonId());
                 if (existingEventRegistration.isPresent()) {
-                    EventRegistrationRecord eventRegistrationRecord = existingEventRegistration.get();
+                    var eventRegistrationRecord = existingEventRegistration.get();
                     eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
                     eventRegistrationRecord.store();
                 }
@@ -106,9 +104,8 @@ public class RegistrationService {
 
     @Async
     public void sendMails(RegistrationRecord registration, String replayTo) {
-        List<RegistrationEmailViewRecord> registrationEmails = registrationEmailRepository
-            .findByRegistrationIdAndSentAtIsNull(registration.getId());
-        for (RegistrationEmailViewRecord registrationEmail : registrationEmails) {
+        var registrationEmails = registrationEmailRepository.findByRegistrationIdAndSentAtIsNull(registration.getId());
+        for (var registrationEmail : registrationEmails) {
             try {
                 emailSender.sendEmail(registration, registrationEmail, replayTo);
             }

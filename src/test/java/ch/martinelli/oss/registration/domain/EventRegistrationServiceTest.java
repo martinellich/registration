@@ -13,7 +13,7 @@ class EventRegistrationServiceTest extends KaribuTest {
 
     @Test
     void createEventRegistrationExcel() {
-        byte[] excelFile = eventRegistrationService.createEventRegistrationExcel(1L);
+        var excelFile = eventRegistrationService.createEventRegistrationExcel(1L);
 
         assertThat(excelFile).isNotEmpty();
     }

@@ -7,7 +7,6 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEvent.REGISTRATION_EVENT;
@@ -21,7 +20,7 @@ public class EventRepository extends JooqDAO<Event, EventRecord, Long> {
     }
 
     public Set<EventRecord> findByRegistrationId(Long registrationId) {
-        List<EventRecord> events = dslContext
+        var events = dslContext
                 .select(REGISTRATION_EVENT.event().fields())
                 .from(REGISTRATION_EVENT)
                 .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))

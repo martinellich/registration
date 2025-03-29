@@ -8,8 +8,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.ListItem;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
 import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,15 +28,15 @@ class PublicEventRegistrationViewTest extends KaribuTest {
     void navigation_with_correct_parameter() {
         UI.getCurrent().navigate("public/550e8400e29b41d4a716446655440000");
 
-        ListItem title = _get(ListItem.class, spec -> spec.withText("Lane Eula"));
+        var title = _get(ListItem.class, spec -> spec.withText("Lane Eula"));
         assertThat(title).isNotNull();
 
-        List<Checkbox> checkboxes = LocatorJ._find(Checkbox.class);
+        var checkboxes = LocatorJ._find(Checkbox.class);
         checkboxes.forEach(LocatorJ::_click);
 
         _click(_get(Button.class, spec -> spec.withText("Anmeldung aktualisieren")));
 
-        Button button = _get(Button.class);
+        var button = _get(Button.class);
         assertThat(button.getText()).isEqualTo("Die Anmeldung wurde aktualisiert");
     }
 

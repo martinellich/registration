@@ -80,7 +80,7 @@ public abstract class KaribuTest {
         createOAuth2AuthenticationToken();
         SecurityContextHolder.getContext().setAuthentication(oAuth2AuthenticationToken);
 
-        FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
+        var request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
         request.setUserPrincipalInt(oAuth2AuthenticationToken);
         request.setUserInRole((principal, roleName) -> oAuth2AuthenticationToken.getPrincipal()
             .getAuthorities()
@@ -90,10 +90,9 @@ public abstract class KaribuTest {
 
     private void createOAuth2AuthenticationToken() {
         if (oAuth2AuthenticationToken == null) {
-            OidcIdToken oidcIdToken = new OidcIdToken("tokenValue", null, null,
+            var oidcIdToken = new OidcIdToken("tokenValue", null, null,
                     Map.of("sub", "-", "preferred_username", username, "name", name));
-            DefaultOidcUser defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)),
-                    oidcIdToken);
+            var defaultOidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority(role)), oidcIdToken);
             oAuth2AuthenticationToken = new OAuth2AuthenticationToken(defaultOidcUser, defaultOidcUser.getAuthorities(),
                     "oidc");
         }
@@ -103,7 +102,7 @@ public abstract class KaribuTest {
         try {
             SecurityContextHolder.getContext().setAuthentication(null);
             if (VaadinServletRequest.getCurrent() != null) {
-                FakeRequest request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
+                var request = (FakeRequest) VaadinServletRequest.getCurrent().getRequest();
                 request.setUserPrincipalInt(null);
                 request.setUserInRole((principal, roleName) -> false);
             }

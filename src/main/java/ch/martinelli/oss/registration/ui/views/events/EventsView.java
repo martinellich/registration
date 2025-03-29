@@ -41,7 +41,7 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository>
     protected void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        Grid.Column<EventRecord> titleColumn = grid.addColumn(EventRecord::getTitle)
+        var titleColumn = grid.addColumn(EventRecord::getTitle)
             .setSortable(true)
             .setSortProperty(EVENT.TITLE.getName())
             .setHeader(translate("title"))
@@ -72,19 +72,19 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository>
     }
 
     protected void createComponents(FormLayout formLayout) {
-        TextField titleTextField = new TextField(translate("title"));
+        var titleTextField = new TextField(translate("title"));
         binder.forField(titleTextField).asRequired().bind(EventRecord::getTitle, EventRecord::setTitle);
-        TextField locationTextField = new TextField(translate("location"));
 
+        var locationTextField = new TextField(translate("location"));
         binder.forField(locationTextField).asRequired().bind(EventRecord::getLocation, EventRecord::setLocation);
-        TextArea descriptionTextArea = new TextArea(translate("description"));
 
+        var descriptionTextArea = new TextArea(translate("description"));
         binder.forField(descriptionTextArea).bind(EventRecord::getDescription, EventRecord::setDescription);
-        I18nDatePicker fromDatePicker = new I18nDatePicker(translate("from"));
 
+        var fromDatePicker = new I18nDatePicker(translate("from"));
         binder.forField(fromDatePicker).asRequired().bind(EventRecord::getFromDate, EventRecord::setFromDate);
-        I18nDatePicker toDatePicker = new I18nDatePicker(translate("until"));
 
+        var toDatePicker = new I18nDatePicker(translate("until"));
         binder.forField(toDatePicker).bind(EventRecord::getToDate, EventRecord::setToDate);
 
         formLayout.add(titleTextField, locationTextField, descriptionTextArea, fromDatePicker, toDatePicker);

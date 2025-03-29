@@ -50,7 +50,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import static ch.martinelli.oss.registration.db.tables.Event.EVENT;
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
@@ -114,7 +113,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         addClassNames("registrations-view");
 
-        SplitLayout splitLayout = new SplitLayout();
+        var splitLayout = new SplitLayout();
         splitLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
         splitLayout.setSplitterPosition(20);
 
@@ -126,9 +125,9 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> eventId = event.getRouteParameters().get(ID).map(Long::parseLong);
+        var eventId = event.getRouteParameters().get(ID).map(Long::parseLong);
         if (eventId.isPresent()) {
-            Optional<RegistrationRecord> registrationFromBackend = registrationRepository.findById(eventId.get());
+            var registrationFromBackend = registrationRepository.findById(eventId.get());
             if (registrationFromBackend.isPresent()) {
                 populateForm(registrationFromBackend.get());
                 registrationRepository.findByIdFromView(eventId.get()).ifPresent(registrationViewRecord -> {
@@ -150,7 +149,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private Div createGridLayout() {
-        Div wrapper = new Div();
+        var wrapper = new Div();
         wrapper.setClassName("grid-wrapper");
         wrapper.add(grid);
 
@@ -162,11 +161,11 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private void configureGrid() {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        Grid.Column<RegistrationViewRecord> titleColumn = grid.addColumn(RegistrationViewRecord::getTitle)
+        var titleColumn = grid.addColumn(RegistrationViewRecord::getTitle)
             .setSortable(true)
             .setSortProperty(REGISTRATION.TITLE.getName())
             .setHeader(translate("title"));
-        Grid.Column<RegistrationViewRecord> yearColumn = grid.addColumn(RegistrationViewRecord::getYear)
+        var yearColumn = grid.addColumn(RegistrationViewRecord::getYear)
             .setSortable(true)
             .setSortProperty(REGISTRATION.YEAR.getName())
             .setHeader(translate("year"));
@@ -181,29 +180,29 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         grid.addComponentColumn(r -> createIcon(r.getEmailCreatedCount())).setHeader(translate("mailing.created"));
         grid.addComponentColumn(r -> createIcon(r.getEmailSentCount())).setHeader(translate("emails.sent"));
 
-        Icon addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
+        var addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
             loadData();
-            RegistrationRecord registrationRecord = new RegistrationRecord();
+            var registrationRecord = new RegistrationRecord();
             populateForm(registrationRecord);
         });
         addIcon.setId("add-icon");
         addIcon.setClassName(ACTION_ICON);
 
         grid.addComponentColumn(registrationViewRecord -> {
-            HorizontalLayout buttonLayout = new HorizontalLayout();
+            var buttonLayout = new HorizontalLayout();
             buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-            Icon showRegistrationsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
+            var showRegistrationsIcon = new Icon(LineAwesomeIcon.TH_LIST_SOLID,
                     e -> UI.getCurrent().navigate(EventRegistrationView.class, registrationViewRecord.getId()));
             showRegistrationsIcon.addClassNames(ACTION_ICON);
             showRegistrationsIcon.setTooltipText(translate("show.registrations"));
 
-            Icon showMailingsIcon = new Icon(LineAwesomeIcon.MAIL_BULK_SOLID,
+            var showMailingsIcon = new Icon(LineAwesomeIcon.MAIL_BULK_SOLID,
                     e -> UI.getCurrent().navigate(RegistrationEmailView.class, registrationViewRecord.getId()));
             showMailingsIcon.addClassNames(ACTION_ICON);
             showMailingsIcon.setTooltipText(translate("show.mailings"));
 
-            Icon deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+            var deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
                     translate("delete.record.question"), translate("yes"), ce -> {
                         registrationRepository.deleteById(registrationViewRecord.getId());
 
@@ -233,7 +232,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                 new GridSortOrder<>(titleColumn, SortDirection.ASCENDING)));
 
         grid.asSingleSelect().addValueChangeListener(event -> {
-            RegistrationViewRecord registrationViewRecord = event.getValue();
+            var registrationViewRecord = event.getValue();
 
             if (registrationViewRecord != null) {
                 UI.getCurrent().navigate(RegistrationView.class, new RouteParam(ID, registrationViewRecord.getId()));
@@ -250,7 +249,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private void loadData() {
-        CallbackDataProvider<RegistrationViewRecord, Void> dataProvider = new CallbackDataProvider<>(
+        var dataProvider = new CallbackDataProvider<RegistrationViewRecord, Void>(
                 query -> registrationRepository
                     .findAllFromView(DSL.noCondition(), query.getOffset(), query.getLimit(),
                             VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
@@ -260,20 +259,21 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private Div createEditorLayout() {
-        Div editorLayoutDiv = new Div();
+        var editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
-        Div editorDiv = new Div();
+        var editorDiv = new Div();
         editorDiv.setClassName("editor");
-        Scroller editorScroller = new Scroller(editorDiv);
+
+        var editorScroller = new Scroller(editorDiv);
         editorScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
         editorScroller.setHeight("calc(100% - 60px)");
         editorLayoutDiv.add(editorScroller);
 
         formLayout = new FormLayout();
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
-        IntegerField yearIntegerField = new IntegerField(translate("year"));
 
+        var yearIntegerField = new IntegerField(translate("year"));
         binder.forField(yearIntegerField).asRequired().bind(RegistrationRecord::getYear, RegistrationRecord::setYear);
         yearIntegerField.addValueChangeListener(e -> {
             if (e.getValue() != null) {
@@ -281,27 +281,27 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
                 eventListBox.clear();
             }
         });
-        I18nDatePicker openFromDatePicker = new I18nDatePicker(translate("open.from"));
 
+        var openFromDatePicker = new I18nDatePicker(translate("open.from"));
         binder.forField(openFromDatePicker)
             .asRequired()
             .bind(RegistrationRecord::getOpenFrom, RegistrationRecord::setOpenFrom);
-        I18nDatePicker openUntilDatePicker = new I18nDatePicker(translate("open.until"));
 
+        var openUntilDatePicker = new I18nDatePicker(translate("open.until"));
         binder.forField(openUntilDatePicker)
             .asRequired()
             .bind(RegistrationRecord::getOpenUntil, RegistrationRecord::setOpenUntil);
 
-        TextField titleTextField = new TextField(translate("title"));
+        var titleTextField = new TextField(translate("title"));
         binder.forField(titleTextField).asRequired().bind(RegistrationRecord::getTitle, RegistrationRecord::setTitle);
 
-        TextArea remarks = new TextArea(translate("remarks"));
+        var remarks = new TextArea(translate("remarks"));
         remarks.setPlaceholder(translate("remarks.placeholder"));
         remarks.setHeight("200px");
         binder.forField(remarks).bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(remarks, 2);
 
-        TextArea emailText = new TextArea(translate("email.text"));
+        var emailText = new TextArea(translate("email.text"));
         emailText.setPlaceholder(translate("email.text.placeholder"));
         emailText.setHeight("200px");
         binder.forField(emailText).bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
@@ -311,26 +311,26 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         editorDiv.add(formLayout);
 
-        FormLayout listBoxFormLayout = new FormLayout();
+        var listBoxFormLayout = new FormLayout();
         listBoxFormLayout.addClassName(LumoUtility.Padding.Top.LARGE);
-        H4 eventsTitle = new H4(translate("events"));
+        var eventsTitle = new H4(translate("events"));
         eventsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
-        H4 personsTitle = new H4(translate("persons"));
+        var personsTitle = new H4(translate("persons"));
         personsTitle.addClassName(LumoUtility.Margin.Bottom.LARGE);
         listBoxFormLayout.add(eventsTitle, personsTitle);
-        Button selectAllEvents = new Button(translate("select.all.events"));
 
+        var selectAllEvents = new Button(translate("select.all.events"));
         selectAllEvents.addClickListener(e -> eventListBox.select(eventListBox.getListDataView().getItems().toList()));
-        Button selectNoEvents = new Button(translate("select.no.events"));
+        var selectNoEvents = new Button(translate("select.no.events"));
         selectNoEvents.addClickListener(e -> eventListBox.deselectAll());
-        HorizontalLayout eventButtons = new HorizontalLayout(selectAllEvents, selectNoEvents);
-        Button selectAllPersons = new Button(translate("select.all.persons"));
+        var eventButtons = new HorizontalLayout(selectAllEvents, selectNoEvents);
 
+        var selectAllPersons = new Button(translate("select.all.persons"));
         selectAllPersons
             .addClickListener(e -> personListBox.select(personListBox.getListDataView().getItems().toList()));
-        Button selectNoPersons = new Button(translate("select.no.persons"));
+        var selectNoPersons = new Button(translate("select.no.persons"));
         selectNoPersons.addClickListener(e -> personListBox.deselectAll());
-        HorizontalLayout personButtons = new HorizontalLayout(selectAllPersons, selectNoPersons);
+        var personButtons = new HorizontalLayout(selectAllPersons, selectNoPersons);
 
         listBoxFormLayout.add(eventButtons, personButtons);
 
@@ -340,7 +340,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         eventListBox.setItemLabelGenerator(EventRecord::getTitle);
         eventListBox.addValueChangeListener(e -> setDirty(e.isFromClient()));
 
-        Scroller eventListBoxScroller = new Scroller(eventListBox);
+        var eventListBoxScroller = new Scroller(eventListBox);
         eventListBoxScroller.addClassName("scroller");
         eventListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
         eventListBoxScroller.setHeight("400px");
@@ -351,7 +351,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         personListBox.setItemLabelGenerator(p -> "%s %s".formatted(p.getLastName(), p.getFirstName()));
         personListBox.addValueChangeListener(e -> setDirty(e.isFromClient()));
 
-        Scroller personListBoxScroller = new Scroller(personListBox);
+        var personListBoxScroller = new Scroller(personListBox);
         personListBoxScroller.addClassName("scroller");
         personListBoxScroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
         personListBoxScroller.setHeight("400px");
@@ -373,7 +373,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private void createButtonLayout(Div editorLayoutDiv) {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
+        var buttonLayout = new HorizontalLayout();
         buttonLayout.setClassName("button-layout");
 
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -524,8 +524,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private void loadEvents(Integer year) {
-        LocalDate fromDate = LocalDate.of(year, 1, 1);
-        LocalDate toDate = LocalDate.of(year, 12, 31);
+        var fromDate = LocalDate.of(year, 1, 1);
+        var toDate = LocalDate.of(year, 12, 31);
 
         eventListBox.setItems(eventRepository.findAll(EVENT.FROM_DATE.between(fromDate, toDate), List.of(EVENT.TITLE)));
     }

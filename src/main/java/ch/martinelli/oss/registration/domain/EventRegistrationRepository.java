@@ -39,7 +39,7 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
 
     public List<EventRegistrationRow> getEventRegistrationMatrix(Long registrationId) {
         // First get all events ordered by date and title
-        List<EventRecord> events = dslContext
+        var events = dslContext
                 .select(REGISTRATION_EVENT.event().fields())
                 .from(REGISTRATION_EVENT)
                 .where(REGISTRATION_EVENT.REGISTRATION_ID.eq(registrationId))
@@ -47,12 +47,12 @@ public class EventRegistrationRepository extends JooqDAO<EventRegistration, Even
                 .fetchInto(EventRecord.class);
 
         // Create select fields starting with person info
-        List<SelectField<?>> fields = new ArrayList<>();
+        var fields = new ArrayList<SelectField<?>>();
         fields.add(PERSON.LAST_NAME);
         fields.add(PERSON.FIRST_NAME);
 
         // Add a field for each event
-        for (EventRecord event : events) {
+        for (var event : events) {
             Field<Boolean> registrationField = boolOr(
                     when(EVENT.TITLE.eq(event.getTitle()), EVENT_REGISTRATION.REGISTERED).otherwise(false)
             ).as(DSL.name(event.getTitle()));

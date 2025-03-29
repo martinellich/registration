@@ -41,7 +41,7 @@ public class EmailSender {
     public void sendEmail(RegistrationRecord registration, RegistrationEmailViewRecord registrationEmail,
             String replyTo) {
         try {
-            SimpleMailMessage mailMessage = createMailMessage(registration, registrationEmail, replyTo);
+            var mailMessage = createMailMessage(registration, registrationEmail, replyTo);
             javaMailSender.send(mailMessage);
 
             log.info("Email sent to {} with RegistrationEmailId {}", registrationEmail.getEmail(),
@@ -64,12 +64,12 @@ public class EmailSender {
             throw new IllegalArgumentException(
                     "Email text is missing for registration %d".formatted(registration.getId()));
         }
-        SimpleMailMessage message = new SimpleMailMessage();
+        var message = new SimpleMailMessage();
         message.setFrom(sender);
         message.setTo(registrationEmail.getEmail());
         message.setReplyTo(replyTo);
         message.setSubject("%s %d".formatted(registration.getTitle(), registration.getYear()));
-        String url = "%s/public/%s".formatted(publicAddress, registrationEmail.getLink());
+        var url = "%s/public/%s".formatted(publicAddress, registrationEmail.getLink());
         message.setText(registration.getEmailText().formatted(url));
         return message;
     }
