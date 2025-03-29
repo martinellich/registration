@@ -152,6 +152,7 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
             byte[] excel = eventRegistrationService.createEventRegistrationExcel(registrationId);
             return new ByteArrayInputStream(excel);
         }), "");
+        excelExportAnchor.setTarget("_blank");
         excelExportAnchor.setVisible(false);
 
         var excelExportButton = new Button(translate("export"), LineAwesomeIcon.FILE_EXCEL_SOLID.create());
