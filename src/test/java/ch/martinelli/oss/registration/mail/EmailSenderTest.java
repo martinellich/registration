@@ -54,7 +54,7 @@ class EmailSenderTest {
             assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
             assertThat(email.getSubject()).isEqualTo("Anmeldung 2023");
             assertThat(email.getPlainTextBody())
-                .isEqualTo("Mail text https://tve-registration.fly.dev/public/2226914588a24213a631dcdd475f81b6\n");
+                .isEqualTo("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6\n");
         });
     }
 
