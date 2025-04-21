@@ -12,7 +12,7 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registrations</artifactId>
-    <version>1.9.8</version>
+    <version>1.9.9</version>
 
     <name>Registrations</name>
     <description>Simple Event Registration App</description>
@@ -328,6 +328,18 @@
                     <statelessTestsetInfoReporter
                             implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                     </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.jelastic</groupId>
+                <artifactId>jelastic-maven-plugin</artifactId>
+                <version>1.9.5</version>
+                <configuration>
+                    <email>${jelastic.username}</email>
+                    <password>${jelastic.password}</password>
+                    <context>ROOT</context>
+                    <environment>jtaf4</environment>
+                    <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
             </plugin>
         </plugins>
