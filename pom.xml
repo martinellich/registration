@@ -338,7 +338,7 @@
                     <email>${jelastic.username}</email>
                     <password>${jelastic.password}</password>
                     <context>ROOT</context>
-                    <environment>jtaf4</environment>
+                    <environment>registration</environment>
                     <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
             </plugin>
