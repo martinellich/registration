@@ -12,7 +12,7 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registrations</artifactId>
-    <version>1.9.9</version>
+    <version>1.9.10</version>
 
     <name>Registrations</name>
     <description>Simple Event Registration App</description>
@@ -338,7 +338,7 @@
                     <email>${jelastic.username}</email>
                     <password>${jelastic.password}</password>
                     <context>ROOT</context>
-                    <environment>jtaf4</environment>
+                    <environment>registration</environment>
                     <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
             </plugin>
