@@ -30,7 +30,7 @@ public class EmailSender {
     private final String sender;
 
     public EmailSender(JavaMailSender javaMailSender, DSLContext dslContext,
-            @Value("${public.address}") String publicAddress, @Value("${spring.mail.username}") String sender) {
+            @Value("${registration.public.address}") String publicAddress, @Value("${spring.mail.username}") String sender) {
         this.javaMailSender = javaMailSender;
         this.dslContext = dslContext;
         this.publicAddress = publicAddress;
