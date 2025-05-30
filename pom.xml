@@ -47,7 +47,7 @@
         <line-awesome.version>2.1.0</line-awesome.version>
         <spring-cloud-azure-starter-active-directory.version>5.22.0</spring-cloud-azure-starter-active-directory.version>
 
-        <testcontainers.version>1.21.0</testcontainers.version>
+        <testcontainers.version>1.21.1</testcontainers.version>
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
         <mailcatcher.version>0.9.3</mailcatcher.version>
 
