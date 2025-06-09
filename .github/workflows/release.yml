@@ -33,6 +33,8 @@ jobs:
             -   name: Maven Build
                 run: ./mvnw -B clean package -Pproduction
 
+            -   uses: superfly/flyctl-actions/setup-flyctl@master
+
             -   name: Deploy to Fly.io
                 run: flyctl deploy --remote-only
                 env:
