@@ -52,7 +52,7 @@ public abstract class KaribuTest {
 
     @BeforeEach
     public void setup() {
-        MockVaadin.INSTANCE.setMockRequestFactory(session -> new FakeRequest(session) {
+        MockVaadin.setMockRequestFactory(session -> new FakeRequest(session) {
             @Override
             public Principal getUserPrincipal() {
                 createAuthentication();
