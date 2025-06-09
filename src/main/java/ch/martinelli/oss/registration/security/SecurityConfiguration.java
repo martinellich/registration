@@ -7,7 +7,6 @@ import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
 @Configuration
@@ -18,9 +17,9 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         http.with(AadWebApplicationHttpSecurityConfigurer.aadWebApplication(), c -> {
         });
 
-        http.authorizeHttpRequests(authorize -> authorize
-            .requestMatchers(new AntPathRequestMatcher("/images/*.png"),
-                    new AntPathRequestMatcher("/line-awesome/**/*.svg"), EndpointRequest.to(HealthEndpoint.class))
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/**/*.svg")
+            .permitAll()
+            .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
             .permitAll());
 
         super.configure(http);
