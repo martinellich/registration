@@ -344,8 +344,8 @@
                         <version>${jacoco.version}</version>
                         <configuration>
                             <excludes>
-                                <exclude>ch/jtaf/Jtaf4Application.*</exclude>
-                                <exclude>ch/jtaf/db/**/**.*</exclude>
+                                <exclude>ch/martinelli/oss/registration/RegistrationApplication.*</exclude>
+                                <exclude>ch/martinelli/oss/registration/db/**/**.*</exclude>
                             </excludes>
                         </configuration>
                         <executions>
