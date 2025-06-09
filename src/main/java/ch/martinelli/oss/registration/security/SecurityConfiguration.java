@@ -17,7 +17,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         http.with(AadWebApplicationHttpSecurityConfigurer.aadWebApplication(), c -> {
         });
 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/**/*.svg")
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/*")
             .permitAll()
             .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
             .permitAll());

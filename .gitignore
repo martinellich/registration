@@ -20,3 +20,8 @@ drivers/
 error-screenshots/
 webpack.generated.js
 /src/main/bundles/prod.bundle
+/.vaadin-node-tasks.lock
+/package.json
+/package-lock.json
+/tsconfig.json
+/types.d.ts
