@@ -45,7 +45,7 @@
         <jooq-utilities.version>1.1.2</jooq-utilities.version>
         <vaadin-jooq.version>2.1.1</vaadin-jooq.version>
         <line-awesome.version>2.1.0</line-awesome.version>
-        <spring-cloud-azure-starter-active-directory.version>5.22.0</spring-cloud-azure-starter-active-directory.version>
+        <spring-cloud-azure-starter-active-directory.version>5.23.0</spring-cloud-azure-starter-active-directory.version>
 
         <testcontainers.version>1.21.3</testcontainers.version>
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
