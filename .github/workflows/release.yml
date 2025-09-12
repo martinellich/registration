@@ -14,13 +14,18 @@ jobs:
             id-token: 'write'
 
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v5
 
             -   name: Set up JDK 21
-                uses: actions/setup-java@v4
+                uses: actions/setup-java@v5
                 with:
                     java-version: '21'
                     distribution: 'adopt'
+
+            - name: Maven settings.xml
+              uses: s4u/maven-settings-action@v3.1.0
+              with:
+                properties: '[{"jelastic.username": "${{ secrets.JELASTIC_USERNAME }}"}, {"jelastic.password": "${{ secrets.JELASTIC_TOKEN }}" }]'
 
             -   name: Cache local Maven repository
                 uses: actions/cache@v4
@@ -33,9 +38,5 @@ jobs:
             -   name: Maven Build
                 run: ./mvnw -B clean package -Pproduction
 
-            -   uses: superfly/flyctl-actions/setup-flyctl@master
-
-            -   name: Deploy to Fly.io
-                run: flyctl deploy --remote-only
-                env:
-                    FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+            - name: Jelastic Deploy
+              run: ./mvnw -B jelastic:deploy

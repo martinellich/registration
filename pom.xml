@@ -7,12 +7,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.5</version>
     </parent>
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registration</artifactId>
-    <version>1.10.4</version>
+    <version>1.10.5</version>
 
     <name>registration</name>
     <description>Simple Event Registration App</description>
@@ -39,21 +39,21 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.7.6</vaadin.version>
-        <jooq.version>3.20.4</jooq.version>
+        <vaadin.version>24.8.7</vaadin.version>
+        <jooq.version>3.20.7</jooq.version>
         <jooq-spring.version>0.4.0</jooq-spring.version>
         <jooq-utilities.version>1.1.2</jooq-utilities.version>
         <vaadin-jooq.version>2.1.1</vaadin-jooq.version>
         <line-awesome.version>2.1.0</line-awesome.version>
-        <spring-cloud-azure-starter-active-directory.version>5.22.0</spring-cloud-azure-starter-active-directory.version>
+        <spring-cloud-azure-starter-active-directory.version>5.23.0</spring-cloud-azure-starter-active-directory.version>
 
-        <testcontainers.version>1.21.1</testcontainers.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
         <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
         <mailcatcher.version>0.9.3</mailcatcher.version>
 
-        <spring-javaformat-maven-plugin.version>0.0.46</spring-javaformat-maven-plugin.version>
+        <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
         <jacoco.version>0.8.13</jacoco.version>
-        <karibu-testing.version>2.3.0</karibu-testing.version>
+        <karibu-testing.version>2.4.2</karibu-testing.version>
 
         <gitflow.version>1.21.0</gitflow.version>
 
@@ -328,6 +328,18 @@
                     <statelessTestsetInfoReporter
                             implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                     </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.jelastic</groupId>
+                <artifactId>jelastic-maven-plugin</artifactId>
+                <version>1.9.5</version>
+                <configuration>
+                    <email>${jelastic.username}</email>
+                    <password>${jelastic.password}</password>
+                    <context>ROOT</context>
+                    <environment>registration</environment>
+                    <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
             </plugin>
         </plugins>
