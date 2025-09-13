@@ -18,7 +18,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         });
 
         http.authorizeHttpRequests(
-                authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/*", "/oauth/token")
+                authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/*", "oauth2/authorization/azure")
                     .permitAll()
                     .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
                     .permitAll());
