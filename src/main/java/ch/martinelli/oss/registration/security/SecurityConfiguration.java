@@ -17,10 +17,11 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         http.with(AadWebApplicationHttpSecurityConfigurer.aadWebApplication(), c -> {
         });
 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/*")
-            .permitAll()
-            .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
-            .permitAll());
+        http.authorizeHttpRequests(
+                authorize -> authorize.requestMatchers("/images/*.png", "/line-awesome/*", "/oauth/token")
+                    .permitAll()
+                    .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
+                    .permitAll());
 
         super.configure(http);
     }
