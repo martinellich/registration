@@ -12,7 +12,7 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registration</artifactId>
-    <version>1.10.14-SNAPSHOT</version>
+    <version>1.10.14</version>
 
     <name>registration</name>
     <description>Simple Event Registration App</description>
