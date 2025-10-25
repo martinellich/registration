@@ -19,6 +19,7 @@ insert into event(id,title,description,location,from_date,to_date) values ( 5,'J
 
 insert into registration(id,title,year,open_from,open_until,remarks,email_text) values (1,'Anmeldung',2023,'2023-01-01','2023-02-28','Some remarks','Mail text %s');
 insert into registration(id,title,year,open_from,open_until,remarks,email_text) values (2,'Anmeldung',2024,'2024-01-01','2024-02-28','Some remarks','Mail text %s');
+insert into registration(id,title,year,open_from,open_until,remarks,email_text) values (3,'Anmeldung',2025,'2025-01-01','2099-12-31','Open registration for testing','Mail text %s');
 
 insert into registration_person (registration_id,person_id) values (1,1);
 insert into registration_person (registration_id,person_id) values (1,5);
@@ -29,7 +30,14 @@ insert into registration_event (registration_id,event_id) values (1,2);
 insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,1, true);
 insert into event_registration (registration_id,event_id,person_id,registered) values (1,1,2, false);
 
+insert into registration_person (registration_id,person_id) values (3,2);
+
+insert into registration_event (registration_id,event_id) values (3,4);
+insert into registration_event (registration_id,event_id) values (3,5);
+
 insert into registration_email (id,registration_id,email,link,sent_at) values (1,1,'jordan.miccinesi@duod.gy','550e8400e29b41d4a716446655440000','2023-01-01 11:00:00');
 insert into registration_email (id,registration_id,email,link,sent_at) values (2,1,'cora.tesi@bivo.yt','2226914588a24213a631dcdd475f81b6',null);
+insert into registration_email (id,registration_id,email,link,sent_at) values (3,3,'barry.rodriquez@zun.mm','openregistrationlink123456789',null);
 insert into registration_email_person (registration_email_id,person_id) values (1,1);
 insert into registration_email_person (registration_email_id,person_id) values (2,5);
+insert into registration_email_person (registration_email_id,person_id) values (3,2);

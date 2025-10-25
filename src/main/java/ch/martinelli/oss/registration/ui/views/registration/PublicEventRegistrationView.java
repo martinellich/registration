@@ -19,6 +19,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,11 +70,24 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
 
         var registration = registrationRepository.findById(registrationEmail.getRegistrationId()).orElseThrow();
 
+        // Check if registration period has ended
+        var isRegistrationClosed = LocalDate.now().isAfter(registration.getOpenUntil());
+
         var logo = new Image("/icons/icon.png", "Logo");
         logo.setHeight("40px");
         var header = new HorizontalLayout(logo,
                 new H2("%s %d".formatted(registration.getTitle(), registration.getYear())));
         add(header);
+
+        // Show notification banner if registration is closed
+        if (isRegistrationClosed) {
+            var closedNotification = new Div();
+            closedNotification.addClassNames(LumoUtility.Background.ERROR_10, LumoUtility.Padding.MEDIUM,
+                    LumoUtility.BorderRadius.MEDIUM, LumoUtility.Margin.Bottom.MEDIUM);
+            closedNotification.setText(translate("registration.closed"));
+            add(closedNotification);
+        }
+
         if (registration.getRemarks() != null) {
             add(new Paragraph(registration.getRemarks()));
         }
@@ -109,6 +123,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 var checkbox = new Checkbox(text);
                 checkbox.getElement().getThemeList().add("switch");
                 checkbox.setWidth("200px");
+                checkbox.setEnabled(!isRegistrationClosed);
                 checkboxes.add(checkbox);
                 checkboxMap.put(checkbox, new EventWithPerson(event, person));
 
@@ -145,6 +160,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
             registerButton.setText(translate("send"));
         }
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        registerButton.setEnabled(!isRegistrationClosed);
         registerButton.addClickListener(e -> {
             var eventRegistrations = new HashSet<EventRegistrationRecord>();
             for (var entry : checkboxMap.entrySet()) {
