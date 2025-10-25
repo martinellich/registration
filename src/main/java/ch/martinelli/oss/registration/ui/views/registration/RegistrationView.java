@@ -301,13 +301,56 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         binder.forField(remarks).bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(remarks, 2);
 
+        // Invitation Email Section
+        var invitationEmailHeader = new H4(translate("invitation.email"));
+        invitationEmailHeader.addClassName(LumoUtility.Margin.Top.LARGE);
+        formLayout.setColspan(invitationEmailHeader, 4);
+
         var emailText = new TextArea(translate("email.text"));
         emailText.setPlaceholder(translate("email.text.placeholder"));
         emailText.setHeight("200px");
         binder.forField(emailText).bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
         formLayout.setColspan(emailText, 2);
 
-        formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, remarks, emailText);
+        // Confirmation Email Section
+        var confirmationEmailHeader = new H4(translate("confirmation.email"));
+        confirmationEmailHeader.addClassName(LumoUtility.Margin.Top.LARGE);
+        formLayout.setColspan(confirmationEmailHeader, 4);
+
+        var placeholdersHelp = new Span(translate("confirmation.email.placeholders.help"));
+        placeholdersHelp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        formLayout.setColspan(placeholdersHelp, 4);
+
+        var confirmationSubjectNew = new TextField(translate("confirmation.email.subject.new"));
+        binder.forField(confirmationSubjectNew)
+            .bind(RegistrationRecord::getConfirmationEmailSubjectNew,
+                    RegistrationRecord::setConfirmationEmailSubjectNew);
+        formLayout.setColspan(confirmationSubjectNew, 2);
+
+        var confirmationTextNew = new TextArea(translate("confirmation.email.text.new"));
+        confirmationTextNew.setPlaceholder(translate("confirmation.email.text.placeholder"));
+        confirmationTextNew.setHeight("200px");
+        binder.forField(confirmationTextNew)
+            .bind(RegistrationRecord::getConfirmationEmailTextNew, RegistrationRecord::setConfirmationEmailTextNew);
+        formLayout.setColspan(confirmationTextNew, 2);
+
+        var confirmationSubjectUpdate = new TextField(translate("confirmation.email.subject.update"));
+        binder.forField(confirmationSubjectUpdate)
+            .bind(RegistrationRecord::getConfirmationEmailSubjectUpdate,
+                    RegistrationRecord::setConfirmationEmailSubjectUpdate);
+        formLayout.setColspan(confirmationSubjectUpdate, 2);
+
+        var confirmationTextUpdate = new TextArea(translate("confirmation.email.text.update"));
+        confirmationTextUpdate.setPlaceholder(translate("confirmation.email.text.placeholder"));
+        confirmationTextUpdate.setHeight("200px");
+        binder.forField(confirmationTextUpdate)
+            .bind(RegistrationRecord::getConfirmationEmailTextUpdate,
+                    RegistrationRecord::setConfirmationEmailTextUpdate);
+        formLayout.setColspan(confirmationTextUpdate, 2);
+
+        formLayout.add(titleTextField, yearIntegerField, openFromDatePicker, openUntilDatePicker, remarks,
+                invitationEmailHeader, emailText, confirmationEmailHeader, placeholdersHelp, confirmationSubjectNew,
+                confirmationTextNew, confirmationSubjectUpdate, confirmationTextUpdate);
 
         editorDiv.add(formLayout);
 

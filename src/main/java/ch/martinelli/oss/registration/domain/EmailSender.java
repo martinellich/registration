@@ -59,6 +59,24 @@ public class EmailSender {
             .execute();
     }
 
+    public void sendConfirmationEmail(String to, String subject, String body, String replyTo) {
+        try {
+            var message = new SimpleMailMessage();
+            message.setFrom(sender);
+            message.setTo(to);
+            message.setReplyTo(replyTo);
+            message.setSubject(subject);
+            message.setText(body);
+            javaMailSender.send(message);
+
+            log.info("Confirmation email sent to {}", to);
+        }
+        catch (Exception e) {
+            log.error("Failed to send confirmation email to {}", to, e);
+            // Don't throw exception - we don't want to block registration if email fails
+        }
+    }
+
     private SimpleMailMessage createMailMessage(RegistrationRecord registration,
             RegistrationEmailViewRecord registrationEmail, String replyTo) {
         if (registration.getEmailText() == null) {

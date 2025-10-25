@@ -50,11 +50,31 @@ class EmailSenderTest {
 
         var emails = mailcatcherContainer.getAllEmails();
 
-        assertThat(emails).hasSize(1).first().satisfies(email -> {
+        // Check that our invitation email is in there
+        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
             assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
             assertThat(email.getSubject()).isEqualTo("Anmeldung 2023");
             assertThat(email.getPlainTextBody())
                 .isEqualTo("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6\n");
+        });
+    }
+
+    @Test
+    void send_confirmation_email() {
+        emailSender.sendConfirmationEmail("test@example.com", "Anmeldebestätigung",
+                "Vielen Dank für deine Anmeldung!\n\nDeine Anlässe:\n- Event 1: Ja\n- Event 2: Nein",
+                "jugi@tverlach.ch");
+
+        var emails = mailcatcherContainer.getAllEmails();
+
+        // Should have 2 emails now (1 from previous test + 1 from this test)
+        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
+            assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
+            assertThat(email.getRecipients()).contains("<test@example.com>");
+            assertThat(email.getSubject()).isEqualTo("Anmeldebestätigung");
+            assertThat(email.getPlainTextBody()).contains("Vielen Dank für deine Anmeldung!")
+                .contains("Event 1: Ja")
+                .contains("Event 2: Nein");
         });
     }
 
