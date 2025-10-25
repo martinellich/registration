@@ -58,7 +58,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
 
         // Verify all checkboxes are disabled
         var checkboxes = _find(Checkbox.class);
-        assertThat(checkboxes).allMatch(checkbox -> !checkbox.isEnabled());
+        assertThat(checkboxes).isNotEmpty().allMatch(checkbox -> !checkbox.isEnabled());
 
         // Verify the submit button is disabled
         var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
