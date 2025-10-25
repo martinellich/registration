@@ -32,20 +32,21 @@ class RegistrationEmailViewTest extends KaribuTest {
         var grid = (Grid<RegistrationEmailViewRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isZero();
 
-        // Filter
+        // Filter - select registration for year 2023 (now at index 2 with 3
+        // registrations)
         @SuppressWarnings("rawtypes")
         var select = _get(Select.class);
         // noinspection unchecked
-        _setValue(_get(Select.class), select.getListDataView().getItem(1));
+        _setValue(_get(Select.class), select.getListDataView().getItem(2));
 
         assertThat(GridKt._size(grid)).isNotZero();
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);
 
-        // Filter
+        // Filter - select registration for year 2024 (now at index 1) which has no emails
         // noinspection unchecked
-        _setValue(_get(Select.class), select.getListDataView().getItem(0));
+        _setValue(_get(Select.class), select.getListDataView().getItem(1));
 
-        // Check the content of grid
+        // Check the content of grid - 2024 has no emails
         assertThat(GridKt._size(grid)).isZero();
 
         // Clear Filter
@@ -62,11 +63,12 @@ class RegistrationEmailViewTest extends KaribuTest {
         var grid = (Grid<RegistrationEmailViewRecord>) _get(Grid.class);
         assertThat(GridKt._size(grid)).isZero();
 
-        // Filter
+        // Filter - select registration for year 2023 (now at index 2 with 3
+        // registrations)
         @SuppressWarnings("rawtypes")
         var select = _get(Select.class);
         // noinspection unchecked
-        _setValue(_get(Select.class), select.getListDataView().getItem(1));
+        _setValue(_get(Select.class), select.getListDataView().getItem(2));
 
         assertThat(GridKt._size(grid)).isNotZero();
         assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2023);

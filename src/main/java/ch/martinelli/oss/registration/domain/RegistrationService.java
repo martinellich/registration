@@ -4,13 +4,16 @@ import ch.martinelli.oss.registration.db.tables.records.*;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
@@ -32,15 +35,22 @@ public class RegistrationService {
 
     private final EventRegistrationRepository eventRegistrationRepository;
 
+    private final EventRepository eventRepository;
+
+    private final String publicAddress;
+
     public RegistrationService(RegistrationRepository registrationRepository, DSLContext dslContext,
             EmailSender emailSender, RegistrationEmailRepository registrationEmailRepository,
-            PersonRepository personRepository, EventRegistrationRepository eventRegistrationRepository) {
+            PersonRepository personRepository, EventRegistrationRepository eventRegistrationRepository,
+            EventRepository eventRepository, @Value("${registration.public.address}") String publicAddress) {
         this.registrationRepository = registrationRepository;
         this.dslContext = dslContext;
         this.emailSender = emailSender;
         this.registrationEmailRepository = registrationEmailRepository;
         this.personRepository = personRepository;
         this.eventRegistrationRepository = eventRegistrationRepository;
+        this.eventRepository = eventRepository;
+        this.publicAddress = publicAddress;
     }
 
     @Transactional
@@ -80,10 +90,15 @@ public class RegistrationService {
     @Transactional
     public void register(Long registrationEmailId, Set<EventRegistrationRecord> eventRegistrations) {
         if (!eventRegistrations.isEmpty()) {
-            registrationEmailRepository.findById(registrationEmailId).ifPresent(registrationEmail -> {
+            // Track if this is the first registration
+            boolean isFirstRegistration = false;
+            var registrationEmailOpt = registrationEmailRepository.findById(registrationEmailId);
+            if (registrationEmailOpt.isPresent()) {
+                var registrationEmail = registrationEmailOpt.get();
+                isFirstRegistration = registrationEmail.getRegisteredAt() == null;
                 registrationEmail.setRegisteredAt(LocalDateTime.now());
                 registrationEmail.store();
-            });
+            }
 
             for (var eventRegistration : eventRegistrations) {
                 var existingEventRegistration = eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
@@ -99,6 +114,9 @@ public class RegistrationService {
                     eventRegistration.store();
                 }
             }
+
+            // Send confirmation email
+            sendConfirmationEmail(registrationEmailId, isFirstRegistration);
         }
     }
 
@@ -113,6 +131,90 @@ public class RegistrationService {
                 log.error("Error sending email", e);
             }
         }
+    }
+
+    private void sendConfirmationEmail(Long registrationEmailId, boolean isFirstRegistration) {
+        var registrationEmailViewOpt = registrationEmailRepository.findByIdFromView(registrationEmailId);
+        if (registrationEmailViewOpt.isEmpty()) {
+            log.warn("Could not find registration email with id {}", registrationEmailId);
+            return;
+        }
+
+        var registrationEmailView = registrationEmailViewOpt.get();
+        var registrationOpt = registrationRepository.findById(registrationEmailView.getRegistrationId());
+        if (registrationOpt.isEmpty()) {
+            log.warn("Could not find registration with id {}", registrationEmailView.getRegistrationId());
+            return;
+        }
+
+        var registration = registrationOpt.get();
+
+        // Choose template based on whether it's first registration or update
+        String subject;
+        String template;
+        if (isFirstRegistration) {
+            subject = registration.getConfirmationEmailSubjectNew();
+            template = registration.getConfirmationEmailTextNew();
+        }
+        else {
+            subject = registration.getConfirmationEmailSubjectUpdate();
+            template = registration.getConfirmationEmailTextUpdate();
+        }
+
+        // If no template is configured, skip sending
+        if (template == null || template.isBlank()) {
+            log.info("No confirmation email template configured for registration {}", registration.getId());
+            return;
+        }
+
+        // Build person names list
+        var persons = registrationEmailRepository.findPersonsByRegistrationEmailId(registrationEmailId);
+        var personNames = persons.stream()
+            .map(p -> p.getFirstName() + " " + p.getLastName())
+            .collect(Collectors.joining("\n- ", "- ", ""));
+
+        // Build events list with registration status
+        var events = eventRepository.findByRegistrationId(registration.getId());
+        var eventsText = new StringBuilder();
+        for (var event : events) {
+            eventsText.append("- ").append(event.getTitle()).append(":\n");
+            for (var person : persons) {
+                var eventRegOpt = eventRegistrationRepository
+                    .findByRegistrationIdAndEventIdAndPersonId(registration.getId(), event.getId(), person.getId());
+                boolean registered = eventRegOpt.map(EventRegistrationRecord::getRegistered).orElse(false);
+                eventsText.append("  ")
+                    .append(person.getFirstName())
+                    .append(" ")
+                    .append(person.getLastName())
+                    .append(": ")
+                    .append(registered ? "Ja" : "Nein")
+                    .append("\n");
+            }
+        }
+
+        // Format dates
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        var openFrom = registration.getOpenFrom().format(dateFormatter);
+        var openUntil = registration.getOpenUntil().format(dateFormatter);
+
+        // Build magic link
+        var magicLink = "%s/public/%s".formatted(publicAddress, registrationEmailView.getLink());
+
+        // Replace placeholders
+        var body = template.replace("%PERSON_NAMES%", personNames)
+            .replace("%EVENTS%", eventsText.toString().trim())
+            .replace("%LINK%", magicLink)
+            .replace("%OPEN_FROM%", openFrom)
+            .replace("%OPEN_UNTIL%", openUntil)
+            .replace("%REMARKS%", registration.getRemarks() != null ? registration.getRemarks() : "");
+
+        // Send email
+        emailSender.sendConfirmationEmail(registrationEmailView.getEmail(),
+                subject != null ? subject : "Anmeldebestätigung", body, registrationEmailView.getEmail() // replyTo
+                                                                                                         // same
+                                                                                                         // as
+                                                                                                         // recipient
+        );
     }
 
 }

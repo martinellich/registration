@@ -60,9 +60,10 @@ class RegistrationViewTest extends KaribuTest {
         // Check the content of grid
         @SuppressWarnings("unchecked")
         var grid = (Grid<RegistrationViewRecord>) _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(2);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2024);
-        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2023);
+        assertThat(GridKt._size(grid)).isEqualTo(3);
+        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
+        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
+        assertThat(GridKt._get(grid, 2).getYear()).isEqualTo(2023);
 
         // Add new registration
         _click(_get(Icon.class, spec -> spec.withId("add-icon")));
@@ -85,10 +86,11 @@ class RegistrationViewTest extends KaribuTest {
 
         NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
 
-        assertThat(GridKt._size(grid)).isEqualTo(3);
+        assertThat(GridKt._size(grid)).isEqualTo(4);
 
-        // Select newly created record
-        var registrationViewRecord = GridKt._get(grid, 0);
+        // Select newly created record (at index 1 because it's sorted by year desc, then
+        // title asc)
+        var registrationViewRecord = GridKt._get(grid, 1);
         assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
 
         // Create mailing
