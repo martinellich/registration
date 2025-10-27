@@ -55,7 +55,7 @@
         <jacoco.version>0.8.14</jacoco.version>
         <karibu-testing.version>2.5.0</karibu-testing.version>
         <pitest-maven.version>1.21.0</pitest-maven.version>
-        <pitest-junit5-plugin.version>1.2.2</pitest-junit5-plugin.version>
+        <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
         <gitflow.version>1.21.0</gitflow.version>
 
