@@ -28,6 +28,8 @@ class EventsViewTest extends KaribuTest {
     @BeforeEach
     void login() {
         UI.getCurrent().navigate(EventsView.class);
+        // Show past events to ensure test data is visible
+        _click(_get(Button.class, spec -> spec.withId("toggle-past-events-button")));
     }
 
     @Test
