@@ -8,6 +8,8 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.registration.ui.views.EditView;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -15,7 +17,9 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -35,15 +39,53 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
 public class PersonsView extends EditView<Person, PersonRecord, PersonRepository>
         implements BeforeEnterObserver, HasDynamicTitle {
 
+    private boolean hideInactive;
+
     public PersonsView(PersonRepository personRepository) {
         super(personRepository, PERSON, new Grid<>(PersonRecord.class, false), new Binder<>(PersonRecord.class));
 
+        this.hideInactive = true; // Initialize in constructor
         afterNewRecord = personRecord -> personRecord.setActive(true); // default value
     }
 
     @Override
     public String getPageTitle() {
         return translate("persons");
+    }
+
+    @Override
+    protected Div createGridLayout() {
+        var wrapper = new Div();
+        wrapper.setClassName("grid-wrapper");
+
+        // Add toolbar with filter button
+        var toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setPadding(true);
+        toolbar.setSpacing(true);
+
+        // When hideInactive is true (default), button should show "Show inactive" action
+        // Note: field may not be initialized yet if called from parent constructor
+        var toggleInactiveButton = new Button(translate("show.inactive"));
+        toggleInactiveButton.setId("toggle-inactive-button");
+        toggleInactiveButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        toggleInactiveButton.addClickListener(event -> {
+            hideInactive = !hideInactive;
+            toggleInactiveButton.setText(hideInactive ? translate("show.inactive") : translate("hide.inactive"));
+            grid.getDataProvider().refreshAll();
+        });
+
+        toolbar.add(toggleInactiveButton);
+
+        wrapper.add(toolbar, grid);
+
+        configureGrid();
+        addActionColumn();
+        addSelectionListener();
+        setItems();
+
+        return wrapper;
     }
 
     protected void configureGrid() {
@@ -77,6 +119,15 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
             .setAutoWidth(true);
 
         grid.sort(GridSortOrder.asc(lastNameColumn).thenAsc(firstNameColumn).build());
+    }
+
+    @Override
+    protected void setItems() {
+        grid.setItems(query -> repository
+            .findAll(query.getOffset(), query.getLimit(),
+                    ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil.orderFields(PERSON, query))
+            .stream()
+            .filter(person -> !hideInactive || Boolean.TRUE.equals(person.getActive())));
     }
 
     protected void createComponents(FormLayout formLayout) {
