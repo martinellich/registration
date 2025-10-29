@@ -10,6 +10,7 @@ import com.github.mvysny.kaributesting.v10.pro.ConfirmDialogKt;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -105,6 +106,23 @@ class EventsViewTest extends KaribuTest {
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
         NotificationsKt.expectNotifications("Der Datensatz wird noch verwendet und kann nicht gelöscht werden");
+    }
+
+    @Test
+    void mandatory_event_checkbox() {
+        // Navigate to event with id 4 (CIS 2025) which is mandatory
+        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.ID, "4"));
+
+        // Verify the mandatory checkbox exists and is checked
+        var mandatoryCheckbox = _get(Checkbox.class, spec -> spec.withLabel("Obligatorisch"));
+        assertThat(mandatoryCheckbox.getValue()).isTrue();
+
+        // Navigate to event with id 5 (Jugendmeisterschaft 2025) which is not mandatory
+        UI.getCurrent().navigate(EventsView.class, new RouteParam(EventsView.ID, "5"));
+
+        // Verify the mandatory checkbox exists and is not checked
+        var optionalCheckbox = _get(Checkbox.class, spec -> spec.withLabel("Obligatorisch"));
+        assertThat(optionalCheckbox.getValue()).isFalse();
     }
 
 }

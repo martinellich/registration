@@ -33,12 +33,17 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         assertThat(title).isNotNull();
 
         var checkboxes = LocatorJ._find(Checkbox.class);
-        checkboxes.forEach(checkbox -> LocatorJ._click(checkbox));
+        // Note: Event 4 is mandatory (first checkbox), so it's already checked and
+        // disabled
+        // Only click on enabled checkboxes
+        checkboxes.stream().filter(Checkbox::isEnabled).forEach(checkbox -> LocatorJ._click(checkbox));
 
-        _click(_get(Button.class, spec -> spec.withText("Absenden")));
+        // Button text is "Anmeldung aktualisieren" because there are existing
+        // registrations
+        _click(_get(Button.class, spec -> spec.withText("Anmeldung aktualisieren")));
 
         var button = _get(Button.class);
-        assertThat(button.getText()).isEqualTo("Vielen Dank! Ihre Antwort wurde gesendet.");
+        assertThat(button.getText()).isEqualTo("Die Antwort wurde aktualisiert");
     }
 
     @Test
@@ -80,20 +85,48 @@ class PublicEventRegistrationViewTest extends KaribuTest {
                 "Die Anmeldefrist ist abgelaufen. Sie können Ihre Auswahl ansehen, aber keine Änderungen vornehmen."));
         assertThat(closedNotifications).isEmpty();
 
-        // Verify all checkboxes are enabled
+        // Get all checkboxes (event 4 is mandatory, so first checkbox will be disabled)
         var checkboxes = _find(Checkbox.class);
-        assertThat(checkboxes).allMatch(Checkbox::isEnabled);
+        assertThat(checkboxes).hasSize(2);
 
-        // Verify the submit button is enabled
-        var button = _get(Button.class, spec -> spec.withText("Absenden"));
+        // First checkbox is for mandatory event 4 (CIS 2025) - should be disabled
+        assertThat(checkboxes.get(0).isEnabled()).isFalse();
+        // Second checkbox is for optional event 5 - should be enabled
+        assertThat(checkboxes.get(1).isEnabled()).isTrue();
+
+        // Button text is "Anmeldung aktualisieren" because there are existing
+        // registrations
+        var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
         assertThat(button.isEnabled()).isTrue();
 
-        // Verify we can interact with checkboxes
-        checkboxes.forEach(checkbox -> _click(checkbox));
+        // Verify we can interact with the optional checkbox
+        _click(checkboxes.get(1));
 
         // Verify we can click the submit button
         _click(button);
-        assertThat(button.getText()).isEqualTo("Vielen Dank! Ihre Antwort wurde gesendet.");
+        assertThat(button.getText()).isEqualTo("Die Antwort wurde aktualisiert");
+    }
+
+    @Test
+    void mandatory_event_is_pre_checked_and_disabled() {
+        // Test data: registration 3 includes event 4 (CIS 2025) which is mandatory
+        // and event 5 (Jugendmeisterschaft 2025) which is optional
+        UI.getCurrent().navigate("public/openregistrationlink123456789");
+
+        // Get all checkboxes
+        var checkboxes = _find(Checkbox.class);
+        assertThat(checkboxes).hasSize(2); // Two events in this registration
+
+        // First checkbox should be for event 4 (CIS 2025 - mandatory)
+        // It should be pre-checked and disabled
+        var firstCheckbox = checkboxes.get(0);
+        assertThat(firstCheckbox.getValue()).isTrue();
+        assertThat(firstCheckbox.isEnabled()).isFalse();
+
+        // Second checkbox should be for event 5 (Jugendmeisterschaft 2025 - optional)
+        // It should be enabled and can be toggled
+        var secondCheckbox = checkboxes.get(1);
+        assertThat(secondCheckbox.isEnabled()).isTrue();
     }
 
 }

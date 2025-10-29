@@ -8,6 +8,7 @@ import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -102,6 +103,12 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository>
             .setSortProperty(EVENT.LOCATION.getName())
             .setHeader(translate("location"))
             .setAutoWidth(true);
+        grid.addColumn(
+                eventRecord -> Boolean.TRUE.equals(eventRecord.getMandatory()) ? translate("yes") : translate("no"))
+            .setSortable(true)
+            .setSortProperty(EVENT.MANDATORY.getName())
+            .setHeader(translate("mandatory"))
+            .setAutoWidth(true);
         grid.addColumn(eventRecord -> DATE_FORMAT.format(eventRecord.getFromDate()))
             .setSortable(true)
             .setSortProperty(EVENT.FROM_DATE.getName())
@@ -143,13 +150,17 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository>
         var descriptionTextArea = new TextArea(translate("description"));
         binder.forField(descriptionTextArea).bind(EventRecord::getDescription, EventRecord::setDescription);
 
+        var mandatoryCheckbox = new Checkbox(translate("mandatory"));
+        binder.forField(mandatoryCheckbox).bind(EventRecord::getMandatory, EventRecord::setMandatory);
+
         var fromDatePicker = new I18nDatePicker(translate("from"));
         binder.forField(fromDatePicker).asRequired().bind(EventRecord::getFromDate, EventRecord::setFromDate);
 
         var toDatePicker = new I18nDatePicker(translate("until"));
         binder.forField(toDatePicker).bind(EventRecord::getToDate, EventRecord::setToDate);
 
-        formLayout.add(titleTextField, locationTextField, descriptionTextArea, fromDatePicker, toDatePicker);
+        formLayout.add(titleTextField, locationTextField, descriptionTextArea, mandatoryCheckbox, fromDatePicker,
+                toDatePicker);
     }
 
 }
