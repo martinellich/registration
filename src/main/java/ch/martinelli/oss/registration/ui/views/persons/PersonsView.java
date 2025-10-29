@@ -5,9 +5,13 @@ import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
+import ch.martinelli.oss.registration.ui.components.Icon;
+import ch.martinelli.oss.registration.ui.components.Notification;
 import ch.martinelli.oss.registration.ui.views.EditView;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -19,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
@@ -92,6 +97,50 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         binder.forField(active).bind(PersonRecord::getActive, PersonRecord::setActive);
 
         formLayout.add(lastNameTextField, firstNameTextField, emailTextField, dateOfBirthDatePicker, active);
+    }
+
+    @Override
+    protected void addActionColumn() {
+        var addIcon = new Icon(LineAwesomeIcon.PLUS_CIRCLE_SOLID, e -> {
+            grid.deselectAll();
+            grid.getDataProvider().refreshAll();
+            var personRecord = PERSON.newRecord();
+            if (afterNewRecord != null) {
+                afterNewRecord.accept(personRecord);
+            }
+            populateForm(personRecord);
+        });
+        addIcon.setId("add-icon");
+        addIcon.addClassName(ACTION_ICON);
+
+        grid.addComponentColumn(personRecord -> {
+            var deleteIcon = new Icon(LineAwesomeIcon.TRASH_SOLID, e -> new ConfirmDialog(translate("delete.record"),
+                    translate("delete.record.question"), translate("yes"), ce -> {
+                        try {
+                            repository.delete(personRecord);
+
+                            clearForm();
+                            grid.getDataProvider().refreshAll();
+
+                            Notification.success(translate("delete.record.success"));
+                        }
+                        catch (DataIntegrityViolationException ex) {
+                            // Person cannot be deleted due to foreign key constraints,
+                            // deactivate instead
+                            personRecord.setActive(false);
+                            repository.save(personRecord);
+
+                            clearForm();
+                            grid.getDataProvider().refreshAll();
+
+                            Notification.success(translate("deactivate.record.success"));
+                        }
+                    }, translate("cancel"), ce -> {
+                    })
+                .open());
+            deleteIcon.addClassName("delete-icon");
+            return deleteIcon;
+        }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setKey("action-column");
     }
 
 }

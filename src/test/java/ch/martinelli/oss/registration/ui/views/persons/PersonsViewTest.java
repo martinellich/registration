@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
-import ch.martinelli.oss.registration.db.tables.records.EventRecord;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
@@ -95,7 +94,14 @@ class PersonsViewTest extends KaribuTest {
     @Test
     void try_to_delete_used_person() {
         @SuppressWarnings("unchecked")
-        var grid = (Grid<EventRecord>) _get(Grid.class);
+        var grid = (Grid<PersonRecord>) _get(Grid.class);
+
+        // Get the person record before attempting deletion
+        var personBefore = GridKt._get(grid, 4);
+        var personId = personBefore.getId();
+        assertThat(personBefore.getActive()).isTrue();
+
+        // Attempt to delete the person
         var component = GridKt._getCellComponent(grid, 4, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
@@ -103,7 +109,16 @@ class PersonsViewTest extends KaribuTest {
 
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        NotificationsKt.expectNotifications("Der Datensatz wird noch verwendet und kann nicht gelöscht werden");
+        // Expect deactivation notification instead of error
+        NotificationsKt.expectNotifications("Die Person wurde deaktiviert, da sie noch verwendet wird");
+
+        // Verify the person was deactivated, not deleted
+        assertThat(GridKt._size(grid)).isEqualTo(12); // Same number of records
+
+        // Find the person in the grid and verify it's deactivated
+        var personAfter = GridKt._get(grid, 4);
+        assertThat(personAfter.getId()).isEqualTo(personId);
+        assertThat(personAfter.getActive()).isFalse();
     }
 
 }

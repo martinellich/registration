@@ -1,4 +1,4 @@
-insert into person(id,last_name,first_name,email,date_of_birth,active) values (1,'Lane','Eula','eula.lane@jigrormo.ye','2018-01-12', true);
+insert into person(id,last_name,first_name,email,date_of_birth,active) values (1,'Lane','Eula','simon.martinelli@gmail.com','2018-01-12', true);
 insert into person(id,last_name,first_name,email,date_of_birth,active) values (2,'Rodriquez','Barry','barry.rodriquez@zun.mm','2013-12-07', true);
 insert into person(id,last_name,first_name,email,date_of_birth,active) values (3,'Selvi','Eugenia','eugenia.selvi@capfad.vn','2019-12-05', true);
 insert into person(id,last_name,first_name,email,date_of_birth,active) values (4,'Miles','Alejandro','alejandro.miles@dec.bn','2013-12-11', false);
