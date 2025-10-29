@@ -57,6 +57,9 @@ class RegistrationViewTest extends KaribuTest {
 
     @Test
     void add_registration_create_mailing_send_emails() {
+        // Enable showing past invitations to see all test data
+        _click(_get(Button.class, spec -> spec.withId("toggle-past-invitations-button")));
+
         // Check the content of grid
         @SuppressWarnings("unchecked")
         var grid = (Grid<RegistrationViewRecord>) _get(Grid.class);
