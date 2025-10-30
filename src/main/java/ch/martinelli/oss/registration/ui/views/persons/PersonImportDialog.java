@@ -84,7 +84,7 @@ public class PersonImportDialog extends Dialog {
                 badge.getElement().getThemeList().add("contrast");
             }
             return badge;
-        }).setHeader(translate("upload.persons.type")).setWidth("120px").setFlexGrow(0);
+        }).setHeader(translate("upload.persons.type")).setWidth("130px").setFlexGrow(0);
 
         // Last Name column
         grid.addColumn(change -> {
