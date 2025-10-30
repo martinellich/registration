@@ -19,12 +19,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.StreamResource;
 import jakarta.annotation.security.RolesAllowed;
 import org.jooq.impl.DSL;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import static ch.martinelli.oss.registration.db.tables.Registration.REGISTRATION;
@@ -148,10 +146,13 @@ public class EventRegistrationView extends Div implements HasUrlParameter<Long>,
         cancelButton.addClickListener(e -> UI.getCurrent().getPage().getHistory().back());
         buttonLayout.add(cancelButton);
 
-        excelExportAnchor = new Anchor(new StreamResource("event_registrations.xlsx", () -> {
-            byte[] excel = eventRegistrationService.createEventRegistrationExcel(registrationId);
-            return new ByteArrayInputStream(excel);
-        }), "");
+        excelExportAnchor = new Anchor(e -> {
+            try (var outputStream = e.getOutputStream()) {
+                byte[] excel = eventRegistrationService.createEventRegistrationExcel(registrationId);
+                outputStream.write(excel);
+                e.setFileName("event_registrations.xlsx");
+            }
+        }, "");
         excelExportAnchor.setTarget("_blank");
         excelExportAnchor.setVisible(false);
 
