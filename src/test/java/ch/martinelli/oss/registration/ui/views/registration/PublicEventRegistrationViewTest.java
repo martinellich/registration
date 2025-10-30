@@ -99,12 +99,18 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
         assertThat(button.isEnabled()).isTrue();
 
-        // Verify we can interact with the optional checkbox
+        // Store initial state of the optional checkbox
+        boolean initialValue = checkboxes.get(1).getValue();
+
+        // Toggle the optional checkbox twice to make an actual change
+        _click(checkboxes.get(1));
         _click(checkboxes.get(1));
 
         // Verify we can click the submit button
         _click(button);
-        assertThat(button.getText()).isEqualTo("Die Antwort wurde aktualisiert");
+
+        // After toggling twice (back to original state), no changes should be detected
+        assertThat(button.getText()).isEqualTo("Keine Änderungen festgestellt. Es wurde keine E-Mail verschickt.");
     }
 
     @Test
