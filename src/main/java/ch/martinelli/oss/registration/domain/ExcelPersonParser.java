@@ -42,7 +42,7 @@ public class ExcelPersonParser {
             var sheet = workbook.getSheetAt(0);
 
             // Skip header row (row 0)
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            for (var i = 1; i <= sheet.getLastRowNum(); i++) {
                 var row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row)) {
                     continue;
@@ -101,7 +101,7 @@ public class ExcelPersonParser {
     }
 
     private boolean isRowEmpty(Row row) {
-        for (int i = 0; i < row.getLastCellNum(); i++) {
+        for (var i = 0; i < row.getLastCellNum(); i++) {
             var cell = row.getCell(i);
             if (cell != null && cell.getCellType() != CellType.BLANK) {
                 return false;

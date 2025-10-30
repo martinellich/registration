@@ -44,7 +44,7 @@ public class PersonUploadDialog extends Dialog {
         add(content);
 
         // Create footer
-        Button closeButton = new Button(translate("cancel"), e -> close());
+        var closeButton = new Button(translate("cancel"), e -> close());
         getFooter().add(closeButton);
     }
 
@@ -54,7 +54,7 @@ public class PersonUploadDialog extends Dialog {
         layout.setSpacing(true);
 
         // Instructions
-        Paragraph instructions = new Paragraph(translate("upload.persons.instructions"));
+        var instructions = new Paragraph(translate("upload.persons.instructions"));
         instructions.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
         // Upload component
