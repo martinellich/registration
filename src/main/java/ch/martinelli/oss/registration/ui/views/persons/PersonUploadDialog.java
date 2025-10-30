@@ -10,7 +10,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.server.streams.UploadHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -57,9 +58,8 @@ public class PersonUploadDialog extends Dialog {
         var instructions = new Paragraph(translate("upload.persons.instructions"));
         instructions.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
-        // Upload component
-        var buffer = new MemoryBuffer();
-        var upload = new Upload(buffer);
+        // Upload handler
+        var upload = getUpload();
         upload.setAcceptedFileTypes(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         upload.setMaxFiles(1);
         upload.setMaxFileSize(10 * 1024 * 1024); // 10 MB
@@ -71,10 +71,15 @@ public class PersonUploadDialog extends Dialog {
             .set("border", "2px dashed var(--lumo-contrast-30pct)")
             .set("border-radius", "var(--lumo-border-radius-m)");
 
-        upload.addSucceededListener(event -> {
+        layout.add(instructions, uploadWrapper);
+        return layout;
+    }
+
+    private @NotNull Upload getUpload() {
+        var uploadHandler = UploadHandler.inMemory((metadata, data) -> {
             try {
-                // Parse Excel file
-                var excelData = excelPersonParser.parseExcelFile(buffer.getInputStream());
+                // Parse Excel file from byte array
+                var excelData = excelPersonParser.parseExcelFile(data);
 
                 if (excelData.isEmpty()) {
                     Notification.error(translate("upload.persons.no.data"));
@@ -105,10 +110,8 @@ public class PersonUploadDialog extends Dialog {
             }
         });
 
-        upload.addFailedListener(event -> Notification.error(translate("upload.persons.error")));
-
-        layout.add(instructions, uploadWrapper);
-        return layout;
+        // Upload component
+        return new Upload(uploadHandler);
     }
 
 }

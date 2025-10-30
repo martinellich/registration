@@ -105,41 +105,6 @@ class PersonUploadDialogTest extends KaribuTest {
         assertThat(callbackCalled.get()).isFalse(); // Not called on dialog open
     }
 
-    // ========== Error Handling Tests ==========
-
-    @Test
-    void shouldShowErrorNotificationOnUploadFailed() {
-        // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
-        dialog.open();
-
-        // When
-        var upload = _get(dialog, Upload.class);
-        fireFailedEvent(upload, "test.xlsx");
-
-        // Then
-        NotificationsKt.expectNotifications("Fehler beim Verarbeiten der Excel-Datei");
-        assertThat(callbackCalled.get()).isFalse();
-    }
-
-    @Test
-    void shouldNotInvokeCallbackOnUploadFailure() {
-        // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
-        dialog.open();
-
-        // When
-        var upload = _get(dialog, Upload.class);
-        fireFailedEvent(upload, "test.xlsx");
-
-        // Then
-        assertThat(callbackCalled.get()).isFalse();
-        // Note: No parsing is attempted on failed upload - this is handled by the upload
-        // component's event listeners
-    }
-
     @Test
     void shouldHandleMaxFileSizeExceeded() {
         // Given

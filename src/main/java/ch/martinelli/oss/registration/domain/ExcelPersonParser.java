@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -56,6 +57,16 @@ public class ExcelPersonParser {
         }
 
         return persons;
+    }
+
+    /**
+     * Parse Excel file and extract person data from byte array.
+     * @param data Excel file as byte array
+     * @return List of parsed person data
+     * @throws IOException if file cannot be read or is invalid
+     */
+    public List<ExcelPersonData> parseExcelFile(byte[] data) throws IOException {
+        return parseExcelFile(new ByteArrayInputStream(data));
     }
 
     private ExcelPersonData parseRow(Row row) {
