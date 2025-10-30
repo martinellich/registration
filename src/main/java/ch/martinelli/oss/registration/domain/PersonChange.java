@@ -12,7 +12,7 @@ public class PersonChange {
 
     public enum ChangeType {
 
-        NEW, UPDATE, NO_CHANGE
+        NEW, UPDATE, DEACTIVATE, NO_CHANGE
 
     }
 

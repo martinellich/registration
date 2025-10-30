@@ -5,7 +5,6 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Service to detect changes between Excel data and existing database records. Matches
@@ -23,13 +22,15 @@ public class PersonChangeDetector {
     /**
      * Detect changes between Excel data and database records.
      * @param excelData List of persons parsed from Excel
-     * @return List of detected changes (NEW or UPDATE only, NO_CHANGE filtered out)
+     * @return List of detected changes (NEW, UPDATE, or DEACTIVATE; NO_CHANGE filtered
+     * out)
      */
     public List<PersonChange> detectChanges(List<ExcelPersonData> excelData) {
         // Load all existing persons from database
         List<PersonRecord> allPersons = personRepository.findAll(DSL.trueCondition());
 
         List<PersonChange> changes = new ArrayList<>();
+        Set<Long> matchedPersonIds = new HashSet<>();
 
         for (ExcelPersonData data : excelData) {
             PersonRecord existingRecord = findMatchingRecord(data, allPersons);
@@ -39,6 +40,9 @@ public class PersonChangeDetector {
                 changes.add(createNewPersonChange(data));
             }
             else {
+                // Track that this person was found in Excel
+                matchedPersonIds.add(existingRecord.getId());
+
                 // Match found - check if there are any changes
                 PersonChange change = createUpdateChange(existingRecord, data);
                 if (change.getType() == PersonChange.ChangeType.UPDATE) {
@@ -47,6 +51,12 @@ public class PersonChangeDetector {
                 // Skip NO_CHANGE
             }
         }
+
+        // Find active persons in database that were NOT in Excel - mark for deactivation
+        allPersons.stream()
+            .filter(person -> person.getActive() && !matchedPersonIds.contains(person.getId()))
+            .map(this::createDeactivateChange)
+            .forEach(changes::add);
 
         return changes;
     }
@@ -118,6 +128,13 @@ public class PersonChangeDetector {
                 : PersonChange.ChangeType.UPDATE;
 
         return new PersonChange(type, existingRecord, data, changedFields);
+    }
+
+    private PersonChange createDeactivateChange(PersonRecord existingRecord) {
+        Map<String, PersonChange.FieldChange> changedFields = new HashMap<>();
+        changedFields.put("active", new PersonChange.FieldChange("true", "false"));
+
+        return new PersonChange(PersonChange.ChangeType.DEACTIVATE, existingRecord, null, changedFields);
     }
 
 }
