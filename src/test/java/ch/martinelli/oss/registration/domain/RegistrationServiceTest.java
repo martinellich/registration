@@ -2,6 +2,7 @@ package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
 import ch.martinelli.oss.registration.db.tables.records.EventRegistrationRecord;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,11 @@ class RegistrationServiceTest {
         registry.add("spring.mail.username", () -> "test@example.com");
         registry.add("spring.mail.password", () -> "pass");
         registry.add("registration.public.address", () -> "https://anmeldungen.tverlach.ch");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        mailcatcherContainer.stop();
     }
 
     @BeforeEach

@@ -5,12 +5,16 @@ import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
+import com.github.mvysny.kaributesting.v10.UploadKt;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.upload.Upload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
@@ -181,6 +185,49 @@ class PersonUploadDialogTest extends KaribuTest {
         // Note: Upload component also contains a paragraph for drop label,
         // so we check that dialog has content
         assertThat(dialog.getChildren().count()).isGreaterThan(0);
+    }
+
+    // ========== Actual File Upload Tests ==========
+
+    @Test
+    void shouldSuccessfullyUploadValidExcelFile() throws IOException {
+        // Given
+        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
+                () -> callbackCalled.set(true));
+        dialog.open();
+
+        var upload = _get(dialog, Upload.class);
+
+        // When - Upload actual Excel file
+        var excelFile = Path.of("src/test/resources/upload_partipipants.xlsx");
+        var fileContent = Files.readAllBytes(excelFile);
+        UploadKt._upload(upload, "upload_partipipants.xlsx", fileContent);
+
+        // Then - Verify PersonImportDialog is opened with changes
+        var importDialog = _get(PersonImportDialog.class);
+        assertThat(importDialog.isOpened()).isTrue();
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidExcelFile() {
+        // Given
+        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
+                () -> callbackCalled.set(true));
+        dialog.open();
+
+        var upload = _get(dialog, Upload.class);
+
+        // When/Then - Upload invalid Excel file should throw exception
+        // Note: This reveals that the error handling in PersonUploadDialog only catches
+        // IOException,
+        // but Apache POI throws NotOfficeXmlFileException (RuntimeException) for invalid
+        // files
+        var invalidContent = "This is not a valid Excel file".getBytes();
+        assertThat(org.assertj.core.api.Assertions
+            .catchThrowable(() -> UploadKt._upload(upload, "invalid.xlsx", invalidContent)))
+            .isInstanceOf(java.util.concurrent.ExecutionException.class)
+            .hasCauseInstanceOf(org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException.class)
+            .hasMessageContaining("not a valid OOXML");
     }
 
 }
