@@ -90,7 +90,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         assertThat(checkboxes).hasSize(2);
 
         // First checkbox is for mandatory event 4 (CIS 2025) - should be disabled
-        assertThat(checkboxes.get(0).isEnabled()).isFalse();
+        assertThat(checkboxes.getFirst().isEnabled()).isFalse();
         // Second checkbox is for optional event 5 - should be enabled
         assertThat(checkboxes.get(1).isEnabled()).isTrue();
 
@@ -122,7 +122,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
 
         // First checkbox should be for event 4 (CIS 2025 - mandatory)
         // It should be pre-checked and disabled
-        var firstCheckbox = checkboxes.get(0);
+        var firstCheckbox = checkboxes.getFirst();
         assertThat(firstCheckbox.getValue()).isTrue();
         assertThat(firstCheckbox.isEnabled()).isFalse();
 

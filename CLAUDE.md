@@ -160,6 +160,7 @@ Registration workflow:
 - **Configuration**: `TestcontainersConfiguration` provides `@ServiceConnection`
 - **UI Tests**: Karibu Testing simulates Vaadin UI without browser
 - **Mail Tests**: Mailcatcher container for testing email sending
+- **NO MOCKS***: No mocking is allowed
 
 ### Test Conventions
 

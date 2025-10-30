@@ -25,7 +25,7 @@ class ExcelPersonParserTest {
         assertThat(persons).hasSize(2);
 
         // First person
-        ExcelPersonData person1 = persons.get(0);
+        ExcelPersonData person1 = persons.getFirst();
         assertThat(person1.memberId()).isEqualTo(3934004);
         assertThat(person1.firstName()).isEqualTo("Kalra");
         assertThat(person1.lastName()).isEqualTo("Hansen");
