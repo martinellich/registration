@@ -1,6 +1,8 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
-import ch.martinelli.oss.registration.domain.*;
+import ch.martinelli.oss.registration.domain.ExcelPersonParser;
+import ch.martinelli.oss.registration.domain.PersonChangeDetector;
+import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -11,7 +13,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 
 import java.io.IOException;
-import java.util.List;
 
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
@@ -48,7 +49,7 @@ public class PersonUploadDialog extends Dialog {
     }
 
     private VerticalLayout createContent() {
-        VerticalLayout layout = new VerticalLayout();
+        var layout = new VerticalLayout();
         layout.setPadding(false);
         layout.setSpacing(true);
 
@@ -57,15 +58,15 @@ public class PersonUploadDialog extends Dialog {
         instructions.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
         // Upload component
-        MemoryBuffer buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
+        var buffer = new MemoryBuffer();
+        var upload = new Upload(buffer);
         upload.setAcceptedFileTypes(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         upload.setMaxFiles(1);
         upload.setMaxFileSize(10 * 1024 * 1024); // 10 MB
         upload.setDropLabel(new Paragraph(translate("upload.persons.drop.label")));
 
         // Style the upload area
-        Div uploadWrapper = new Div(upload);
+        var uploadWrapper = new Div(upload);
         uploadWrapper.getStyle()
             .set("border", "2px dashed var(--lumo-contrast-30pct)")
             .set("border-radius", "var(--lumo-border-radius-m)");
@@ -73,7 +74,7 @@ public class PersonUploadDialog extends Dialog {
         upload.addSucceededListener(event -> {
             try {
                 // Parse Excel file
-                List<ExcelPersonData> excelData = excelPersonParser.parseExcelFile(buffer.getInputStream());
+                var excelData = excelPersonParser.parseExcelFile(buffer.getInputStream());
 
                 if (excelData.isEmpty()) {
                     Notification.error(translate("upload.persons.no.data"));
@@ -81,7 +82,7 @@ public class PersonUploadDialog extends Dialog {
                 }
 
                 // Detect changes
-                List<PersonChange> changes = personChangeDetector.detectChanges(excelData);
+                var changes = personChangeDetector.detectChanges(excelData);
 
                 if (changes.isEmpty()) {
                     Notification.success(translate("upload.persons.no.changes"));
@@ -90,7 +91,7 @@ public class PersonUploadDialog extends Dialog {
                 }
 
                 // Open review dialog
-                PersonImportDialog dialog = new PersonImportDialog(changes, personRepository, () -> {
+                var dialog = new PersonImportDialog(changes, personRepository, () -> {
                     if (onSuccess != null) {
                         onSuccess.run();
                     }

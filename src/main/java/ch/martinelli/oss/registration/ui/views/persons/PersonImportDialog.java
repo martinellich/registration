@@ -64,7 +64,7 @@ public class PersonImportDialog extends Dialog {
         grid.setHeightFull();
         // Checkbox column for accept/reject
         grid.addComponentColumn(change -> {
-            Checkbox checkbox = new Checkbox();
+            var checkbox = new Checkbox();
             checkbox.setValue(change.isAccepted());
             checkbox.addValueChangeListener(e -> change.setAccepted(e.getValue()));
             return checkbox;
@@ -72,7 +72,7 @@ public class PersonImportDialog extends Dialog {
 
         // Type column (NEW/UPDATE/DEACTIVATE)
         grid.addComponentColumn(change -> {
-            Span badge = new Span(translate("upload.persons.type." + change.getType().name().toLowerCase()));
+            var badge = new Span(translate("upload.persons.type." + change.getType().name().toLowerCase()));
             badge.getElement().getThemeList().add("badge");
             if (change.getType() == PersonChange.ChangeType.NEW) {
                 badge.getElement().getThemeList().add("success");
@@ -88,7 +88,7 @@ public class PersonImportDialog extends Dialog {
 
         // Last Name column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("lastName");
+            var fieldChange = change.getChangedFields().get("lastName");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
@@ -100,7 +100,7 @@ public class PersonImportDialog extends Dialog {
 
         // First Name column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("firstName");
+            var fieldChange = change.getChangedFields().get("firstName");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
@@ -112,7 +112,7 @@ public class PersonImportDialog extends Dialog {
 
         // Email column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("email");
+            var fieldChange = change.getChangedFields().get("email");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
@@ -124,7 +124,7 @@ public class PersonImportDialog extends Dialog {
 
         // Member ID column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("memberId");
+            var fieldChange = change.getChangedFields().get("memberId");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
@@ -173,7 +173,7 @@ public class PersonImportDialog extends Dialog {
     }
 
     private void applyChanges() {
-        int appliedCount = 0;
+        var appliedCount = 0;
 
         for (PersonChange change : changes) {
             if (!change.isAccepted()) {

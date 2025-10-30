@@ -71,6 +71,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     private static final String CREATE_MAILING = "create.mailing";
 
+    private static final String PX_200 = "200px";
+
     private final transient RegistrationService registrationService;
 
     private final transient RegistrationRepository registrationRepository;
@@ -157,7 +159,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
         // Add toolbar with filter button
         var toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 
@@ -327,7 +329,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         var remarks = new TextArea(translate("remarks"));
         remarks.setPlaceholder(translate("remarks.placeholder"));
-        remarks.setHeight("200px");
+        remarks.setHeight(PX_200);
         binder.forField(remarks).bind(RegistrationRecord::getRemarks, RegistrationRecord::setRemarks);
         formLayout.setColspan(remarks, 2);
 
@@ -338,7 +340,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         var emailText = new TextArea(translate("email.text"));
         emailText.setPlaceholder(translate("email.text.placeholder"));
-        emailText.setHeight("200px");
+        emailText.setHeight(PX_200);
         binder.forField(emailText).bind(RegistrationRecord::getEmailText, RegistrationRecord::setEmailText);
         formLayout.setColspan(emailText, 2);
 
@@ -359,7 +361,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         var confirmationTextNew = new TextArea(translate("confirmation.email.text.new"));
         confirmationTextNew.setPlaceholder(translate("confirmation.email.text.placeholder"));
-        confirmationTextNew.setHeight("200px");
+        confirmationTextNew.setHeight(PX_200);
         binder.forField(confirmationTextNew)
             .bind(RegistrationRecord::getConfirmationEmailTextNew, RegistrationRecord::setConfirmationEmailTextNew);
         formLayout.setColspan(confirmationTextNew, 2);
@@ -372,7 +374,7 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
         var confirmationTextUpdate = new TextArea(translate("confirmation.email.text.update"));
         confirmationTextUpdate.setPlaceholder(translate("confirmation.email.text.placeholder"));
-        confirmationTextUpdate.setHeight("200px");
+        confirmationTextUpdate.setHeight(PX_200);
         binder.forField(confirmationTextUpdate)
             .bind(RegistrationRecord::getConfirmationEmailTextUpdate,
                     RegistrationRecord::setConfirmationEmailTextUpdate);

@@ -109,7 +109,7 @@ public class RegistrationService {
         }
 
         // Track if this is the first registration
-        boolean isFirstRegistration = false;
+        var isFirstRegistration = false;
         var registrationEmailOpt = registrationEmailRepository.findById(registrationEmailId);
         if (registrationEmailOpt.isPresent()) {
             var registrationEmail = registrationEmailOpt.get();
@@ -212,7 +212,7 @@ public class RegistrationService {
         }
 
         // Format dates
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        var dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         var openFrom = registration.getOpenFrom().format(dateFormatter);
         var openUntil = registration.getOpenUntil().format(dateFormatter);
 

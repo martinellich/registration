@@ -208,14 +208,13 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     }
 
     private Button createUploadButton() {
-        Button uploadButton = new Button(translate("upload.persons"));
+        var uploadButton = new Button(translate("upload.persons"));
         uploadButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         uploadButton.addClickListener(event -> {
-            PersonUploadDialog dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, repository,
-                    () -> {
-                        grid.getDataProvider().refreshAll();
-                        clearForm();
-                    });
+            var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, repository, () -> {
+                grid.getDataProvider().refreshAll();
+                clearForm();
+            });
             dialog.open();
         });
         return uploadButton;
