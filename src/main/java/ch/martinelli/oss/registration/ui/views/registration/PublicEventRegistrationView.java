@@ -186,16 +186,23 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 eventRegistration.setRegistered(entry.getKey().getValue());
                 eventRegistrations.add(eventRegistration);
             }
-            registrationService.register(registrationEmail.getId(), eventRegistrations);
+            boolean hasChanges = registrationService.register(registrationEmail.getId(), eventRegistrations);
 
-            if (hasRegistrations()) {
-                registerButton.setText(translate("registration.updated"));
+            if (hasChanges) {
+                // Registration was updated - email was sent
+                if (hasRegistrations()) {
+                    registerButton.setText(translate("registration.updated"));
+                }
+                else {
+                    registerButton.setText(translate("registration.success"));
+                }
+                registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
             }
             else {
-                registerButton.setText(translate("registration.success"));
+                // No changes detected - no email sent
+                registerButton.setText(translate("registration.no.changes"));
+                registerButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
             }
-
-            registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         });
         add(registerButton);
     }

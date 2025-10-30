@@ -88,36 +88,54 @@ public class RegistrationService {
     }
 
     @Transactional
-    public void register(Long registrationEmailId, Set<EventRegistrationRecord> eventRegistrations) {
-        if (!eventRegistrations.isEmpty()) {
-            // Track if this is the first registration
-            boolean isFirstRegistration = false;
-            var registrationEmailOpt = registrationEmailRepository.findById(registrationEmailId);
-            if (registrationEmailOpt.isPresent()) {
-                var registrationEmail = registrationEmailOpt.get();
-                isFirstRegistration = registrationEmail.getRegisteredAt() == null;
-                registrationEmail.setRegisteredAt(LocalDateTime.now());
-                registrationEmail.store();
-            }
-
-            for (var eventRegistration : eventRegistrations) {
-                var existingEventRegistration = eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
-                        eventRegistration.getRegistrationId(), eventRegistration.getEventId(),
-                        eventRegistration.getPersonId());
-                if (existingEventRegistration.isPresent()) {
-                    var eventRegistrationRecord = existingEventRegistration.get();
-                    eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
-                    eventRegistrationRecord.store();
-                }
-                else {
-                    dslContext.attach(eventRegistration);
-                    eventRegistration.store();
-                }
-            }
-
-            // Send confirmation email
-            sendConfirmationEmail(registrationEmailId, isFirstRegistration);
+    public boolean register(Long registrationEmailId, Set<EventRegistrationRecord> eventRegistrations) {
+        if (eventRegistrations.isEmpty()) {
+            return false;
         }
+
+        // Fetch all existing registrations to compare
+        var existingRegistrations = eventRegistrations.stream()
+            .map(eventReg -> eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
+                    eventReg.getRegistrationId(), eventReg.getEventId(), eventReg.getPersonId()))
+            .filter(opt -> opt.isPresent())
+            .map(opt -> opt.get())
+            .collect(Collectors.toSet());
+
+        // Check if there are any changes
+        if (!hasRegistrationChanged(existingRegistrations, eventRegistrations)) {
+            // No changes detected, skip save and email
+            return false;
+        }
+
+        // Track if this is the first registration
+        boolean isFirstRegistration = false;
+        var registrationEmailOpt = registrationEmailRepository.findById(registrationEmailId);
+        if (registrationEmailOpt.isPresent()) {
+            var registrationEmail = registrationEmailOpt.get();
+            isFirstRegistration = registrationEmail.getRegisteredAt() == null;
+            registrationEmail.setRegisteredAt(LocalDateTime.now());
+            registrationEmail.store();
+        }
+
+        for (var eventRegistration : eventRegistrations) {
+            var existingEventRegistration = eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
+                    eventRegistration.getRegistrationId(), eventRegistration.getEventId(),
+                    eventRegistration.getPersonId());
+            if (existingEventRegistration.isPresent()) {
+                var eventRegistrationRecord = existingEventRegistration.get();
+                eventRegistrationRecord.setRegistered(eventRegistration.getRegistered());
+                eventRegistrationRecord.store();
+            }
+            else {
+                dslContext.attach(eventRegistration);
+                eventRegistration.store();
+            }
+        }
+
+        // Send confirmation email
+        sendConfirmationEmail(registrationEmailId, isFirstRegistration);
+
+        return true;
     }
 
     @Async
@@ -215,6 +233,36 @@ public class RegistrationService {
                                                                                                          // as
                                                                                                          // recipient
         );
+    }
+
+    private boolean hasRegistrationChanged(Set<EventRegistrationRecord> existing,
+            Set<EventRegistrationRecord> submitted) {
+        // If no existing registrations, this is the first time - consider it a change
+        if (existing.isEmpty()) {
+            return true;
+        }
+
+        // Compare each submitted registration with existing
+        for (var submittedReg : submitted) {
+            var matchingExisting = existing.stream()
+                .filter(e -> e.getRegistrationId().equals(submittedReg.getRegistrationId())
+                        && e.getEventId().equals(submittedReg.getEventId())
+                        && e.getPersonId().equals(submittedReg.getPersonId()))
+                .findFirst();
+
+            if (matchingExisting.isEmpty()) {
+                // New registration (not in existing) - this is a change
+                return true;
+            }
+
+            // Check if registered status changed
+            if (!matchingExisting.get().getRegistered().equals(submittedReg.getRegistered())) {
+                return true;
+            }
+        }
+
+        // No changes detected
+        return false;
     }
 
 }

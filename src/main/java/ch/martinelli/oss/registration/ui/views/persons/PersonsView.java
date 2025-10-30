@@ -2,6 +2,8 @@ package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
+import ch.martinelli.oss.registration.domain.ExcelPersonParser;
+import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
@@ -41,9 +43,16 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
 
     private boolean hideInactive;
 
-    public PersonsView(PersonRepository personRepository) {
+    private final ExcelPersonParser excelPersonParser;
+
+    private final PersonChangeDetector personChangeDetector;
+
+    public PersonsView(PersonRepository personRepository, ExcelPersonParser excelPersonParser,
+            PersonChangeDetector personChangeDetector) {
         super(personRepository, PERSON, new Grid<>(PersonRecord.class, false), new Binder<>(PersonRecord.class));
 
+        this.excelPersonParser = excelPersonParser;
+        this.personChangeDetector = personChangeDetector;
         this.hideInactive = true; // Initialize in constructor
         afterNewRecord = personRecord -> personRecord.setActive(true); // default value
     }
@@ -65,6 +74,9 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 
+        // Upload button for Excel import
+        var uploadButton = createUploadButton();
+
         // When hideInactive is true (default), button should show "Show inactive" action
         // Note: field may not be initialized yet if called from parent constructor
         var toggleInactiveButton = new Button(translate("show.inactive"));
@@ -76,7 +88,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
             grid.getDataProvider().refreshAll();
         });
 
-        toolbar.add(toggleInactiveButton);
+        toolbar.add(uploadButton, toggleInactiveButton);
 
         wrapper.add(toolbar, grid);
 
@@ -192,6 +204,20 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
             deleteIcon.addClassName("delete-icon");
             return deleteIcon;
         }).setHeader(addIcon).setTextAlign(ColumnTextAlign.END).setKey("action-column");
+    }
+
+    private Button createUploadButton() {
+        Button uploadButton = new Button(translate("upload.persons"));
+        uploadButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        uploadButton.addClickListener(event -> {
+            PersonUploadDialog dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, repository,
+                    () -> {
+                        grid.getDataProvider().refreshAll();
+                        clearForm();
+                    });
+            dialog.open();
+        });
+        return uploadButton;
     }
 
 }
