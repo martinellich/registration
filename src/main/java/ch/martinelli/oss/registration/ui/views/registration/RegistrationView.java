@@ -103,6 +103,8 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
 
     private boolean dirty;
 
+    private boolean hidePastInvitations = true;
+
     public RegistrationView(RegistrationService registrationService, RegistrationRepository registrationRepository,
             EventRepository eventRepository, PersonRepository personRepository, SecurityContext securityContext) {
         this.registrationService = registrationService;
@@ -151,7 +153,29 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     private Div createGridLayout() {
         var wrapper = new Div();
         wrapper.setClassName("grid-wrapper");
-        wrapper.add(grid);
+
+        // Add toolbar with filter button
+        var toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setPadding(true);
+        toolbar.setSpacing(true);
+
+        // When hidePastInvitations is true (default), button should show "Show past
+        // invitations" action
+        var togglePastInvitationsButton = new Button(translate("show.past.invitations"));
+        togglePastInvitationsButton.setId("toggle-past-invitations-button");
+        togglePastInvitationsButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        togglePastInvitationsButton.addClickListener(event -> {
+            hidePastInvitations = !hidePastInvitations;
+            togglePastInvitationsButton
+                .setText(hidePastInvitations ? translate("show.past.invitations") : translate("hide.past.invitations"));
+            grid.getDataProvider().refreshAll();
+        });
+
+        toolbar.add(togglePastInvitationsButton);
+
+        wrapper.add(toolbar, grid);
 
         configureGrid();
 
@@ -249,12 +273,18 @@ public class RegistrationView extends Div implements BeforeEnterObserver, HasDyn
     }
 
     private void loadData() {
-        var dataProvider = new CallbackDataProvider<RegistrationViewRecord, Void>(
-                query -> registrationRepository
-                    .findAllFromView(DSL.noCondition(), query.getOffset(), query.getLimit(),
-                            VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
-                    .stream(),
-                query -> registrationRepository.countFromView(DSL.noCondition()), RegistrationViewRecord::getId);
+        var dataProvider = new CallbackDataProvider<RegistrationViewRecord, Void>(query -> {
+            var condition = hidePastInvitations ? REGISTRATION_VIEW.YEAR.greaterOrEqual(LocalDate.now().getYear())
+                .and(REGISTRATION_VIEW.OPEN_UNTIL.greaterOrEqual(LocalDate.now())) : DSL.noCondition();
+            return registrationRepository
+                .findAllFromView(condition, query.getOffset(), query.getLimit(),
+                        VaadinJooqUtil.orderFields(REGISTRATION_VIEW, query))
+                .stream();
+        }, query -> {
+            var condition = hidePastInvitations ? REGISTRATION_VIEW.YEAR.greaterOrEqual(LocalDate.now().getYear())
+                .and(REGISTRATION_VIEW.OPEN_UNTIL.greaterOrEqual(LocalDate.now())) : DSL.noCondition();
+            return registrationRepository.countFromView(condition);
+        }, RegistrationViewRecord::getId);
         grid.setDataProvider(dataProvider);
     }
 

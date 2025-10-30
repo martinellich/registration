@@ -111,6 +111,7 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
         var events = registrationRepository.findAllEventsByRegistrationId(registrationEmail.getRegistrationId());
 
         for (var event : events) {
+            var isMandatory = Boolean.TRUE.equals(event.getMandatory());
             var checkboxes = new FormLayout();
             for (var person : persons) {
                 String text;
@@ -123,16 +124,30 @@ public class PublicEventRegistrationView extends VerticalLayout implements HasUr
                 var checkbox = new Checkbox(text);
                 checkbox.getElement().getThemeList().add("switch");
                 checkbox.setWidth("200px");
-                checkbox.setEnabled(!isRegistrationClosed);
+
+                if (isMandatory) {
+                    // For mandatory events: pre-check and disable the checkbox
+                    checkbox.setValue(true);
+                    checkbox.setEnabled(false);
+                }
+                else {
+                    checkbox.setEnabled(!isRegistrationClosed);
+                    // Load existing registration state for optional events
+                    eventRegistrationRepository.findByEventIdAndPersonId(event.getId(), person.getId())
+                        .ifPresent(eventRegistration -> checkbox.setValue(eventRegistration.getRegistered()));
+                }
+
                 checkboxes.add(checkbox);
                 checkboxMap.put(checkbox, new EventWithPerson(event, person));
-
-                eventRegistrationRepository.findByEventIdAndPersonId(event.getId(), person.getId())
-                    .ifPresent(eventRegistration -> checkbox.setValue(eventRegistration.getRegistered()));
             }
 
             var titleSpan = new Span(event.getTitle());
             titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
+            if (isMandatory) {
+                var mandatoryBadge = new Span(" (" + translate("mandatory") + ")");
+                mandatoryBadge.getStyle().set("color", "var(--lumo-error-text-color)");
+                titleSpan = new Span(titleSpan, mandatoryBadge);
+            }
             var remarksSpan = new Span(event.getDescription());
             Span dateSpan;
             if (event.getToDate() != null) {
