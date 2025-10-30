@@ -5,9 +5,7 @@ import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.upload.FailedEvent;
 import com.vaadin.flow.component.upload.Upload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -183,17 +181,6 @@ class PersonUploadDialogTest extends KaribuTest {
         // Note: Upload component also contains a paragraph for drop label,
         // so we check that dialog has content
         assertThat(dialog.getChildren().count()).isGreaterThan(0);
-    }
-
-    // ========== Helper Methods ==========
-
-    /**
-     * Fires a FailedEvent on the Upload component.
-     */
-    private void fireFailedEvent(Upload upload, String fileName) {
-        var event = new FailedEvent(upload, fileName,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 0);
-        ComponentUtil.fireEvent(upload, event);
     }
 
 }
