@@ -1,16 +1,10 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
-import ch.martinelli.oss.registration.domain.ExcelPersonData;
-import ch.martinelli.oss.registration.domain.ExcelPersonParser;
-import ch.martinelli.oss.registration.domain.PersonChange;
-import ch.martinelli.oss.registration.domain.PersonChangeDetector;
-import ch.martinelli.oss.registration.domain.PersonRepository;
+import ch.martinelli.oss.registration.domain.*;
 import ch.martinelli.oss.registration.ui.components.Notification;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
@@ -41,7 +35,7 @@ public class PersonUploadDialog extends Dialog {
         this.personRepository = personRepository;
         this.onSuccess = onSuccess;
 
-        setHeaderTitle(translate("upload.persons"));
+        setHeaderTitle(translate("upload.persons.instructions.title"));
         setWidth("500px");
 
         // Create content
@@ -59,7 +53,6 @@ public class PersonUploadDialog extends Dialog {
         layout.setSpacing(true);
 
         // Instructions
-        H3 title = new H3(translate("upload.persons.instructions.title"));
         Paragraph instructions = new Paragraph(translate("upload.persons.instructions"));
         instructions.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
@@ -111,11 +104,9 @@ public class PersonUploadDialog extends Dialog {
             }
         });
 
-        upload.addFailedListener(event -> {
-            Notification.error(translate("upload.persons.error"));
-        });
+        upload.addFailedListener(event -> Notification.error(translate("upload.persons.error")));
 
-        layout.add(title, instructions, uploadWrapper);
+        layout.add(instructions, uploadWrapper);
         return layout;
     }
 
