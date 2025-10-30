@@ -20,13 +20,13 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
  */
 public class PersonUploadDialog extends Dialog {
 
-    private final ExcelPersonParser excelPersonParser;
+    private final transient ExcelPersonParser excelPersonParser;
 
-    private final PersonChangeDetector personChangeDetector;
+    private final transient PersonChangeDetector personChangeDetector;
 
-    private final PersonRepository personRepository;
+    private final transient PersonRepository personRepository;
 
-    private final Runnable onSuccess;
+    private final transient Runnable onSuccess;
 
     public PersonUploadDialog(ExcelPersonParser excelPersonParser, PersonChangeDetector personChangeDetector,
             PersonRepository personRepository, Runnable onSuccess) {

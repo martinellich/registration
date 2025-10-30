@@ -67,11 +67,9 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Confirmation email should be sent
-        var emails = mailcatcherContainer.getAllEmails();
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1);
-
         // Verify email content
-        assertThat(emails).anySatisfy(email -> {
+        var emails = mailcatcherContainer.getAllEmails();
+        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
             assertThat(email.getRecipients()).contains("<barry.rodriquez@zun.mm>");
             assertThat(email.getSubject()).isEqualTo("Registration Confirmed");
             assertThat(email.getPlainTextBody()).contains("Thank you!");
@@ -145,9 +143,7 @@ class RegistrationServiceTest {
 
         // Then: Check email with all placeholders replaced
         var emails = mailcatcherContainer.getAllEmails();
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1);
-
-        assertThat(emails).anySatisfy(email -> {
+        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
             assertThat(email.getSubject()).isEqualTo("Registration Confirmed");
             var body = email.getPlainTextBody();
 
@@ -194,12 +190,12 @@ class RegistrationServiceTest {
 
     private EventRegistrationRecord createEventRegistration(Long registrationId, Long eventId, Long personId,
             boolean registered) {
-        var record = new EventRegistrationRecord();
-        record.setRegistrationId(registrationId);
-        record.setEventId(eventId);
-        record.setPersonId(personId);
-        record.setRegistered(registered);
-        return record;
+        var eventRegistrationRecord = new EventRegistrationRecord();
+        eventRegistrationRecord.setRegistrationId(registrationId);
+        eventRegistrationRecord.setEventId(eventId);
+        eventRegistrationRecord.setPersonId(personId);
+        eventRegistrationRecord.setRegistered(registered);
+        return eventRegistrationRecord;
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -97,8 +98,8 @@ public class RegistrationService {
         var existingRegistrations = eventRegistrations.stream()
             .map(eventReg -> eventRegistrationRepository.findByRegistrationIdAndEventIdAndPersonId(
                     eventReg.getRegistrationId(), eventReg.getEventId(), eventReg.getPersonId()))
-            .filter(opt -> opt.isPresent())
-            .map(opt -> opt.get())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .collect(Collectors.toSet());
 
         // Check if there are any changes

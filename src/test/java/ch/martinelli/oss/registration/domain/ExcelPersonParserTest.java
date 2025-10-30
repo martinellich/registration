@@ -63,8 +63,9 @@ class ExcelPersonParserTest {
         List<ExcelPersonData> persons = parser.parseExcelFile(inputStream);
 
         // All parsed persons should have firstName and lastName
-        assertThat(persons).allMatch(person -> person.firstName() != null && !person.firstName().isBlank()
-                && person.lastName() != null && !person.lastName().isBlank());
+        assertThat(persons).isNotEmpty()
+            .allMatch(person -> person.firstName() != null && !person.firstName().isBlank() && person.lastName() != null
+                    && !person.lastName().isBlank());
     }
 
 }

@@ -21,6 +21,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -43,9 +44,9 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
 
     private boolean hideInactive;
 
-    private final ExcelPersonParser excelPersonParser;
+    private final transient ExcelPersonParser excelPersonParser;
 
-    private final PersonChangeDetector personChangeDetector;
+    private final transient PersonChangeDetector personChangeDetector;
 
     public PersonsView(PersonRepository personRepository, ExcelPersonParser excelPersonParser,
             PersonChangeDetector personChangeDetector) {
@@ -70,7 +71,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         // Add toolbar with filter button
         var toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 

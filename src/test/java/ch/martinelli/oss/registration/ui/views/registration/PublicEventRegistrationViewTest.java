@@ -36,7 +36,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         // Note: Event 4 is mandatory (first checkbox), so it's already checked and
         // disabled
         // Only click on enabled checkboxes
-        checkboxes.stream().filter(Checkbox::isEnabled).forEach(checkbox -> LocatorJ._click(checkbox));
+        checkboxes.stream().filter(Checkbox::isEnabled).forEach(LocatorJ::_click);
 
         // Button text is "Anmeldung aktualisieren" because there are existing
         // registrations
@@ -98,9 +98,6 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         // registrations
         var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
         assertThat(button.isEnabled()).isTrue();
-
-        // Store initial state of the optional checkbox
-        boolean initialValue = checkboxes.get(1).getValue();
 
         // Toggle the optional checkbox twice to make an actual change
         _click(checkboxes.get(1));
