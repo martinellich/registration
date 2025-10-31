@@ -2,7 +2,6 @@ package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
-import ch.martinelli.oss.registration.domain.ExcelPersonParser;
 import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.security.Roles;
@@ -44,15 +43,11 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
 
     private boolean hideInactive;
 
-    private final transient ExcelPersonParser excelPersonParser;
-
     private final transient PersonChangeDetector personChangeDetector;
 
-    public PersonsView(PersonRepository personRepository, ExcelPersonParser excelPersonParser,
-            PersonChangeDetector personChangeDetector) {
+    public PersonsView(PersonRepository personRepository, PersonChangeDetector personChangeDetector) {
         super(personRepository, PERSON, new Grid<>(PersonRecord.class, false), new Binder<>(PersonRecord.class));
 
-        this.excelPersonParser = excelPersonParser;
         this.personChangeDetector = personChangeDetector;
         this.hideInactive = true; // Initialize in constructor
         afterNewRecord = personRecord -> personRecord.setActive(true); // default value
@@ -211,7 +206,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         var uploadButton = new Button(translate("upload.persons"));
         uploadButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         uploadButton.addClickListener(event -> {
-            var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, repository, () -> {
+            var dialog = new PersonUploadDialog(personChangeDetector, repository, () -> {
                 grid.getDataProvider().refreshAll();
                 clearForm();
             });

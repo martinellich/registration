@@ -4,7 +4,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,11 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service to parse person data from Excel files. Expected Excel format: - First row is
- * header - Columns: MITGLIEDERNR, VORNAME, NACHNAME, STRASSE, PLZ, ORT, EMAIL, EMAIL
+ * Utility class to parse person data from Excel files. Expected Excel format: - First row
+ * is header - Columns: MITGLIEDERNR, VORNAME, NACHNAME, STRASSE, PLZ, ORT, EMAIL, EMAIL
  * ALTERNATIV, KATEGORIE, ZUSATZ, RIEGEN
  */
-@Service
 public class ExcelPersonParser {
 
     private static final int COL_MEMBER_ID = 0;

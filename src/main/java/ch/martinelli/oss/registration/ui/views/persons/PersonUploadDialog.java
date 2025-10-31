@@ -22,17 +22,14 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
  */
 public class PersonUploadDialog extends Dialog {
 
-    private final transient ExcelPersonParser excelPersonParser;
-
     private final transient PersonChangeDetector personChangeDetector;
 
     private final transient PersonRepository personRepository;
 
     private final transient Runnable onSuccess;
 
-    public PersonUploadDialog(ExcelPersonParser excelPersonParser, PersonChangeDetector personChangeDetector,
-            PersonRepository personRepository, Runnable onSuccess) {
-        this.excelPersonParser = excelPersonParser;
+    public PersonUploadDialog(PersonChangeDetector personChangeDetector, PersonRepository personRepository,
+            Runnable onSuccess) {
         this.personChangeDetector = personChangeDetector;
         this.personRepository = personRepository;
         this.onSuccess = onSuccess;
@@ -79,6 +76,7 @@ public class PersonUploadDialog extends Dialog {
         var uploadHandler = UploadHandler.inMemory((metadata, data) -> {
             try {
                 // Parse Excel file from byte array
+                var excelPersonParser = new ExcelPersonParser();
                 var excelData = excelPersonParser.parseExcelFile(data);
 
                 if (excelData.isEmpty()) {

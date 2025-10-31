@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
-import ch.martinelli.oss.registration.domain.ExcelPersonParser;
 import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
@@ -24,9 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PersonUploadDialogTest extends KaribuTest {
 
     @Autowired
-    private ExcelPersonParser excelPersonParser;
-
-    @Autowired
     private PersonChangeDetector personChangeDetector;
 
     @Autowired
@@ -45,8 +41,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldInitializeDialogWithCorrectConfiguration() {
         // When
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // Then
@@ -66,8 +61,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldCreateUploadComponent() {
         // Given/When
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // Then - Verify upload component exists and is properly configured
@@ -83,8 +77,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldAcceptOnlyXlsxFiles() {
         // Given/When
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // Then - Verify accepted file types
@@ -97,8 +90,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldConfigureCallbackCorrectly() {
         // Given/When
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // Then - Verify callback is stored and can be invoked
@@ -110,8 +102,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldHandleMaxFileSizeExceeded() {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // When
@@ -125,8 +116,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldHandleInvalidFileType() {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // When
@@ -142,8 +132,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldHandleMultipleFileUploadAttempt() {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // When
@@ -160,8 +149,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldCloseDialogWhenCancelButtonClicked() {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
         assertThat(dialog.isOpened()).isTrue();
 
@@ -177,8 +165,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldDisplayInstructions() {
         // Given/When
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         // Then - Verify instructions paragraph exists in dialog
@@ -192,8 +179,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldSuccessfullyUploadValidExcelFile() throws IOException {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         var upload = _get(dialog, Upload.class);
@@ -211,8 +197,7 @@ class PersonUploadDialogTest extends KaribuTest {
     @Test
     void shouldThrowExceptionForInvalidExcelFile() {
         // Given
-        var dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, personRepository,
-                () -> callbackCalled.set(true));
+        var dialog = new PersonUploadDialog(personChangeDetector, personRepository, () -> callbackCalled.set(true));
         dialog.open();
 
         var upload = _get(dialog, Upload.class);
