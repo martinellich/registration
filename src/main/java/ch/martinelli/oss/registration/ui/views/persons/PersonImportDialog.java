@@ -1,6 +1,5 @@
 package ch.martinelli.oss.registration.ui.views.persons;
 
-import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
 import ch.martinelli.oss.registration.domain.PersonChange;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.components.Notification;
@@ -24,13 +23,13 @@ import static com.vaadin.flow.i18n.I18NProvider.translate;
  */
 public class PersonImportDialog extends Dialog {
 
-    private final List<PersonChange> changes;
+    private final transient List<PersonChange> changes;
 
-    private final PersonRepository personRepository;
+    private final transient PersonRepository personRepository;
 
     final Grid<PersonChange> grid; // Package-private for testing
 
-    private final Runnable onSuccess;
+    private final transient Runnable onSuccess;
 
     public PersonImportDialog(List<PersonChange> changes, PersonRepository personRepository, Runnable onSuccess) {
         this.changes = changes;
@@ -46,10 +45,10 @@ public class PersonImportDialog extends Dialog {
         configureGrid();
 
         // Create toolbar
-        HorizontalLayout toolbar = createToolbar();
+        var toolbar = createToolbar();
 
         // Create content layout
-        VerticalLayout content = new VerticalLayout(toolbar, grid);
+        var content = new VerticalLayout(toolbar, grid);
         content.setHeightFull();
         content.setFlexGrow(1, grid);
         content.setPadding(false);
@@ -60,84 +59,100 @@ public class PersonImportDialog extends Dialog {
         createFooter();
     }
 
+    @SuppressWarnings("java:S3776")
     private void configureGrid() {
         grid.setHeightFull();
         // Checkbox column for accept/reject
         grid.addComponentColumn(change -> {
-            Checkbox checkbox = new Checkbox();
+            var checkbox = new Checkbox();
             checkbox.setValue(change.isAccepted());
             checkbox.addValueChangeListener(e -> change.setAccepted(e.getValue()));
             return checkbox;
         }).setHeader(translate("upload.persons.accept")).setWidth("80px").setFlexGrow(0);
 
-        // Type column (NEW/UPDATE)
+        // Type column (NEW/UPDATE/DEACTIVATE)
         grid.addComponentColumn(change -> {
-            Span badge = new Span(translate("upload.persons.type." + change.getType().name().toLowerCase()));
+            var badge = new Span(translate("upload.persons.type." + change.getType().name().toLowerCase()));
             badge.getElement().getThemeList().add("badge");
             if (change.getType() == PersonChange.ChangeType.NEW) {
                 badge.getElement().getThemeList().add("success");
+            }
+            else if (change.getType() == PersonChange.ChangeType.DEACTIVATE) {
+                badge.getElement().getThemeList().add("error");
             }
             else {
                 badge.getElement().getThemeList().add("contrast");
             }
             return badge;
-        }).setHeader(translate("upload.persons.type")).setWidth("100px").setFlexGrow(0);
+        }).setHeader(translate("upload.persons.type")).setWidth("130px").setFlexGrow(0);
 
         // Last Name column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("lastName");
+            var fieldChange = change.getChangedFields().get("lastName");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
-            return change.getExistingRecord() != null ? change.getExistingRecord().getLastName() : "";
+            if (change.getExistingRecord() != null) {
+                return change.getExistingRecord().getLastName();
+            }
+            return change.getNewData() != null ? change.getNewData().lastName() : "";
         }).setHeader(translate("last.name")).setAutoWidth(true);
 
         // First Name column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("firstName");
+            var fieldChange = change.getChangedFields().get("firstName");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
-            return change.getExistingRecord() != null ? change.getExistingRecord().getFirstName() : "";
+            if (change.getExistingRecord() != null) {
+                return change.getExistingRecord().getFirstName();
+            }
+            return change.getNewData() != null ? change.getNewData().firstName() : "";
         }).setHeader(translate("first.name")).setAutoWidth(true);
 
         // Email column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("email");
+            var fieldChange = change.getChangedFields().get("email");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
-            return change.getExistingRecord() != null ? change.getExistingRecord().getEmail() : "";
+            if (change.getExistingRecord() != null) {
+                return change.getExistingRecord().getEmail();
+            }
+            return change.getNewData() != null ? change.getNewData().email() : "";
         }).setHeader(translate("email")).setAutoWidth(true);
 
         // Member ID column
         grid.addColumn(change -> {
-            PersonChange.FieldChange fieldChange = change.getChangedFields().get("memberId");
+            var fieldChange = change.getChangedFields().get("memberId");
             if (fieldChange != null) {
                 return fieldChange.toString();
             }
-            return change.getExistingRecord() != null && change.getExistingRecord().getMemberId() != null
-                    ? String.valueOf(change.getExistingRecord().getMemberId()) : "";
+            if (change.getExistingRecord() != null && change.getExistingRecord().getMemberId() != null) {
+                return String.valueOf(change.getExistingRecord().getMemberId());
+            }
+            return change.getNewData() != null && change.getNewData().memberId() != null
+                    ? String.valueOf(change.getNewData().memberId()) : "";
         }).setHeader(translate("member.id")).setAutoWidth(true);
 
         grid.setItems(changes);
     }
 
     private HorizontalLayout createToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
+        var toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 
-        Button acceptAllButton = new Button(translate("upload.persons.accept.all"));
+        var acceptAllButton = new Button(translate("upload.persons.accept.all"));
         acceptAllButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         acceptAllButton.addClickListener(e -> {
             changes.forEach(change -> change.setAccepted(true));
             grid.getDataProvider().refreshAll();
         });
 
-        Button rejectAllButton = new Button(translate("upload.persons.reject.all"));
+        var rejectAllButton = new Button(translate("upload.persons.reject.all"));
         rejectAllButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         rejectAllButton.addClickListener(e -> {
             changes.forEach(change -> change.setAccepted(false));
@@ -149,16 +164,16 @@ public class PersonImportDialog extends Dialog {
     }
 
     private void createFooter() {
-        Button cancelButton = new Button(translate("upload.persons.cancel"), e -> close());
+        var cancelButton = new Button(translate("upload.persons.cancel"), e -> close());
 
-        Button applyButton = new Button(translate("upload.persons.apply"), e -> applyChanges());
+        var applyButton = new Button(translate("upload.persons.apply"), e -> applyChanges());
         applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         getFooter().add(cancelButton, applyButton);
     }
 
     private void applyChanges() {
-        int appliedCount = 0;
+        var appliedCount = 0;
 
         for (PersonChange change : changes) {
             if (!change.isAccepted()) {
@@ -167,7 +182,7 @@ public class PersonImportDialog extends Dialog {
 
             if (change.getType() == PersonChange.ChangeType.NEW) {
                 // Create new person
-                PersonRecord newRecord = PERSON.newRecord();
+                var newRecord = PERSON.newRecord();
                 newRecord.setFirstName(change.getNewData().firstName());
                 newRecord.setLastName(change.getNewData().lastName());
                 newRecord.setEmail(change.getNewData().email());
@@ -178,12 +193,19 @@ public class PersonImportDialog extends Dialog {
             }
             else if (change.getType() == PersonChange.ChangeType.UPDATE) {
                 // Update existing person
-                PersonRecord record = change.getExistingRecord();
-                record.setFirstName(change.getNewData().firstName());
-                record.setLastName(change.getNewData().lastName());
-                record.setEmail(change.getNewData().email());
-                record.setMemberId(change.getNewData().memberId());
-                personRepository.save(record);
+                var personRecord = change.getExistingRecord();
+                personRecord.setFirstName(change.getNewData().firstName());
+                personRecord.setLastName(change.getNewData().lastName());
+                personRecord.setEmail(change.getNewData().email());
+                personRecord.setMemberId(change.getNewData().memberId());
+                personRepository.save(personRecord);
+                appliedCount++;
+            }
+            else if (change.getType() == PersonChange.ChangeType.DEACTIVATE) {
+                // Deactivate person not in Excel
+                var personRecord = change.getExistingRecord();
+                personRecord.setActive(false);
+                personRepository.save(personRecord);
                 appliedCount++;
             }
         }

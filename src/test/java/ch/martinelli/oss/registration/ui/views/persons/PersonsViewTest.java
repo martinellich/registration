@@ -96,14 +96,6 @@ class PersonsViewTest extends KaribuTest {
         // Find person 1 in the grid - need to find it by checking the records
         grid.getDataProvider().refreshAll();
 
-        // Wait a moment for the grid to update
-        try {
-            Thread.sleep(100);
-        }
-        catch (InterruptedException e) {
-            // Ignore
-        }
-
         // Skip this test if there are not enough persons in the grid
         var gridSize = GridKt._size(grid);
         if (gridSize == 0) {

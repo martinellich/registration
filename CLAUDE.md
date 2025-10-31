@@ -160,6 +160,7 @@ Registration workflow:
 - **Configuration**: `TestcontainersConfiguration` provides `@ServiceConnection`
 - **UI Tests**: Karibu Testing simulates Vaadin UI without browser
 - **Mail Tests**: Mailcatcher container for testing email sending
+- **NO MOCKS***: No mocking is allowed
 
 ### Test Conventions
 
@@ -220,4 +221,5 @@ docker run -p 8080:8080 registration
 - **No JPA annotations**: This is a jOOQ project, not JPA
 - **Frontend bundling**: `src/main/bundles/dev.bundle` is version-controlled (pre-compiled frontend)
 - **Code style**: Uses Spring Java Format (runs on validate phase)
+- **Type inference**: Use `var` where possible
 - **Azure AD required**: App won't start without valid Azure AD config (or disable in properties)

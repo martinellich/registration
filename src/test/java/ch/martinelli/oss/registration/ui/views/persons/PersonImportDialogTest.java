@@ -6,30 +6,25 @@ import ch.martinelli.oss.registration.domain.PersonChange;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import com.github.mvysny.kaributesting.v10.GridKt;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.grid.Grid;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
-import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
+import static com.github.mvysny.kaributesting.v10.LocatorJ._click;
+import static com.github.mvysny.kaributesting.v10.LocatorJ._get;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PersonImportDialogTest extends KaribuTest {
 
     @Autowired
     private PersonRepository personRepository;
-
-    @BeforeEach
-    public void setup() {
-        super.setup();
-    }
 
     @Test
     void shouldDisplayNewPersonChange() {

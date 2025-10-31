@@ -2,7 +2,6 @@ package ch.martinelli.oss.registration.ui.views.persons;
 
 import ch.martinelli.oss.registration.db.tables.Person;
 import ch.martinelli.oss.registration.db.tables.records.PersonRecord;
-import ch.martinelli.oss.registration.domain.ExcelPersonParser;
 import ch.martinelli.oss.registration.domain.PersonChangeDetector;
 import ch.martinelli.oss.registration.domain.PersonRepository;
 import ch.martinelli.oss.registration.security.Roles;
@@ -21,6 +20,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -43,15 +43,11 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
 
     private boolean hideInactive;
 
-    private final ExcelPersonParser excelPersonParser;
+    private final transient PersonChangeDetector personChangeDetector;
 
-    private final PersonChangeDetector personChangeDetector;
-
-    public PersonsView(PersonRepository personRepository, ExcelPersonParser excelPersonParser,
-            PersonChangeDetector personChangeDetector) {
+    public PersonsView(PersonRepository personRepository, PersonChangeDetector personChangeDetector) {
         super(personRepository, PERSON, new Grid<>(PersonRecord.class, false), new Binder<>(PersonRecord.class));
 
-        this.excelPersonParser = excelPersonParser;
         this.personChangeDetector = personChangeDetector;
         this.hideInactive = true; // Initialize in constructor
         afterNewRecord = personRecord -> personRecord.setActive(true); // default value
@@ -70,7 +66,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
         // Add toolbar with filter button
         var toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 
@@ -207,14 +203,13 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     }
 
     private Button createUploadButton() {
-        Button uploadButton = new Button(translate("upload.persons"));
+        var uploadButton = new Button(translate("upload.persons"));
         uploadButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         uploadButton.addClickListener(event -> {
-            PersonUploadDialog dialog = new PersonUploadDialog(excelPersonParser, personChangeDetector, repository,
-                    () -> {
-                        grid.getDataProvider().refreshAll();
-                        clearForm();
-                    });
+            var dialog = new PersonUploadDialog(personChangeDetector, repository, () -> {
+                grid.getDataProvider().refreshAll();
+                clearForm();
+            });
             dialog.open();
         });
         return uploadButton;

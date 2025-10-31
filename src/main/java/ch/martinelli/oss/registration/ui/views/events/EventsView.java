@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -56,7 +57,7 @@ public class EventsView extends EditView<Event, EventRecord, EventRepository>
         // Add toolbar with filter button
         var toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(HorizontalLayout.JustifyContentMode.END);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         toolbar.setPadding(true);
         toolbar.setSpacing(true);
 

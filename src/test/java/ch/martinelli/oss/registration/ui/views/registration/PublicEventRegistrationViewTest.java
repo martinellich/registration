@@ -36,7 +36,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         // Note: Event 4 is mandatory (first checkbox), so it's already checked and
         // disabled
         // Only click on enabled checkboxes
-        checkboxes.stream().filter(Checkbox::isEnabled).forEach(checkbox -> LocatorJ._click(checkbox));
+        checkboxes.stream().filter(Checkbox::isEnabled).forEach(LocatorJ::_click);
 
         // Button text is "Anmeldung aktualisieren" because there are existing
         // registrations
@@ -90,7 +90,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         assertThat(checkboxes).hasSize(2);
 
         // First checkbox is for mandatory event 4 (CIS 2025) - should be disabled
-        assertThat(checkboxes.get(0).isEnabled()).isFalse();
+        assertThat(checkboxes.getFirst().isEnabled()).isFalse();
         // Second checkbox is for optional event 5 - should be enabled
         assertThat(checkboxes.get(1).isEnabled()).isTrue();
 
@@ -99,12 +99,15 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
         assertThat(button.isEnabled()).isTrue();
 
-        // Verify we can interact with the optional checkbox
+        // Toggle the optional checkbox twice to make an actual change
+        _click(checkboxes.get(1));
         _click(checkboxes.get(1));
 
         // Verify we can click the submit button
         _click(button);
-        assertThat(button.getText()).isEqualTo("Die Antwort wurde aktualisiert");
+
+        // After toggling twice (back to original state), no changes should be detected
+        assertThat(button.getText()).isEqualTo("Keine Änderungen festgestellt. Es wurde keine E-Mail verschickt.");
     }
 
     @Test
@@ -119,7 +122,7 @@ class PublicEventRegistrationViewTest extends KaribuTest {
 
         // First checkbox should be for event 4 (CIS 2025 - mandatory)
         // It should be pre-checked and disabled
-        var firstCheckbox = checkboxes.get(0);
+        var firstCheckbox = checkboxes.getFirst();
         assertThat(firstCheckbox.getValue()).isTrue();
         assertThat(firstCheckbox.isEnabled()).isFalse();
 
