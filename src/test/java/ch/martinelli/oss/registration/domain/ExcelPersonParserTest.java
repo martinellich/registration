@@ -599,4 +599,192 @@ class ExcelPersonParserTest {
         }
     }
 
+    // ========== Header Parsing Tests ==========
+
+    @Test
+    void shouldParseExcelFileWithReorderedColumns() throws IOException {
+        // Given - columns in different order than expected
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        // Reorder: EMAIL, NACHNAME, VORNAME, MITGLIEDERNR
+        headerRow.createCell(0).setCellValue("EMAIL");
+        headerRow.createCell(1).setCellValue("NACHNAME");
+        headerRow.createCell(2).setCellValue("VORNAME");
+        headerRow.createCell(3).setCellValue("MITGLIEDERNR");
+
+        var row = sheet.createRow(1);
+        row.createCell(0).setCellValue("john@example.com");
+        row.createCell(1).setCellValue("Doe");
+        row.createCell(2).setCellValue("John");
+        row.createCell(3).setCellValue(123);
+
+        var bytes = workbookToBytes(workbook);
+
+        // When
+        var persons = parser.parseExcelFile(bytes);
+
+        // Then
+        assertThat(persons).hasSize(1);
+        assertThat(persons.getFirst().memberId()).isEqualTo(123);
+        assertThat(persons.getFirst().firstName()).isEqualTo("John");
+        assertThat(persons.getFirst().lastName()).isEqualTo("Doe");
+        assertThat(persons.getFirst().email()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    void shouldThrowExceptionForMissingRequiredHeaders() throws IOException {
+        // Given - missing VORNAME (first name) column
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("MITGLIEDERNR");
+        headerRow.createCell(1).setCellValue("NACHNAME"); // Missing VORNAME
+        headerRow.createCell(2).setCellValue("EMAIL");
+
+        var bytes = workbookToBytes(workbook);
+
+        // When/Then
+        assertThatThrownBy(() -> parser.parseExcelFile(bytes)).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Required headers missing")
+            .hasMessageContaining("VORNAME");
+    }
+
+    @Test
+    void shouldThrowExceptionForMissingLastNameHeader() throws IOException {
+        // Given - missing NACHNAME (last name) column
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("MITGLIEDERNR");
+        headerRow.createCell(1).setCellValue("VORNAME");
+        headerRow.createCell(2).setCellValue("EMAIL"); // Missing NACHNAME
+
+        var bytes = workbookToBytes(workbook);
+
+        // When/Then
+        assertThatThrownBy(() -> parser.parseExcelFile(bytes)).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Required headers missing")
+            .hasMessageContaining("NACHNAME");
+    }
+
+    @Test
+    void shouldIgnoreExtraUnknownColumns() throws IOException {
+        // Given - includes extra columns not used by parser
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("VORNAME");
+        headerRow.createCell(1).setCellValue("NACHNAME");
+        headerRow.createCell(2).setCellValue("EXTRA_COLUMN"); // Extra column
+        headerRow.createCell(3).setCellValue("ANOTHER_EXTRA"); // Another extra column
+        headerRow.createCell(4).setCellValue("EMAIL");
+
+        var row = sheet.createRow(1);
+        row.createCell(0).setCellValue("John");
+        row.createCell(1).setCellValue("Doe");
+        row.createCell(2).setCellValue("Ignored");
+        row.createCell(3).setCellValue("Also Ignored");
+        row.createCell(4).setCellValue("john@example.com");
+
+        var bytes = workbookToBytes(workbook);
+
+        // When
+        var persons = parser.parseExcelFile(bytes);
+
+        // Then
+        assertThat(persons).hasSize(1);
+        assertThat(persons.getFirst().firstName()).isEqualTo("John");
+        assertThat(persons.getFirst().lastName()).isEqualTo("Doe");
+        assertThat(persons.getFirst().email()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    void shouldHandleCaseInsensitiveHeaders() throws IOException {
+        // Given - headers in different cases
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("vorname"); // lowercase
+        headerRow.createCell(1).setCellValue("NachName"); // mixed case
+        headerRow.createCell(2).setCellValue("EMAIL"); // uppercase
+        headerRow.createCell(3).setCellValue("MitgliederNr"); // mixed case
+
+        var row = sheet.createRow(1);
+        row.createCell(0).setCellValue("John");
+        row.createCell(1).setCellValue("Doe");
+        row.createCell(2).setCellValue("john@example.com");
+        row.createCell(3).setCellValue(123);
+
+        var bytes = workbookToBytes(workbook);
+
+        // When
+        var persons = parser.parseExcelFile(bytes);
+
+        // Then
+        assertThat(persons).hasSize(1);
+        assertThat(persons.getFirst().firstName()).isEqualTo("John");
+        assertThat(persons.getFirst().lastName()).isEqualTo("Doe");
+        assertThat(persons.getFirst().email()).isEqualTo("john@example.com");
+        assertThat(persons.getFirst().memberId()).isEqualTo(123);
+    }
+
+    @Test
+    void shouldHandleHeadersWithExtraWhitespace() throws IOException {
+        // Given - headers with leading/trailing whitespace
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("  VORNAME  "); // extra spaces
+        headerRow.createCell(1).setCellValue("\tNACHNAME\t"); // tabs
+        headerRow.createCell(2).setCellValue(" EMAIL "); // spaces
+        headerRow.createCell(3).setCellValue("EMAIL ALTERNATIV  "); // trailing spaces
+
+        var row = sheet.createRow(1);
+        row.createCell(0).setCellValue("John");
+        row.createCell(1).setCellValue("Doe");
+        row.createCell(2).setCellValue(""); // blank primary email
+        row.createCell(3).setCellValue("john.alt@example.com");
+
+        var bytes = workbookToBytes(workbook);
+
+        // When
+        var persons = parser.parseExcelFile(bytes);
+
+        // Then
+        assertThat(persons).hasSize(1);
+        assertThat(persons.getFirst().firstName()).isEqualTo("John");
+        assertThat(persons.getFirst().lastName()).isEqualTo("Doe");
+        assertThat(persons.getFirst().email()).isEqualTo("john.alt@example.com"); // Falls
+                                                                                  // back
+                                                                                  // to
+                                                                                  // alternate
+    }
+
+    @Test
+    void shouldHandleMinimalColumnsInAnyOrder() throws IOException {
+        // Given - only required columns (VORNAME, NACHNAME), no optional columns
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.createSheet("Sheet1");
+        var headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("NACHNAME");
+        headerRow.createCell(1).setCellValue("VORNAME");
+
+        var row = sheet.createRow(1);
+        row.createCell(0).setCellValue("Doe");
+        row.createCell(1).setCellValue("John");
+
+        var bytes = workbookToBytes(workbook);
+
+        // When
+        var persons = parser.parseExcelFile(bytes);
+
+        // Then
+        assertThat(persons).hasSize(1);
+        assertThat(persons.getFirst().firstName()).isEqualTo("John");
+        assertThat(persons.getFirst().lastName()).isEqualTo("Doe");
+        assertThat(persons.getFirst().email()).isNull();
+        assertThat(persons.getFirst().memberId()).isNull();
+    }
+
 }
