@@ -33,6 +33,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import static ch.martinelli.oss.registration.db.tables.Person.PERSON;
+import static ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil.orderFields;
 import static com.vaadin.flow.i18n.I18NProvider.translate;
 
 @SuppressWarnings("java:S110")
@@ -132,8 +133,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     @Override
     protected void setItems() {
         grid.setItems(query -> repository
-            .findAll(query.getOffset(), query.getLimit(),
-                    ch.martinelli.oss.vaadinjooq.util.VaadinJooqUtil.orderFields(PERSON, query))
+            .findAll(hideInactive, query.getOffset(), query.getLimit(), orderFields(PERSON, query))
             .stream()
             .filter(person -> !hideInactive || Boolean.TRUE.equals(person.getActive())));
     }
