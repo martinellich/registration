@@ -133,8 +133,7 @@ public class PersonsView extends EditView<Person, PersonRecord, PersonRepository
     @Override
     protected void setItems() {
         grid.setItems(query -> repository
-            .findAll(hideInactive, query.getOffset(), query.getLimit(),
-                    orderFields(PERSON, query))
+            .findAll(hideInactive, query.getOffset(), query.getLimit(), orderFields(PERSON, query))
             .stream()
             .filter(person -> !hideInactive || Boolean.TRUE.equals(person.getActive())));
     }
