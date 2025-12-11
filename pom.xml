@@ -53,7 +53,7 @@
 
         <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
-        <karibu-testing.version>2.5.0</karibu-testing.version>
+        <karibu-testing.version>2.6.0</karibu-testing.version>
         <pitest-maven.version>1.21.1</pitest-maven.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
