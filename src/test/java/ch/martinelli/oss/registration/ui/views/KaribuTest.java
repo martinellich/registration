@@ -60,7 +60,8 @@ public abstract class KaribuTest {
             }
         });
         final Function0<UI> uiFactory = UI::new;
-        MockVaadin.setup(uiFactory, new MockSpringServlet(routes, ctx, uiFactory));
+        var servlet = new MockSpringServlet(routes, ctx, uiFactory);
+        MockVaadin.setup(uiFactory, servlet);
     }
 
     @AfterEach
