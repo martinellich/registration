@@ -75,7 +75,13 @@ class RegistrationViewTest extends KaribuTest {
         @SuppressWarnings("unchecked")
         var personListBox = (MultiSelectListBox<PersonRecord>) _get(MultiSelectListBox.class,
                 spec -> spec.withId("person-list-box"));
-        personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
+        // Find Lettie Bennett by email instead of relying on index order
+        var lettieBennett = personListBox.getListDataView()
+            .getItems()
+            .filter(p -> "lettie.bennett@odeter.bb".equals(p.getEmail()))
+            .findFirst()
+            .orElseThrow();
+        personListBox.setValue(Set.of(lettieBennett));
 
         _click(_get(Button.class, spec -> spec.withText("Speichern")));
 
