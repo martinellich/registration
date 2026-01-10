@@ -7,6 +7,9 @@ import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
+import ch.martinelli.oss.testcontainers.mailpit.Address;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitClient;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.LocatorJ;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -24,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -37,14 +39,14 @@ import static org.hamcrest.Matchers.equalTo;
 class RegistrationViewTest extends KaribuTest {
 
     @Container
-    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    static final MailpitContainer mailpitContainer = new MailpitContainer();
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailcatcherContainer.start();
+        mailpitContainer.start();
 
-        registry.add("spring.mail.host", mailcatcherContainer::getHost);
-        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
+        registry.add("spring.mail.host", mailpitContainer::getHost);
+        registry.add("spring.mail.port", mailpitContainer::getSmtpPort);
         registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
         registry.add("spring.mail.password", () -> "pass");
     }
@@ -114,10 +116,11 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        await().until(() -> mailcatcherContainer.getAllEmails().size(), equalTo(1));
-        assertThat(mailcatcherContainer.getAllEmails()).first().satisfies(mail -> {
-            assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
-            assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
+        MailpitClient client = mailpitContainer.getClient();
+        await().until(() -> client.getAllMessages().size(), equalTo(1));
+        assertThat(client.getAllMessages()).first().satisfies(message -> {
+            assertThat(message.subject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
+            assertThat(message.recipients()).extracting(Address::address).first().isEqualTo("lettie.bennett@odeter.bb");
         });
 
         // Delete new item

@@ -4,6 +4,9 @@ import ch.martinelli.oss.registration.TestcontainersConfiguration;
 import ch.martinelli.oss.registration.domain.EmailSender;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
+import ch.martinelli.oss.testcontainers.mailpit.Address;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitClient;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,7 +14,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
-import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EmailSenderTest {
 
     @Container
-    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    static final MailpitContainer mailpitContainer = new MailpitContainer();
 
     @Autowired
     private EmailSender emailSender;
@@ -33,10 +35,10 @@ class EmailSenderTest {
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailcatcherContainer.start();
+        mailpitContainer.start();
 
-        registry.add("spring.mail.host", mailcatcherContainer::getHost);
-        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
+        registry.add("spring.mail.host", mailpitContainer::getHost);
+        registry.add("spring.mail.port", mailpitContainer::getSmtpPort);
         registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
         registry.add("spring.mail.password", () -> "pass");
     }
@@ -48,14 +50,15 @@ class EmailSenderTest {
 
         emailSender.sendEmail(registration, registrationEmail, "jugi@tverlach.ch");
 
-        var emails = mailcatcherContainer.getAllEmails();
+        MailpitClient client = mailpitContainer.getClient();
+        var messages = client.getAllMessages();
 
         // Check that our invitation email is in there
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
-            assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
-            assertThat(email.getSubject()).isEqualTo("Anmeldung 2023");
-            assertThat(email.getPlainTextBody())
-                .isEqualTo("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6\n");
+        assertThat(messages).hasSizeGreaterThanOrEqualTo(1).anySatisfy(message -> {
+            assertThat(message.from().address()).isEqualTo("jugi@tverlach.ch");
+            assertThat(message.subject()).isEqualTo("Anmeldung 2023");
+            assertThat(client.getMessagePlain(message.id()))
+                .contains("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6");
         });
     }
 
@@ -65,14 +68,15 @@ class EmailSenderTest {
                 "Vielen Dank für deine Anmeldung!\n\nDeine Anlässe:\n- Event 1: Ja\n- Event 2: Nein",
                 "jugi@tverlach.ch");
 
-        var emails = mailcatcherContainer.getAllEmails();
+        MailpitClient client = mailpitContainer.getClient();
+        var messages = client.getAllMessages();
 
         // Should have 2 emails now (1 from previous test + 1 from this test)
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
-            assertThat(email.getSender()).isEqualTo("<jugi@tverlach.ch>");
-            assertThat(email.getRecipients()).contains("<test@example.com>");
-            assertThat(email.getSubject()).isEqualTo("Anmeldebestätigung");
-            assertThat(email.getPlainTextBody()).contains("Vielen Dank für deine Anmeldung!")
+        assertThat(messages).hasSizeGreaterThanOrEqualTo(1).anySatisfy(message -> {
+            assertThat(message.from().address()).isEqualTo("jugi@tverlach.ch");
+            assertThat(message.recipients()).extracting(Address::address).contains("test@example.com");
+            assertThat(message.subject()).isEqualTo("Anmeldebestätigung");
+            assertThat(client.getMessagePlain(message.id())).contains("Vielen Dank für deine Anmeldung!")
                 .contains("Event 1: Ja")
                 .contains("Event 2: Nein");
         });

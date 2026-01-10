@@ -48,7 +48,7 @@
         <spring-cloud-azure-starter-active-directory.version>7.0.0-beta.1
         </spring-cloud-azure-starter-active-directory.version>
 
-        <mailcatcher.version>0.9.3</mailcatcher.version>
+        <testcontainers-mailpit.version>0.0.1</testcontainers-mailpit.version>
 
         <flyway-maven-plugin.version>11.20.1</flyway-maven-plugin.version>
         <groovy-maven-plugin.version>2.1.1</groovy-maven-plugin.version>
@@ -215,9 +215,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.skydrinker-tox</groupId>
-            <artifactId>testcontainers-mailcatcher</artifactId>
-            <version>${mailcatcher.version}</version>
+            <groupId>ch.martinelli.oss</groupId>
+            <artifactId>testcontainers-mailpit</artifactId>
+            <version>${testcontainers-mailpit.version}</version>
             <scope>test</scope>
         </dependency>
 
