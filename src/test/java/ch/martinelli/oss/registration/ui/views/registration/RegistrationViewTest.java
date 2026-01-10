@@ -9,7 +9,6 @@ import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
 import ch.martinelli.oss.testcontainers.mailpit.Address;
 import ch.martinelli.oss.testcontainers.mailpit.MailpitClient;
-import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.LocatorJ;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -24,9 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -38,21 +35,14 @@ import static org.hamcrest.Matchers.equalTo;
 
 class RegistrationViewTest extends KaribuTest {
 
-    @Container
-    static final MailpitContainer mailpitContainer = new MailpitContainer();
-
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailpitContainer.start();
-
-        registry.add("spring.mail.host", mailpitContainer::getHost);
-        registry.add("spring.mail.port", mailpitContainer::getSmtpPort);
-        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
-        registry.add("spring.mail.password", () -> "pass");
-    }
+    @Autowired
+    MailpitClient mailpitClient;
 
     @BeforeEach
     void login() {
+        // Clear email container before each test
+        mailpitClient.deleteAllMessages();
+
         login("user@test.com", Roles.USER);
         UI.getCurrent().navigate(RegistrationView.class);
     }
@@ -116,15 +106,14 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        MailpitClient client = mailpitContainer.getClient();
-        await().until(() -> client.getAllMessages().size(), equalTo(1));
-        assertThat(client.getAllMessages()).first().satisfies(message -> {
+        await().until(() -> mailpitClient.getAllMessages().size(), equalTo(1));
+        assertThat(mailpitClient.getAllMessages()).first().satisfies(message -> {
             assertThat(message.subject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
             assertThat(message.recipients()).extracting(Address::address).first().isEqualTo("lettie.bennett@odeter.bb");
         });
 
-        // Delete new item
-        GridKt._getCellComponent(grid, 2, "action-column")
+        // Delete new item (at index 1 where we created it)
+        GridKt._getCellComponent(grid, 1, "action-column")
             .getChildren()
             .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
             .findFirst()

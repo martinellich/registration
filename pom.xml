@@ -54,7 +54,7 @@
         <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
         <jacoco.version>0.8.14</jacoco.version>
         <karibu-testing.version>2.6.1</karibu-testing.version>
-        <testcontainers-mailpit.version>1.0.0</testcontainers-mailpit.version>
+        <testcontainers-mailpit.version>1.0.1</testcontainers-mailpit.version>
         <pitest-maven.version>1.21.1</pitest-maven.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
@@ -379,26 +379,6 @@
                     <gitFlowConfig>
                         <productionBranch>main</productionBranch>
                     </gitFlowConfig>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>me.fabriciorby</groupId>
-                        <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                        <version>1.5.1</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <reportFormat>plain</reportFormat>
-                    <consoleOutputReporter>
-                        <disable>true</disable>
-                    </consoleOutputReporter>
-                    <statelessTestsetInfoReporter
-                            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
-                    </statelessTestsetInfoReporter>
                 </configuration>
             </plugin>
             <plugin>
