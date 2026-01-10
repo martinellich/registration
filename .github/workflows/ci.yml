@@ -43,6 +43,6 @@ jobs:
                         ${{ runner.os }}-maven-
 
             -   name: Maven Build, Test, and Sonar
-                run: ./mvnw -B verify sonar:sonar -Pcoverage -Dsonar.projectKey=martinellich_registration
+                run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=martinellich_registration
                 env:
                     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
