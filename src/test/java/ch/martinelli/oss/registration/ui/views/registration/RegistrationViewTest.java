@@ -75,11 +75,13 @@ class RegistrationViewTest extends KaribuTest {
         var personListBox = (MultiSelectListBox<PersonRecord>) _get(MultiSelectListBox.class,
                 spec -> spec.withId("person-list-box"));
         // Find Lettie Bennett by email instead of relying on index order
-        var lettieBennett = personListBox.getListDataView()
-            .getItems()
+        var allPersons = personListBox.getListDataView().getItems().toList();
+        var lettieBennett = allPersons.stream()
             .filter(p -> "lettie.bennett@odeter.bb".equals(p.getEmail()))
             .findFirst()
-            .orElseThrow();
+            .orElseThrow(
+                    () -> new AssertionError("Expected to find person with email 'lettie.bennett@odeter.bb' but found: "
+                            + allPersons.stream().map(p -> p.getEmail()).toList()));
         personListBox.setValue(Set.of(lettieBennett));
 
         _click(_get(Button.class, spec -> spec.withText("Speichern")));

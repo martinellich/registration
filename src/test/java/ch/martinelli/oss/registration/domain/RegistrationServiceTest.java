@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.time.Duration;
 import java.util.Set;
 
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
@@ -87,7 +88,8 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Confirmation email should be sent
-        assertThat(mailpitContainer).hasMessages()
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+            .awaitMessageCount(1)
             .firstMessage()
             .hasRecipient("barry.rodriquez@zun.mm")
             .hasSubject("Registration Confirmed")
@@ -124,7 +126,8 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, updatedRegistrations);
 
         // Then: Update confirmation email should be sent (2 messages total)
-        assertThat(mailpitContainer).hasMessageCount(2)
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+            .awaitMessageCount(2)
             .messages()
             .filteredOnSubject("Registration Updated")
             .hasSize(1)
@@ -161,7 +164,10 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Check email with all placeholders replaced
-        assertThat(mailpitContainer).hasMessages().firstMessage().hasSubject("Registration Confirmed");
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+            .awaitMessageCount(1)
+            .firstMessage()
+            .hasSubject("Registration Confirmed");
 
         // Use client for detailed body content assertions (snippet is truncated)
         var message = mailpitContainer.getClient().getAllMessages().getFirst();
