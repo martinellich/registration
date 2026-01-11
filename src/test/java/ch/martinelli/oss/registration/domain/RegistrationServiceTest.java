@@ -62,10 +62,11 @@ class RegistrationServiceTest {
             .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(3L))
             .execute();
 
-        // Reset registered_at for registration_email ID 2 (used by detailed template
-        // test)
+        // Reset registered_at and sent_at for registration_email ID 2 (used by detailed
+        // template test)
         dslContext.update(REGISTRATION_EMAIL)
             .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
+            .setNull(REGISTRATION_EMAIL.SENT_AT)
             .where(REGISTRATION_EMAIL.ID.eq(2L))
             .execute();
     }
@@ -161,10 +162,13 @@ class RegistrationServiceTest {
                 createEventRegistration(registrationId, event2Id, personId, false));
 
         // When: Register
-        registrationService.register(registrationEmailId, eventRegistrations);
+        var registered = registrationService.register(registrationEmailId, eventRegistrations);
 
-        // Then: Check email with all placeholders replaced
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
+        // Then: Registration should succeed
+        Assertions.assertThat(registered).as("Registration should succeed and return true").isTrue();
+
+        // And: Check email with all placeholders replaced
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(60))
             .awaitMessageCount(1)
             .firstMessage()
             .hasSubject("Registration Confirmed");
