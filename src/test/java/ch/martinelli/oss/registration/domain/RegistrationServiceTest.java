@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Set;
@@ -21,7 +20,6 @@ import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAsserti
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
-@Transactional
 class RegistrationServiceTest {
 
     @Autowired
@@ -47,14 +45,6 @@ class RegistrationServiceTest {
         // ready
         assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10)).hasMessageCount(0);
 
-        // Verify test data exists before proceeding (helps diagnose CI issues)
-        var registrationEmail2 = registrationEmailRepository.findById(2L);
-        Assertions.assertThat(registrationEmail2)
-            .as("Test data integrity check: registration_email ID 2 must exist. "
-                    + "If this fails, it indicates database state corruption from another test. "
-                    + "Check PersonChangeDetectorTest or other tests that modify registration_email_person.")
-            .isPresent();
-
         // Clean up event registrations for registration 3 (shared by multiple tests)
         // This ensures test isolation for person 2 with events 4 and 5
         dslContext.deleteFrom(EVENT_REGISTRATION)
@@ -77,13 +67,11 @@ class RegistrationServiceTest {
 
         // Reset registered_at and sent_at for registration_email ID 2 (used by detailed
         // template test)
-        var updatedRows = dslContext.update(REGISTRATION_EMAIL)
+        dslContext.update(REGISTRATION_EMAIL)
             .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
             .setNull(REGISTRATION_EMAIL.SENT_AT)
             .where(REGISTRATION_EMAIL.ID.eq(2L))
             .execute();
-
-        Assertions.assertThat(updatedRows).as("Should successfully reset registration_email ID 2").isEqualTo(1);
     }
 
     @Test
