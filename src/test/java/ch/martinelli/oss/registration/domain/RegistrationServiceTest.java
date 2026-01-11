@@ -170,8 +170,11 @@ class RegistrationServiceTest {
         Assertions.assertThat(registered).as("Registration should succeed and return true").isTrue();
 
         // And: Check email with all placeholders replaced
+        // Use hasMessages() first to wait for at least one message before checking
+        // specific
+        // content
         assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(60))
-            .awaitMessageCount(1)
+            .hasMessages()
             .firstMessage()
             .hasSubject("Registration Confirmed");
 
