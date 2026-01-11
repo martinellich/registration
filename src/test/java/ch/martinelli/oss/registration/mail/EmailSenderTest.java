@@ -4,8 +4,7 @@ import ch.martinelli.oss.registration.TestcontainersConfiguration;
 import ch.martinelli.oss.registration.domain.EmailSender;
 import ch.martinelli.oss.registration.domain.RegistrationEmailRepository;
 import ch.martinelli.oss.registration.domain.RegistrationRepository;
-import ch.martinelli.oss.testcontainers.mailpit.Address;
-import ch.martinelli.oss.testcontainers.mailpit.MailpitClient;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,14 +14,14 @@ import org.springframework.context.annotation.Import;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
-import static org.assertj.core.api.Assertions.assertThat;
+import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 class EmailSenderTest {
 
     @Autowired
-    private MailpitClient mailpitClient;
+    private MailpitContainer mailpitContainer;
 
     @Autowired
     private EmailSender emailSender;
@@ -39,7 +38,7 @@ class EmailSenderTest {
     @BeforeEach
     void setUp() {
         // Clear email container before each test
-        mailpitClient.deleteAllMessages();
+        mailpitContainer.getClient().deleteAllMessages();
 
         // Ensure registration_email ID 2 exists (may be deleted by other tests)
         var exists = dslContext
@@ -74,15 +73,12 @@ class EmailSenderTest {
 
         emailSender.sendEmail(registration, registrationEmail, "jugi@tverlach.ch");
 
-        var messages = mailpitClient.getAllMessages();
-
         // Check that our invitation email is in there
-        assertThat(messages).hasSizeGreaterThanOrEqualTo(1).anySatisfy(message -> {
-            assertThat(message.from().address()).isEqualTo("jugi@tverlach.ch");
-            assertThat(message.subject()).isEqualTo("Anmeldung 2023");
-            assertThat(mailpitClient.getMessagePlain(message.id()))
-                .contains("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6");
-        });
+        assertThat(mailpitContainer).hasMessages()
+            .firstMessage()
+            .isFrom("jugi@tverlach.ch")
+            .hasSubject("Anmeldung 2023")
+            .hasSnippetContaining("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6");
     }
 
     @Test
@@ -91,17 +87,14 @@ class EmailSenderTest {
                 "Vielen Dank für deine Anmeldung!\n\nDeine Anlässe:\n- Event 1: Ja\n- Event 2: Nein",
                 "jugi@tverlach.ch");
 
-        var messages = mailpitClient.getAllMessages();
-
-        // Should have 2 emails now (1 from previous test + 1 from this test)
-        assertThat(messages).hasSizeGreaterThanOrEqualTo(1).anySatisfy(message -> {
-            assertThat(message.from().address()).isEqualTo("jugi@tverlach.ch");
-            assertThat(message.recipients()).extracting(Address::address).contains("test@example.com");
-            assertThat(message.subject()).isEqualTo("Anmeldebestätigung");
-            assertThat(mailpitClient.getMessagePlain(message.id())).contains("Vielen Dank für deine Anmeldung!")
-                .contains("Event 1: Ja")
-                .contains("Event 2: Nein");
-        });
+        assertThat(mailpitContainer).hasMessages()
+            .firstMessage()
+            .isFrom("jugi@tverlach.ch")
+            .hasRecipient("test@example.com")
+            .hasSubject("Anmeldebestätigung")
+            .hasSnippetContaining("Vielen Dank für deine Anmeldung!")
+            .hasSnippetContaining("Event 1: Ja")
+            .hasSnippetContaining("Event 2: Nein");
     }
 
 }

@@ -7,8 +7,7 @@ import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
-import ch.martinelli.oss.testcontainers.mailpit.Address;
-import ch.martinelli.oss.testcontainers.mailpit.MailpitClient;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.LocatorJ;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -21,27 +20,27 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
 
+import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 
 class RegistrationViewTest extends KaribuTest {
 
     @Autowired
-    MailpitClient mailpitClient;
+    MailpitContainer mailpitContainer;
 
     @BeforeEach
     void login() {
         // Clear email container before each test
-        mailpitClient.deleteAllMessages();
+        mailpitContainer.getClient().deleteAllMessages();
 
         login("user@test.com", Roles.USER);
         UI.getCurrent().navigate(RegistrationView.class);
@@ -55,10 +54,10 @@ class RegistrationViewTest extends KaribuTest {
         // Check the content of grid
         @SuppressWarnings("unchecked")
         var grid = (Grid<RegistrationViewRecord>) _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(3);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
-        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
-        assertThat(GridKt._get(grid, 2).getYear()).isEqualTo(2023);
+        Assertions.assertThat(GridKt._size(grid)).isEqualTo(3);
+        Assertions.assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
+        Assertions.assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
+        Assertions.assertThat(GridKt._get(grid, 2).getYear()).isEqualTo(2023);
 
         // Add new registration
         _click(_get(Icon.class, spec -> spec.withId("add-icon")));
@@ -87,12 +86,12 @@ class RegistrationViewTest extends KaribuTest {
 
         NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
 
-        assertThat(GridKt._size(grid)).isEqualTo(4);
+        Assertions.assertThat(GridKt._size(grid)).isEqualTo(4);
 
         // Select newly created record (at index 1 because it's sorted by year desc, then
         // title asc)
         var registrationViewRecord = GridKt._get(grid, 1);
-        assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
+        Assertions.assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
@@ -112,11 +111,11 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        await().until(() -> mailpitClient.getAllMessages().size(), equalTo(1));
-        assertThat(mailpitClient.getAllMessages()).first().satisfies(message -> {
-            assertThat(message.subject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
-            assertThat(message.recipients()).extracting(Address::address).first().isEqualTo("lettie.bennett@odeter.bb");
-        });
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
+            .awaitMessageCount(1)
+            .firstMessage()
+            .hasSubject("Jugi TV Erlach - Anmeldung 2025")
+            .hasRecipient("lettie.bennett@odeter.bb");
 
         // Delete new item (at index 1 where we created it)
         GridKt._getCellComponent(grid, 1, "action-column")
@@ -137,7 +136,7 @@ class RegistrationViewTest extends KaribuTest {
         UI.getCurrent().navigate(RegistrationView.class, new RouteParam(RegistrationView.ID, "9999"));
 
         // Form must be empty
-        assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
+        Assertions.assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
     }
 
 }
