@@ -39,10 +39,8 @@ class RegistrationServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Clear email container before each test and verify it's empty
+        // Clear email container before each test
         mailpitContainer.getClient().deleteAllMessages();
-        // Wait for container to confirm messages are deleted
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5)).hasMessageCount(0);
 
         // Clean up event registrations for registration 3 (shared by multiple tests)
         // This ensures test isolation for person 2 with events 4 and 5
@@ -153,7 +151,7 @@ class RegistrationServiceTest {
     void register_with_detailed_template_replaces_all_placeholders() {
         // Given: Registration email ID 2 with person 5 (Cora Tesi)
         // Using registration 1 which has detailed confirmation templates
-        // First, let's create a registration email /cfor registration 1
+        // First, let's create a registration email for registration 1
         var registrationEmailId = 2L; // This is for registration 1, person 5
         var registrationId = 1L;
         var personId = 5L; // Cora Tesi

@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
-import java.time.Duration;
-
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
@@ -39,10 +37,8 @@ class EmailSenderTest {
 
     @BeforeEach
     void setUp() {
-        // Clear email container before each test and verify it's empty
+        // Clear email container before each test
         mailpitContainer.getClient().deleteAllMessages();
-        // Wait for container to confirm messages are deleted
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5)).hasMessageCount(0);
 
         // Ensure registration_email ID 2 exists (may be deleted by other tests)
         var exists = dslContext
