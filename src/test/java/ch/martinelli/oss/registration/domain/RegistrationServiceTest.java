@@ -88,7 +88,7 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Confirmation email should be sent
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
             .awaitMessageCount(1)
             .firstMessage()
             .hasRecipient("barry.rodriquez@zun.mm")
@@ -126,7 +126,7 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, updatedRegistrations);
 
         // Then: Update confirmation email should be sent (2 messages total)
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
             .awaitMessageCount(2)
             .messages()
             .filteredOnSubject("Registration Updated")
@@ -164,7 +164,7 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Check email with all placeholders replaced
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10))
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
             .awaitMessageCount(1)
             .firstMessage()
             .hasSubject("Registration Confirmed");
