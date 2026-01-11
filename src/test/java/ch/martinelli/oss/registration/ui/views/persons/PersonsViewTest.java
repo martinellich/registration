@@ -155,15 +155,41 @@ class PersonsViewTest extends KaribuTest {
         // Initially, inactive persons should be hidden (default behavior)
         assertThat(initialSize).isGreaterThan(0);
 
-        // Delete one person (person at index 0) - actually deletes successfully
-        var component = GridKt._getCellComponent(grid, 0, "action-column");
+        // First, create a new person specifically for this test
+        _click(_get(Icon.class, spec -> spec.withId("add-icon")));
+
+        var testEmail = "test.delete.person@test.com";
+        _setValue(_get(TextField.class, spec -> spec.withLabel("Nachname")), "TestDelete");
+        _setValue(_get(TextField.class, spec -> spec.withLabel("Vorname")), "Person");
+        _setValue(_get(EmailField.class, spec -> spec.withLabel("E-Mail")), testEmail);
+        _get(Checkbox.class, spec -> spec.withLabel("Aktiv")).setValue(true);
+
+        _click(_get(Button.class, spec -> spec.withText("Speichern")));
+        NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
+
+        // Now grid should have one more person
+        assertThat(GridKt._size(grid)).isEqualTo(initialSize + 1);
+
+        // Find the newly created person by email and delete it
+        var personIndex = -1;
+        for (int i = 0; i < GridKt._size(grid); i++) {
+            var person = GridKt._get(grid, i);
+            if (testEmail.equals(person.getEmail())) {
+                personIndex = i;
+                break;
+            }
+        }
+        assertThat(personIndex).as("Should find the test person we just created").isGreaterThanOrEqualTo(0);
+
+        // Delete the test person
+        var component = GridKt._getCellComponent(grid, personIndex, "action-column");
         if (component instanceof Icon icon) {
             _click(icon);
         }
         ConfirmDialogKt._fireConfirm(_get(ConfirmDialog.class));
 
-        // After deletion, grid should show one less record
-        assertThat(GridKt._size(grid)).isEqualTo(initialSize - 1);
+        // After deletion, grid should be back to initial size
+        assertThat(GridKt._size(grid)).isEqualTo(initialSize);
     }
 
     @Test
