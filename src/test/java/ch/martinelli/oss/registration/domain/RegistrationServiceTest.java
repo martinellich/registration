@@ -41,8 +41,9 @@ class RegistrationServiceTest {
     void setUp() {
         // Clear email container before each test and verify it's empty
         mailpitContainer.getClient().deleteAllMessages();
-        // Wait for container to confirm messages are deleted
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5)).hasMessageCount(0);
+        // Wait for container to confirm messages are deleted - this ensures mailpit is
+        // ready
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(10)).hasMessageCount(0);
 
         // Clean up event registrations for registration 3 (shared by multiple tests)
         // This ensures test isolation for person 2 with events 4 and 5
@@ -151,6 +152,9 @@ class RegistrationServiceTest {
 
     @Test
     void register_with_detailed_template_replaces_all_placeholders() {
+        // Given: Verify mailbox is empty and container is ready
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5)).hasMessageCount(0);
+
         // Given: Registration email ID 2 with person 5 (Cora Tesi)
         // Using registration 1 which has detailed confirmation templates
         // First, let's create a registration email /cfor registration 1
@@ -170,10 +174,16 @@ class RegistrationServiceTest {
         Assertions.assertThat(registered).as("Registration should succeed and return true").isTrue();
 
         // And: Check email with all placeholders replaced
-        // Use hasMessages() first to wait for at least one message before checking
-        // specific
-        // content
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(60))
+        // First check how many messages are in the mailbox for debugging
+        var messageCount = mailpitContainer.getClient().getAllMessages().size();
+        Assertions.assertThat(messageCount)
+            .as("Expected exactly 1 message in mailbox after registration, but found %d messages. "
+                    + "This could indicate: 1) Email sending failed silently, 2) Another test cleared the mailbox, "
+                    + "or 3) Multiple emails were sent unexpectedly. "
+                    + "Check CI logs for 'Confirmation email sent to cora.tesi@bivo.yt' or errors.", messageCount)
+            .isEqualTo(1);
+
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5))
             .hasMessages()
             .firstMessage()
             .hasSubject("Registration Confirmed");
