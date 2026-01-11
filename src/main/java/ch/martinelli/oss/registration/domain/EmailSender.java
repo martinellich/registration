@@ -29,13 +29,17 @@ public class EmailSender {
 
     private final String sender;
 
+    private final boolean failOnError;
+
     public EmailSender(JavaMailSender javaMailSender, DSLContext dslContext,
             @Value("${registration.public.address}") String publicAddress,
-            @Value("${spring.mail.username:jugi@tverlach.ch}") String sender) {
+            @Value("${spring.mail.username:jugi@tverlach.ch}") String sender,
+            @Value("${registration.email.fail-on-error:false}") boolean failOnError) {
         this.javaMailSender = javaMailSender;
         this.dslContext = dslContext;
         this.publicAddress = publicAddress;
         this.sender = sender;
+        this.failOnError = failOnError;
     }
 
     @Transactional
@@ -73,7 +77,12 @@ public class EmailSender {
         }
         catch (Exception e) {
             log.error("Failed to send confirmation email to {}", to, e);
-            // Don't throw exception - we don't want to block registration if email fails
+            if (failOnError) {
+                throw new MailSendException("Failed to send confirmation email to " + to, e);
+            }
+            // Don't throw exception in production - we don't want to block registration
+            // if
+            // email fails
         }
     }
 
