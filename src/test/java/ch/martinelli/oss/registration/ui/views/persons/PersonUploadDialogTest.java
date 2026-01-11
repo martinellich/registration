@@ -210,8 +210,7 @@ class PersonUploadDialogTest extends KaribuTest {
         // but Apache POI throws NotOfficeXmlFileException (RuntimeException) for invalid
         // files
         var invalidContent = "This is not a valid Excel file".getBytes();
-        assertThat(Assertions
-            .catchThrowable(() -> UploadKt._upload(upload, "invalid.xlsx", invalidContent)))
+        assertThat(Assertions.catchThrowable(() -> UploadKt._upload(upload, "invalid.xlsx", invalidContent)))
             .isInstanceOf(java.util.concurrent.ExecutionException.class)
             .hasCauseInstanceOf(NotOfficeXmlFileException.class)
             .hasMessageContaining("not a valid OOXML");
