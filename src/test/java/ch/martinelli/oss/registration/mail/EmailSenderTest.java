@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import java.time.Duration;
 
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
+import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
@@ -43,17 +44,36 @@ class EmailSenderTest {
         // Wait for container to confirm messages are deleted
         assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(5)).hasMessageCount(0);
 
-        // Reset sent_at for registration_email ID 1 (used by send_mails test)
-        dslContext.update(REGISTRATION_EMAIL)
-            .setNull(REGISTRATION_EMAIL.SENT_AT)
-            .where(REGISTRATION_EMAIL.ID.eq(1L))
-            .execute();
+        // Ensure registration_email ID 2 exists (may be deleted by other tests)
+        var exists = dslContext
+            .fetchExists(dslContext.selectFrom(REGISTRATION_EMAIL).where(REGISTRATION_EMAIL.ID.eq(2L)));
+        if (!exists) {
+            // Re-insert registration_email ID 2 and its person association
+            dslContext
+                .insertInto(REGISTRATION_EMAIL, REGISTRATION_EMAIL.ID, REGISTRATION_EMAIL.REGISTRATION_ID,
+                        REGISTRATION_EMAIL.EMAIL, REGISTRATION_EMAIL.LINK)
+                .values(2L, 1L, "cora.tesi@bivo.yt", "2226914588a24213a631dcdd475f81b6")
+                .execute();
+            dslContext
+                .insertInto(REGISTRATION_EMAIL_PERSON, REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID,
+                        REGISTRATION_EMAIL_PERSON.PERSON_ID)
+                .values(2L, 5L)
+                .execute();
+        }
+        else {
+            // Reset registered_at in case another test modified it
+            dslContext.update(REGISTRATION_EMAIL)
+                .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
+                .setNull(REGISTRATION_EMAIL.SENT_AT)
+                .where(REGISTRATION_EMAIL.ID.eq(2L))
+                .execute();
+        }
     }
 
     @Test
     void send_mails() {
         var registration = registrationRepository.findById(1L).orElseThrow();
-        var registrationEmail = registrationEmailRepository.findByIdFromView(1L).orElseThrow();
+        var registrationEmail = registrationEmailRepository.findByIdFromView(2L).orElseThrow();
 
         emailSender.sendEmail(registration, registrationEmail, "jugi@tverlach.ch");
 
@@ -62,7 +82,7 @@ class EmailSenderTest {
             .firstMessage()
             .isFrom("jugi@tverlach.ch")
             .hasSubject("Anmeldung 2023")
-            .hasSnippetContaining("Mail text https://anmeldungen.tverlach.ch/public/550e8400e29b41d4a716446655440000");
+            .hasSnippetContaining("Mail text https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6");
     }
 
     @Test
