@@ -172,10 +172,7 @@ class RegistrationServiceTest {
         System.out.println(allMessages);
 
         // And: Check email with all placeholders replaced
-        assertThat(mailpitContainer)
-            .awaitMessageCount(1)
-            .firstMessage()
-            .hasSubject("Registration Confirmed");
+        assertThat(mailpitContainer).awaitMessageCount(1).firstMessage().hasSubject("Registration Confirmed");
 
         // Use client for detailed body content assertions (snippet is truncated)
         var message = allMessages.getFirst();
