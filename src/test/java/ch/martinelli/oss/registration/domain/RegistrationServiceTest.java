@@ -16,6 +16,7 @@ import java.util.Set;
 
 import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
+import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
 import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
@@ -62,13 +63,32 @@ class RegistrationServiceTest {
             .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(3L))
             .execute();
 
-        // Reset registered_at and sent_at for registration_email ID 2 (used by detailed
-        // template test)
-        dslContext.update(REGISTRATION_EMAIL)
-            .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
-            .setNull(REGISTRATION_EMAIL.SENT_AT)
-            .where(REGISTRATION_EMAIL.ID.eq(2L))
-            .execute();
+        // Ensure registration_email ID 2 exists (may be deleted by other tests like
+        // RegistrationEmailViewTest)
+        var exists = dslContext
+            .fetchExists(dslContext.selectFrom(REGISTRATION_EMAIL).where(REGISTRATION_EMAIL.ID.eq(2L)));
+        if (!exists) {
+            // Re-insert registration_email ID 2 and its person association
+            dslContext
+                .insertInto(REGISTRATION_EMAIL, REGISTRATION_EMAIL.ID, REGISTRATION_EMAIL.REGISTRATION_ID,
+                        REGISTRATION_EMAIL.EMAIL, REGISTRATION_EMAIL.LINK)
+                .values(2L, 1L, "cora.tesi@bivo.yt", "2226914588a24213a631dcdd475f81b6")
+                .execute();
+            dslContext
+                .insertInto(REGISTRATION_EMAIL_PERSON, REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID,
+                        REGISTRATION_EMAIL_PERSON.PERSON_ID)
+                .values(2L, 5L)
+                .execute();
+        }
+        else {
+            // Reset registered_at and sent_at for registration_email ID 2 (used by
+            // detailed template test)
+            dslContext.update(REGISTRATION_EMAIL)
+                .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
+                .setNull(REGISTRATION_EMAIL.SENT_AT)
+                .where(REGISTRATION_EMAIL.ID.eq(2L))
+                .execute();
+        }
     }
 
     @Test
