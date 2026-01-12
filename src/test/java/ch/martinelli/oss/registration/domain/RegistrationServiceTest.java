@@ -167,14 +167,18 @@ class RegistrationServiceTest {
         // Then: Registration should succeed
         Assertions.assertThat(registered).as("Registration should succeed and return true").isTrue();
 
+        var allMessages = mailpitContainer.getClient().getAllMessages();
+        System.out.println("All messages:");
+        System.out.println(allMessages);
+
         // And: Check email with all placeholders replaced
-        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(60))
+        assertThat(mailpitContainer)
             .awaitMessageCount(1)
             .firstMessage()
             .hasSubject("Registration Confirmed");
 
         // Use client for detailed body content assertions (snippet is truncated)
-        var message = mailpitContainer.getClient().getAllMessages().getFirst();
+        var message = allMessages.getFirst();
         var body = mailpitContainer.getClient().getMessagePlain(message.id());
         Assertions.assertThat(body)
             // Check all placeholders are replaced
