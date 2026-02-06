@@ -45,8 +45,7 @@
         <jooq-utilities.version>1.1.2</jooq-utilities.version>
         <vaadin-jooq.version>2.1.1</vaadin-jooq.version>
         <line-awesome.version>2.1.0</line-awesome.version>
-        <spring-cloud-azure-starter-active-directory.version>7.0.0-beta.1
-        </spring-cloud-azure-starter-active-directory.version>
+        <spring-cloud-azure-starter-active-directory.version>7.0.0</spring-cloud-azure-starter-active-directory.version>
 
         <flyway-maven-plugin.version>11.20.2</flyway-maven-plugin.version>
         <groovy-maven-plugin.version>2.1.1</groovy-maven-plugin.version>
