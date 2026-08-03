@@ -7,13 +7,37 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.ListItem;
+import org.jooq.DSLContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class PublicEventRegistrationViewTest extends KaribuTest {
+
+    @Autowired
+    private DSLContext dslContext;
+
+    @BeforeEach
+    void seedEventRegistrations() {
+        // Other test classes (e.g. RegistrationServiceTest) modify the event
+        // registrations of registration 3 / person 2 without cleaning up. Reset them to
+        // a known state so the tests don't depend on class execution order.
+        dslContext.deleteFrom(EVENT_REGISTRATION)
+            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(3L))
+            .and(EVENT_REGISTRATION.PERSON_ID.eq(2L))
+            .execute();
+        dslContext
+            .insertInto(EVENT_REGISTRATION, EVENT_REGISTRATION.REGISTRATION_ID, EVENT_REGISTRATION.EVENT_ID,
+                    EVENT_REGISTRATION.PERSON_ID, EVENT_REGISTRATION.REGISTERED)
+            .values(3L, 4L, 2L, true)
+            .values(3L, 5L, 2L, false)
+            .execute();
+    }
 
     @Test
     void navigation_without_parameter() {
@@ -35,8 +59,8 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         var checkboxes = LocatorJ._find(Checkbox.class);
         // Note: Event 4 is mandatory (first checkbox), so it's already checked and
         // disabled
-        // Only click on enabled checkboxes
-        checkboxes.stream().filter(Checkbox::isEnabled).forEach(LocatorJ::_click);
+        // Toggle all enabled checkboxes to guarantee a change against the seeded state
+        checkboxes.stream().filter(Checkbox::isEnabled).forEach(checkbox -> _setValue(checkbox, !checkbox.getValue()));
 
         // Button text is "Anmeldung aktualisieren" because there are existing
         // registrations
@@ -99,9 +123,9 @@ class PublicEventRegistrationViewTest extends KaribuTest {
         var button = _get(Button.class, spec -> spec.withText("Anmeldung aktualisieren"));
         assertThat(button.isEnabled()).isTrue();
 
-        // Toggle the optional checkbox twice to make an actual change
-        _click(checkboxes.get(1));
-        _click(checkboxes.get(1));
+        // Toggle the optional checkbox twice so it ends up in its original state
+        _setValue(checkboxes.get(1), true);
+        _setValue(checkboxes.get(1), false);
 
         // Verify we can click the submit button
         _click(button);
