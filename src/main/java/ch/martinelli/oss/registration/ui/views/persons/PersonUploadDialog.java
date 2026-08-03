@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.streams.UploadHandler;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -72,7 +71,7 @@ public class PersonUploadDialog extends Dialog {
         return layout;
     }
 
-    private @NotNull Upload getUpload() {
+    private Upload getUpload() {
         var uploadHandler = UploadHandler.inMemory((metadata, data) -> {
             try {
                 // Parse Excel file from byte array

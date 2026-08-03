@@ -7,6 +7,7 @@ import ch.martinelli.oss.registration.security.Roles;
 import ch.martinelli.oss.registration.ui.components.I18nDatePicker;
 import ch.martinelli.oss.registration.ui.components.Icon;
 import ch.martinelli.oss.registration.ui.views.KaribuTest;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
 import com.github.mvysny.kaributesting.v10.GridKt;
 import com.github.mvysny.kaributesting.v10.LocatorJ;
 import com.github.mvysny.kaributesting.v10.NotificationsKt;
@@ -19,38 +20,28 @@ import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParam;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
 
+import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 import static com.github.mvysny.kaributesting.v10.LocatorJ.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 
 class RegistrationViewTest extends KaribuTest {
 
-    @Container
-    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
-
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailcatcherContainer.start();
-
-        registry.add("spring.mail.host", mailcatcherContainer::getHost);
-        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
-        registry.add("spring.mail.username", () -> "jugi@tverlach.ch");
-        registry.add("spring.mail.password", () -> "pass");
-    }
+    @Autowired
+    MailpitContainer mailpitContainer;
 
     @BeforeEach
     void login() {
+        // Clear email container before each test
+        mailpitContainer.getClient().deleteAllMessages();
+
         login("user@test.com", Roles.USER);
         UI.getCurrent().navigate(RegistrationView.class);
     }
@@ -63,10 +54,10 @@ class RegistrationViewTest extends KaribuTest {
         // Check the content of grid
         @SuppressWarnings("unchecked")
         var grid = (Grid<RegistrationViewRecord>) _get(Grid.class);
-        assertThat(GridKt._size(grid)).isEqualTo(3);
-        assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
-        assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
-        assertThat(GridKt._get(grid, 2).getYear()).isEqualTo(2023);
+        Assertions.assertThat(GridKt._size(grid)).isEqualTo(3);
+        Assertions.assertThat(GridKt._get(grid, 0).getYear()).isEqualTo(2025);
+        Assertions.assertThat(GridKt._get(grid, 1).getYear()).isEqualTo(2024);
+        Assertions.assertThat(GridKt._get(grid, 2).getYear()).isEqualTo(2023);
 
         // Add new registration
         _click(_get(Icon.class, spec -> spec.withId("add-icon")));
@@ -83,18 +74,26 @@ class RegistrationViewTest extends KaribuTest {
         @SuppressWarnings("unchecked")
         var personListBox = (MultiSelectListBox<PersonRecord>) _get(MultiSelectListBox.class,
                 spec -> spec.withId("person-list-box"));
-        personListBox.setValue(Set.of(personListBox.getListDataView().getItem(0)));
+        // Find Lettie Bennett by email instead of relying on index order
+        var allPersons = personListBox.getListDataView().getItems().toList();
+        var lettieBennett = allPersons.stream()
+            .filter(p -> "lettie.bennett@odeter.bb".equals(p.getEmail()))
+            .findFirst()
+            .orElseThrow(
+                    () -> new AssertionError("Expected to find person with email 'lettie.bennett@odeter.bb' but found: "
+                            + allPersons.stream().map(p -> p.getEmail()).toList()));
+        personListBox.setValue(Set.of(lettieBennett));
 
         _click(_get(Button.class, spec -> spec.withText("Speichern")));
 
         NotificationsKt.expectNotifications("Der Datensatz wurden gespeichert");
 
-        assertThat(GridKt._size(grid)).isEqualTo(4);
+        Assertions.assertThat(GridKt._size(grid)).isEqualTo(4);
 
         // Select newly created record (at index 1 because it's sorted by year desc, then
         // title asc)
         var registrationViewRecord = GridKt._get(grid, 1);
-        assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
+        Assertions.assertThat(registrationViewRecord.getTitle()).isEqualTo("Jugi TV Erlach - Anmeldung");
 
         // Create mailing
         _click(_get(Button.class, spec -> spec.withText("Versand erstellen")));
@@ -114,14 +113,14 @@ class RegistrationViewTest extends KaribuTest {
         // Check if save was successful
         NotificationsKt.expectNotifications("Die E-Mails werden nun versendet");
 
-        await().until(() -> mailcatcherContainer.getAllEmails().size(), equalTo(1));
-        assertThat(mailcatcherContainer.getAllEmails()).first().satisfies(mail -> {
-            assertThat(mail.getSubject()).isEqualTo("Jugi TV Erlach - Anmeldung 2025");
-            assertThat(mail.getRecipients()).first().isEqualTo("<lettie.bennett@odeter.bb>");
-        });
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
+            .awaitMessageCount(1)
+            .firstMessage()
+            .hasSubject("Jugi TV Erlach - Anmeldung 2025")
+            .hasRecipient("lettie.bennett@odeter.bb");
 
-        // Delete new item
-        GridKt._getCellComponent(grid, 2, "action-column")
+        // Delete new item (at index 1 where we created it)
+        GridKt._getCellComponent(grid, 1, "action-column")
             .getChildren()
             .filter(child -> child.getId().isPresent() && child.getId().get().equals("delete-action"))
             .findFirst()
@@ -139,7 +138,7 @@ class RegistrationViewTest extends KaribuTest {
         UI.getCurrent().navigate(RegistrationView.class, new RouteParam(RegistrationView.ID, "9999"));
 
         // Form must be empty
-        assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
+        Assertions.assertThat(_get(IntegerField.class, spec -> spec.withLabel("Jahr")).getValue()).isNull();
     }
 
 }

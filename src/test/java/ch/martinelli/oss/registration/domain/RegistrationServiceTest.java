@@ -2,27 +2,29 @@ package ch.martinelli.oss.registration.domain;
 
 import ch.martinelli.oss.registration.TestcontainersConfiguration;
 import ch.martinelli.oss.registration.db.tables.records.EventRegistrationRecord;
-import org.junit.jupiter.api.AfterAll;
+import ch.martinelli.oss.testcontainers.mailpit.MailpitContainer;
+import org.assertj.core.api.Assertions;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import skydrinker.testcontainers.mailcatcher.MailCatcherContainer;
 
+import java.time.Duration;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static ch.martinelli.oss.registration.db.tables.EventRegistration.EVENT_REGISTRATION;
+import static ch.martinelli.oss.registration.db.tables.RegistrationEmail.REGISTRATION_EMAIL;
+import static ch.martinelli.oss.registration.db.tables.RegistrationEmailPerson.REGISTRATION_EMAIL_PERSON;
+import static ch.martinelli.oss.testcontainers.mailpit.assertions.MailpitAssertions.assertThat;
 
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 class RegistrationServiceTest {
 
-    @Container
-    static final MailCatcherContainer mailcatcherContainer = new MailCatcherContainer();
+    @Autowired
+    private MailpitContainer mailpitContainer;
 
     @Autowired
     private RegistrationService registrationService;
@@ -33,26 +35,60 @@ class RegistrationServiceTest {
     @Autowired
     private EventRegistrationRepository eventRegistrationRepository;
 
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        mailcatcherContainer.start();
-
-        registry.add("spring.mail.host", mailcatcherContainer::getHost);
-        registry.add("spring.mail.port", mailcatcherContainer::getSmtpPort);
-        registry.add("spring.mail.username", () -> "test@example.com");
-        registry.add("spring.mail.password", () -> "pass");
-        registry.add("registration.public.address", () -> "https://anmeldungen.tverlach.ch");
-    }
-
-    @AfterAll
-    static void afterAll() {
-        mailcatcherContainer.stop();
-    }
+    @Autowired
+    private DSLContext dslContext;
 
     @BeforeEach
     void setUp() {
         // Clear email container before each test
-        mailcatcherContainer.getAllEmails();
+        mailpitContainer.getClient().deleteAllMessages();
+
+        // Clean up event registrations for registration 3 (shared by multiple tests)
+        // This ensures test isolation for person 2 with events 4 and 5
+        dslContext.deleteFrom(EVENT_REGISTRATION)
+            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(3L))
+            .and(EVENT_REGISTRATION.PERSON_ID.eq(2L))
+            .execute();
+
+        // Clean up event registrations for registration 1, person 5 (used by detailed
+        // template test)
+        dslContext.deleteFrom(EVENT_REGISTRATION)
+            .where(EVENT_REGISTRATION.REGISTRATION_ID.eq(1L))
+            .and(EVENT_REGISTRATION.PERSON_ID.eq(5L))
+            .execute();
+
+        // Reset registered_at for registration_email records used in registration 3 tests
+        dslContext.update(REGISTRATION_EMAIL)
+            .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
+            .where(REGISTRATION_EMAIL.REGISTRATION_ID.eq(3L))
+            .execute();
+
+        // Ensure registration_email ID 2 exists (may be deleted by other tests like
+        // RegistrationEmailViewTest)
+        var exists = dslContext
+            .fetchExists(dslContext.selectFrom(REGISTRATION_EMAIL).where(REGISTRATION_EMAIL.ID.eq(2L)));
+        if (!exists) {
+            // Re-insert registration_email ID 2 and its person association
+            dslContext
+                .insertInto(REGISTRATION_EMAIL, REGISTRATION_EMAIL.ID, REGISTRATION_EMAIL.REGISTRATION_ID,
+                        REGISTRATION_EMAIL.EMAIL, REGISTRATION_EMAIL.LINK)
+                .values(2L, 1L, "cora.tesi@bivo.yt", "2226914588a24213a631dcdd475f81b6")
+                .execute();
+            dslContext
+                .insertInto(REGISTRATION_EMAIL_PERSON, REGISTRATION_EMAIL_PERSON.REGISTRATION_EMAIL_ID,
+                        REGISTRATION_EMAIL_PERSON.PERSON_ID)
+                .values(2L, 5L)
+                .execute();
+        }
+        else {
+            // Reset registered_at and sent_at for registration_email ID 2 (used by
+            // detailed template test)
+            dslContext.update(REGISTRATION_EMAIL)
+                .setNull(REGISTRATION_EMAIL.REGISTERED_AT)
+                .setNull(REGISTRATION_EMAIL.SENT_AT)
+                .where(REGISTRATION_EMAIL.ID.eq(2L))
+                .execute();
+        }
     }
 
     @Test
@@ -73,17 +109,16 @@ class RegistrationServiceTest {
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: Confirmation email should be sent
-        // Verify email content
-        var emails = mailcatcherContainer.getAllEmails();
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
-            assertThat(email.getRecipients()).contains("<barry.rodriquez@zun.mm>");
-            assertThat(email.getSubject()).isEqualTo("Registration Confirmed");
-            assertThat(email.getPlainTextBody()).contains("Thank you!");
-        });
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
+            .awaitMessageCount(1)
+            .firstMessage()
+            .hasRecipient("barry.rodriquez@zun.mm")
+            .hasSubject("Registration Confirmed")
+            .hasSnippetContaining("Thank you!");
 
         // Verify registered_at timestamp is set
         var registrationEmail = registrationEmailRepository.findById(registrationEmailId).orElseThrow();
-        assertThat(registrationEmail.getRegisteredAt()).isNotNull();
+        Assertions.assertThat(registrationEmail.getRegisteredAt()).isNotNull();
     }
 
     @Test
@@ -100,8 +135,10 @@ class RegistrationServiceTest {
 
         // First registration
         registrationService.register(registrationEmailId, initialRegistrations);
-        var emailsAfterFirst = mailcatcherContainer.getAllEmails();
-        var firstEmailCount = emailsAfterFirst.size();
+
+        // Verify registered_at is set after first registration
+        var registrationEmailAfterFirst = registrationEmailRepository.findById(registrationEmailId).orElseThrow();
+        Assertions.assertThat(registrationEmailAfterFirst.getRegisteredAt()).isNotNull();
 
         // When: Update registration (second time)
         var updatedRegistrations = Set.of(createEventRegistration(registrationId, event4Id, personId, false),
@@ -109,14 +146,14 @@ class RegistrationServiceTest {
 
         registrationService.register(registrationEmailId, updatedRegistrations);
 
-        // Then: Update confirmation email should be sent
-        var allEmails = mailcatcherContainer.getAllEmails();
-        assertThat(allEmails).hasSizeGreaterThan(firstEmailCount);
-
-        // Find the update confirmation email (should be the most recent one)
-        var updateEmail = allEmails.get(allEmails.size() - 1);
-        assertThat(updateEmail.getSubject()).isEqualTo("Registration Updated");
-        assertThat(updateEmail.getPlainTextBody()).contains("Updated!");
+        // Then: Update confirmation email should be sent (2 messages total)
+        assertThat(mailpitContainer).withTimeout(Duration.ofSeconds(30))
+            .awaitMessageCount(2)
+            .messages()
+            .filteredOnSubject("Registration Updated")
+            .hasSize(1)
+            .first()
+            .hasSnippetContaining("Updated!");
 
         // Verify event registrations were updated
         var event4Registration = eventRegistrationRepository
@@ -126,8 +163,8 @@ class RegistrationServiceTest {
             .findByRegistrationIdAndEventIdAndPersonId(registrationId, event5Id, personId)
             .orElseThrow();
 
-        assertThat(event4Registration.getRegistered()).isFalse();
-        assertThat(event5Registration.getRegistered()).isTrue();
+        Assertions.assertThat(event4Registration.getRegistered()).isFalse();
+        Assertions.assertThat(event5Registration.getRegistered()).isTrue();
     }
 
     @Test
@@ -145,33 +182,39 @@ class RegistrationServiceTest {
                 createEventRegistration(registrationId, event2Id, personId, false));
 
         // When: Register
-        registrationService.register(registrationEmailId, eventRegistrations);
+        var registered = registrationService.register(registrationEmailId, eventRegistrations);
 
-        // Then: Check email with all placeholders replaced
-        var emails = mailcatcherContainer.getAllEmails();
-        assertThat(emails).hasSizeGreaterThanOrEqualTo(1).anySatisfy(email -> {
-            assertThat(email.getSubject()).isEqualTo("Registration Confirmed");
-            var body = email.getPlainTextBody();
+        // Then: Registration should succeed
+        Assertions.assertThat(registered).as("Registration should succeed and return true").isTrue();
 
+        var allMessages = mailpitContainer.getClient().getAllMessages();
+        System.out.println("All messages:");
+        System.out.println(allMessages);
+
+        // And: Check email with all placeholders replaced
+        assertThat(mailpitContainer).awaitMessageCount(1).firstMessage().hasSubject("Registration Confirmed");
+
+        // Use client for detailed body content assertions (snippet is truncated)
+        var message = allMessages.getFirst();
+        var body = mailpitContainer.getClient().getMessagePlain(message.id());
+        Assertions.assertThat(body)
             // Check all placeholders are replaced
-            assertThat(body).contains("Cora Tesi"); // %PERSON_NAMES%
-            assertThat(body).contains("CIS 2023"); // %EVENTS%
-            assertThat(body).contains("Jugendmeisterschaft 2023"); // %EVENTS%
-            assertThat(body).contains("Ja"); // Registered for event 1
-            assertThat(body).contains("Nein"); // Not registered for event 2
-            assertThat(body).contains("01.01.2023"); // %OPEN_FROM%
-            assertThat(body).contains("28.02.2023"); // %OPEN_UNTIL%
-            assertThat(body).contains("Some remarks"); // %REMARKS%
-            assertThat(body).contains("https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6"); // %LINK%
-
+            .contains("Cora Tesi") // %PERSON_NAMES%
+            .contains("CIS 2023") // %EVENTS%
+            .contains("Jugendmeisterschaft 2023") // %EVENTS%
+            .contains("Ja") // Registered for event 1
+            .contains("Nein") // Not registered for event 2
+            .contains("01.01.2023") // %OPEN_FROM%
+            .contains("28.02.2023") // %OPEN_UNTIL%
+            .contains("Some remarks") // %REMARKS%
+            .contains("https://anmeldungen.tverlach.ch/public/2226914588a24213a631dcdd475f81b6") // %LINK%
             // Verify no placeholders remain
-            assertThat(body).doesNotContain("%PERSON_NAMES%")
-                .doesNotContain("%EVENTS%")
-                .doesNotContain("%LINK%")
-                .doesNotContain("%OPEN_FROM%")
-                .doesNotContain("%OPEN_UNTIL%")
-                .doesNotContain("%REMARKS%");
-        });
+            .doesNotContain("%PERSON_NAMES%")
+            .doesNotContain("%EVENTS%")
+            .doesNotContain("%LINK%")
+            .doesNotContain("%OPEN_FROM%")
+            .doesNotContain("%OPEN_UNTIL%")
+            .doesNotContain("%REMARKS%");
     }
 
     @Test
@@ -180,18 +223,15 @@ class RegistrationServiceTest {
         var registrationEmailId = 5L;
         var eventRegistrations = Set.<EventRegistrationRecord>of();
 
-        var emailsBeforeRegister = mailcatcherContainer.getAllEmails().size();
-
         // When: Register with empty set
         registrationService.register(registrationEmailId, eventRegistrations);
 
         // Then: No email should be sent because registrations are empty
-        var emailsAfterRegister = mailcatcherContainer.getAllEmails().size();
-        assertThat(emailsAfterRegister).isEqualTo(emailsBeforeRegister);
+        assertThat(mailpitContainer).hasMessageCount(0);
 
         // And: registered_at should NOT be set
         var registrationEmail = registrationEmailRepository.findById(registrationEmailId).orElseThrow();
-        assertThat(registrationEmail.getRegisteredAt()).isNull();
+        Assertions.assertThat(registrationEmail.getRegisteredAt()).isNull();
     }
 
     private EventRegistrationRecord createEventRegistration(Long registrationId, Long eventId, Long personId,

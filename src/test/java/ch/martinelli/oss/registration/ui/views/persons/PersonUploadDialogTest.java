@@ -7,6 +7,8 @@ import com.github.mvysny.kaributesting.v10.NotificationsKt;
 import com.github.mvysny.kaributesting.v10.UploadKt;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.upload.Upload;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,10 +210,9 @@ class PersonUploadDialogTest extends KaribuTest {
         // but Apache POI throws NotOfficeXmlFileException (RuntimeException) for invalid
         // files
         var invalidContent = "This is not a valid Excel file".getBytes();
-        assertThat(org.assertj.core.api.Assertions
-            .catchThrowable(() -> UploadKt._upload(upload, "invalid.xlsx", invalidContent)))
+        assertThat(Assertions.catchThrowable(() -> UploadKt._upload(upload, "invalid.xlsx", invalidContent)))
             .isInstanceOf(java.util.concurrent.ExecutionException.class)
-            .hasCauseInstanceOf(org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException.class)
+            .hasCauseInstanceOf(NotOfficeXmlFileException.class)
             .hasMessageContaining("not a valid OOXML");
     }
 

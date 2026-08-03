@@ -7,12 +7,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.1.0</version>
     </parent>
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registration</artifactId>
-    <version>1.11.2</version>
+    <version>1.12.0</version>
 
     <name>registration</name>
     <description>Simple Event Registration App</description>
@@ -38,22 +38,22 @@
     </developers>
 
     <properties>
-        <java.version>21</java.version>
-        <vaadin.version>24.9.5</vaadin.version>
-        <jooq.version>3.20.8</jooq.version>
-        <jooq-spring.version>0.4.0</jooq-spring.version>
-        <jooq-utilities.version>1.1.2</jooq-utilities.version>
-        <vaadin-jooq.version>2.1.1</vaadin-jooq.version>
+        <java.version>25</java.version>
+        <vaadin.version>25.2.4</vaadin.version>
+        <jooq.version>3.21.6</jooq.version>
+        <jooq-spring.version>1.1.1</jooq-spring.version>
+        <jooq-utilities.version>1.1.4</jooq-utilities.version>
+        <vaadin-jooq.version>2.1.3</vaadin-jooq.version>
         <line-awesome.version>2.1.0</line-awesome.version>
-        <spring-cloud-azure-starter-active-directory.version>6.0.0</spring-cloud-azure-starter-active-directory.version>
+        <spring-cloud-azure-starter-active-directory.version>7.4.0</spring-cloud-azure-starter-active-directory.version>
 
-        <testcontainers.version>1.21.3</testcontainers.version>
-        <testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
-        <mailcatcher.version>0.9.3</mailcatcher.version>
+        <flyway-maven-plugin.version>13.1.0</flyway-maven-plugin.version>
+        <groovy-maven-plugin.version>2.1.1</groovy-maven-plugin.version>
 
         <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
-        <jacoco.version>0.8.14</jacoco.version>
-        <karibu-testing.version>2.5.0</karibu-testing.version>
+        <jacoco.version>0.8.15</jacoco.version>
+        <karibu-testing.version>2.7.2</karibu-testing.version>
+        <testcontainers-mailpit.version>1.3.1</testcontainers-mailpit.version>
         <pitest-maven.version>1.21.1</pitest-maven.version>
         <pitest-junit5-plugin.version>1.2.3</pitest-junit5-plugin.version>
 
@@ -125,13 +125,17 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.4.1</version>
+            <version>5.5.1</version>
         </dependency>
 
         <dependency>
@@ -154,6 +158,11 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -193,20 +202,20 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.skydrinker-tox</groupId>
-            <artifactId>testcontainers-mailcatcher</artifactId>
-            <version>${mailcatcher.version}</version>
+            <groupId>ch.martinelli.oss</groupId>
+            <artifactId>testcontainers-mailpit</artifactId>
+            <version>${testcontainers-mailpit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -221,21 +230,74 @@
     <build>
         <defaultGoal>spring-boot:test-run</defaultGoal>
         <plugins>
+            <!-- jOOQ Code Generation -->
             <plugin>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
-                <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <version>${groovy-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- Start the Testcontainer in the generate-sources phase -->
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>
+                                db = new org.testcontainers.postgresql.PostgreSQLContainer(project.properties.getProperty('db.image'))
+                                        .withUsername(project.properties.getProperty('db.username'))
+                                        .withPassword(project.properties.getProperty('db.password'))
+                                db.start()
+                                // After you've started the container, collect its generated
+                                // JDBC URL (which contains a random port)
+                                project.properties.setProperty('db.url', db.getJdbcUrl())
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.jooq</groupId>
-                        <artifactId>jooq-codegen</artifactId>
-                        <version>${jooq.version}</version>
+                        <groupId>org.testcontainers</groupId>
+                        <artifactId>testcontainers</artifactId>
+                        <version>${testcontainers.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.testcontainers</groupId>
-                        <artifactId>postgresql</artifactId>
+                        <artifactId>testcontainers-postgresql</artifactId>
                         <version>${testcontainers.version}</version>
                     </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <!-- Run the migration in the same phase, before jOOQ's code generation -->
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>migrate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- This URL has been set by groovy, above -->
+                            <url>${db.url}</url>
+                            <user>${db.username}</user>
+                            <password>${db.password}</password>
+                            <locations>
+                                <location>
+                                    filesystem:src/main/resources/db/migration
+                                </location>
+                            </locations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq.version}</version>
+                <dependencies>
                     <dependency>
                         <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
@@ -249,34 +311,30 @@
                 </dependencies>
                 <executions>
                     <execution>
-                        <id>generate-jooq-sources</id>
+                        <id>java-generator</id>
+                        <!-- Same phase as above, but the previous plugins have already executed, now generate the jOOQ code-->
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
-                            <database>
-                                <type>POSTGRES</type>
-                                <containerImage>${db.image}</containerImage>
-                                <username>${db.username}</username>
+                            <jdbc>
+                                <driver>org.postgresql.Driver</driver>
+                                <!-- Again, this URL has been set by groovy, above -->
+                                <url>${db.url}</url>
+                                <user>${db.username}</user>
                                 <password>${db.password}</password>
-                                <databaseName>registration</databaseName>
-                            </database>
-                            <flyway>
-                                <locations>filesystem:src/main/resources/db/migration</locations>
-                            </flyway>
-                            <jooq>
-                                <generator>
-                                    <database>
-                                        <inputSchema>public</inputSchema>
-                                        <excludes>flyway_schema_history</excludes>
-                                    </database>
-                                    <name>ch.martinelli.oss.jooq.EqualsAndHashCodeJavaGenerator</name>
-                                    <target>
-                                        <packageName>ch.martinelli.oss.registration.db</packageName>
-                                    </target>
-                                </generator>
-                            </jooq>
+                            </jdbc>
+                            <generator>
+                                <database>
+                                    <inputSchema>public</inputSchema>
+                                    <excludes>flyway_schema_history</excludes>
+                                </database>
+                                <name>ch.martinelli.oss.jooq.EqualsAndHashCodeJavaGenerator</name>
+                                <target>
+                                    <packageName>ch.martinelli.oss.registration.db</packageName>
+                                </target>
+                            </generator>
                         </configuration>
                     </execution>
                 </executions>
@@ -323,26 +381,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>me.fabriciorby</groupId>
-                        <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                        <version>1.5.1</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <reportFormat>plain</reportFormat>
-                    <consoleOutputReporter>
-                        <disable>true</disable>
-                    </consoleOutputReporter>
-                    <statelessTestsetInfoReporter
-                            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
-                    </statelessTestsetInfoReporter>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>com.jelastic</groupId>
                 <artifactId>jelastic-maven-plugin</artifactId>
                 <version>1.9.5</version>
@@ -353,18 +391,6 @@
                     <environment>registration</environment>
                     <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>${pitest-maven.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.pitest</groupId>
-                        <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>${pitest-junit5-plugin.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
