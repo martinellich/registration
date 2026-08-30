@@ -19,3 +19,8 @@ webpack.generated.js
 /types.d.ts
 
 config/secrets
+
+# Eclipse
+/.classpath
+/.project
+/.settings/

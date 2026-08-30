@@ -49,15 +49,19 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     private final String applicationVersion;
 
+    private final String environment;
+
     private H1 viewTitle;
 
     public MainLayout(SecurityContext securityContext, AuthenticationContext authenticationContext,
             AccessAnnotationChecker accessAnnotationChecker,
-            @Value("${spring.application.version}") String applicationVersion) {
+            @Value("${spring.application.version}") String applicationVersion,
+            @Value("${registration.environment}") String environment) {
         this.securityContext = securityContext;
         this.authenticationContext = authenticationContext;
         this.accessAnnotationChecker = accessAnnotationChecker;
         this.applicationVersion = applicationVersion;
+        this.environment = environment;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -72,6 +76,14 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
         addToNavbar(true, drawerToggle, viewTitle);
+
+        if (!environment.isBlank()) {
+            var environmentBadge = new Span(environment);
+            environmentBadge.setId("environment-badge");
+            environmentBadge.addClassName("environment-badge");
+            addToNavbar(true, environmentBadge);
+            addClassName("environment-" + environment.toLowerCase(Locale.ROOT));
+        }
     }
 
     private void addDrawerContent() {

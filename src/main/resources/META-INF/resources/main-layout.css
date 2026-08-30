@@ -18,3 +18,20 @@ vaadin-side-nav-item vaadin-icon {
 [slot="drawer"]:is(header, footer):is(:empty) {
   display: none;
 }
+
+/* Non-production environments (REGISTRATION_ENVIRONMENT set, see MainLayout) */
+.environment-badge {
+  background-color: #d32f2f;
+  color: white;
+  font-weight: bold;
+  letter-spacing: 2px;
+  padding: 2px 14px;
+  margin-left: var(--lumo-space-m);
+  border-radius: var(--lumo-border-radius-m);
+  white-space: nowrap;
+}
+
+vaadin-app-layout.environment-test::part(navbar) {
+  background-image: linear-gradient(0deg, rgba(211, 47, 47, 0.18), rgba(211, 47, 47, 0.18));
+  border-bottom: 3px solid #d32f2f;
+}
