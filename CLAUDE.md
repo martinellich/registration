@@ -202,9 +202,36 @@ docker build -t registration .
 docker run -p 8080:8080 registration
 ```
 
-### Jelastic (Production)
+### Fly.io + Neon
+
+The app runs on [Fly.io](https://fly.io) (org `martinelli-gmbh`, region `fra`) against a
+[Neon](https://neon.tech) PostgreSQL project `registration`:
+
+| Environment | Fly app                 | Config          | Neon branch | Deployed by                                        |
+|-------------|-------------------------|-----------------|-------------|----------------------------------------------------|
+| Production  | `tve-registration`      | `fly.toml`      | `main`      | `release.yml` on every `*.*.*` tag                 |
+| Test        | `tve-registration-test` | `fly.test.toml` | `test`      | `ci.yml` on every green push to `develop`          |
+
+The jar is built on GitHub Actions (jOOQ codegen needs Docker/Testcontainers, which the Fly
+builder does not have) and only the jar enters the image context (`.dockerignore`).
+The test build stamps the version with the commit SHA (`1.12.2-a1b2c3d`), shown in the drawer.
+Setting `REGISTRATION_ENVIRONMENT=TEST` (done in `fly.test.toml`) renders a red TEST badge.
+`REGISTRATION_MAIL_ENABLED=false` (also in `fly.test.toml`) makes `EmailSender` log mails
+instead of sending them; the test app has no `SPRING_MAIL_*` secrets.
+
+Configuration is passed as Fly secrets (`fly secrets set -a <app> KEY=value`):
+`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`,
+`SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`,
+`SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH`, `SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE`,
+`SPRING_CLOUD_AZURE_ACTIVE_DIRECTORY_PROFILE_TENANT_ID`,
+`SPRING_CLOUD_AZURE_ACTIVE_DIRECTORY_CREDENTIAL_CLIENT_ID`,
+`SPRING_CLOUD_AZURE_ACTIVE_DIRECTORY_CREDENTIAL_CLIENT_SECRET`,
+`REGISTRATION_PUBLIC_ADDRESS`.
+
+Manual deploy (needs a jar in `target/` built with `-Pproduction`):
 ```bash
-./mvnw jelastic:deploy -Djelastic.username=... -Djelastic.password=...
+fly deploy                                        # production
+fly deploy -c fly.test.toml                       # test
 ```
 
 ## Development Workflow

@@ -12,7 +12,7 @@
 
     <groupId>ch.martinelli.oss</groupId>
     <artifactId>registration</artifactId>
-    <version>1.12.1</version>
+    <version>1.13.0</version>
 
     <name>registration</name>
     <description>Simple Event Registration App</description>
@@ -39,18 +39,18 @@
 
     <properties>
         <java.version>25</java.version>
-        <vaadin.version>25.2.4</vaadin.version>
-        <jooq.version>3.21.6</jooq.version>
+        <vaadin.version>25.2.6</vaadin.version>
+        <jooq.version>3.21.7</jooq.version>
         <jooq-spring.version>1.1.1</jooq-spring.version>
         <jooq-utilities.version>1.1.4</jooq-utilities.version>
         <vaadin-jooq.version>2.1.3</vaadin-jooq.version>
         <line-awesome.version>2.1.0</line-awesome.version>
         <spring-cloud-azure-starter-active-directory.version>7.4.0</spring-cloud-azure-starter-active-directory.version>
 
-        <flyway-maven-plugin.version>13.1.0</flyway-maven-plugin.version>
+        <flyway-maven-plugin.version>13.3.0</flyway-maven-plugin.version>
         <groovy-maven-plugin.version>2.1.1</groovy-maven-plugin.version>
 
-        <spring-javaformat-maven-plugin.version>0.0.47</spring-javaformat-maven-plugin.version>
+        <spring-javaformat-maven-plugin.version>0.0.48</spring-javaformat-maven-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
         <karibu-testing.version>2.7.2</karibu-testing.version>
         <testcontainers-mailpit.version>1.3.1</testcontainers-mailpit.version>
@@ -378,18 +378,6 @@
                     <gitFlowConfig>
                         <productionBranch>main</productionBranch>
                     </gitFlowConfig>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.jelastic</groupId>
-                <artifactId>jelastic-maven-plugin</artifactId>
-                <version>1.9.5</version>
-                <configuration>
-                    <email>${jelastic.username}</email>
-                    <password>${jelastic.password}</password>
-                    <context>ROOT</context>
-                    <environment>registration</environment>
-                    <api_hoster>app.hidora.com</api_hoster>
                 </configuration>
             </plugin>
         </plugins>
