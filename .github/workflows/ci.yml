@@ -52,10 +52,14 @@ jobs:
                     BASE=$(./mvnw -B help:evaluate -Dexpression=project.version -q -DforceStdout)
                     ./mvnw -B versions:set -DnewVersion="${BASE%-SNAPSHOT}-${GITHUB_SHA::7}" -DgenerateBackupPoms=false
 
+            # The jar deployed to test must be a production build (optimized frontend
+            # bundle, no vaadin-dev); a development-mode jar refuses to start on Fly
+            # because it looks for the project folder of the build runner
             -   name: Maven Build, Test, and Sonar
-                run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=martinellich_registration
+                run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage$PROFILES -Dsonar.projectKey=martinellich_registration
                 env:
                     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                    PROFILES: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' && ',production' || '' }}
 
             # Handed to deploy-test, which deploys exactly the jar that was verified
             # here (.dockerignore lets only this one file into the image context)
