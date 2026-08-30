@@ -29,13 +29,17 @@ public class EmailSender {
 
     private final String sender;
 
+    private final boolean mailEnabled;
+
     public EmailSender(JavaMailSender javaMailSender, DSLContext dslContext,
             @Value("${registration.public.address}") String publicAddress,
-            @Value("${spring.mail.username:jugi@tverlach.ch}") String sender) {
+            @Value("${spring.mail.username:jugi@tverlach.ch}") String sender,
+            @Value("${registration.mail.enabled}") boolean mailEnabled) {
         this.javaMailSender = javaMailSender;
         this.dslContext = dslContext;
         this.publicAddress = publicAddress;
         this.sender = sender;
+        this.mailEnabled = mailEnabled;
     }
 
     @Transactional
@@ -43,7 +47,7 @@ public class EmailSender {
             String replyTo) {
         try {
             var mailMessage = createMailMessage(registration, registrationEmail, replyTo);
-            javaMailSender.send(mailMessage);
+            send(mailMessage);
 
             log.info("Email sent to {} with RegistrationEmailId {}", registrationEmail.getEmail(),
                     registrationEmail.getRegistrationEmailId());
@@ -67,13 +71,26 @@ public class EmailSender {
             message.setReplyTo(replyTo);
             message.setSubject(subject);
             message.setText(body);
-            javaMailSender.send(message);
+            send(message);
 
             log.info("Confirmation email sent to {}", to);
         }
         catch (Exception e) {
             log.error("Failed to send confirmation email to {}", to, e);
             // Don't throw exception - we don't want to block registration if email fails
+        }
+    }
+
+    /**
+     * On non-production systems (registration.mail.enabled=false) nothing leaves the
+     * application; the message is logged instead so the workflow stays testable.
+     */
+    private void send(SimpleMailMessage message) {
+        if (mailEnabled) {
+            javaMailSender.send(message);
+        }
+        else {
+            log.info("Mail sending is disabled, not sending: {}", message);
         }
     }
 

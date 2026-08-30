@@ -9,6 +9,8 @@ primary_region = 'fra'
 [env]
   # Shows the TEST badge and recolors the header (see MainLayout)
   REGISTRATION_ENVIRONMENT = 'TEST'
+  # Test must never send mails to real recipients; EmailSender logs them instead
+  REGISTRATION_MAIL_ENABLED = 'false'
 
 [http_service]
   internal_port = 8080

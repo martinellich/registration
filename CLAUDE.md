@@ -216,6 +216,8 @@ The jar is built on GitHub Actions (jOOQ codegen needs Docker/Testcontainers, wh
 builder does not have) and only the jar enters the image context (`.dockerignore`).
 The test build stamps the version with the commit SHA (`1.12.2-a1b2c3d`), shown in the drawer.
 Setting `REGISTRATION_ENVIRONMENT=TEST` (done in `fly.test.toml`) renders a red TEST badge.
+`REGISTRATION_MAIL_ENABLED=false` (also in `fly.test.toml`) makes `EmailSender` log mails
+instead of sending them; the test app has no `SPRING_MAIL_*` secrets.
 
 Configuration is passed as Fly secrets (`fly secrets set -a <app> KEY=value`):
 `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`,
