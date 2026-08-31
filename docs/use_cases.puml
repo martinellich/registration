@@ -1,0 +1,28 @@
+@startuml Use Cases Overview
+left to right direction
+
+actor "User" as user
+actor "Administrator" as admin
+actor "Invitee" as invitee
+
+admin --|> user
+
+rectangle "Anmeldetool (registration)" {
+    usecase "UC-001\nPrepare Invitation" as UC001
+    usecase "UC-002\nSend Invitations" as UC002
+    usecase "UC-003\nRegister for Events" as UC003
+    usecase "UC-004\nTrack Event Registrations" as UC004
+    usecase "UC-005\nPlan Events" as UC005
+    usecase "UC-006\nMaintain Person Register" as UC006
+    usecase "UC-007\nImport Persons from Excel" as UC007
+}
+
+user --> UC001
+user --> UC002
+user --> UC004
+user --> UC005
+user --> UC006
+user --> UC007
+invitee --> UC003
+
+@enduml
