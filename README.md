@@ -20,8 +20,13 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
 
 ### 1. Person Management
 - Maintain a database of people (members, participants, families)
-- Store contact information (name, email, date of birth)
+- Store contact information (name, email, date of birth, member ID)
 - Mark people as active/inactive
+- Import persons from an Excel membership list: the system detects new, changed,
+  and missing members (matching by member ID, then by name), presents the changes
+  for review, and applies only the accepted ones
+- Persons with existing registrations are deactivated instead of deleted, so
+  history is preserved
 - Persons are the recipients of registration invitations
 
 ### 2. Event Management
@@ -29,13 +34,20 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
   - Title and description
   - Location
   - Date range (from/to dates)
+  - Mandatory flag: mandatory events are pre-selected on the registration form
+    and cannot be declined
+- Past events are hidden by default and can be shown on demand
 - Events are what people register for (e.g., "Summer Camp", "Saturday Training", "Tournament")
 
 ### 3. Registration Periods
-- Define registration periods by year with open/close dates
-- Select which events are available in this registration period
-- Select which persons should receive registration invitations
+- Define registration periods with a title, year, and open/close dates
+- Select which events are available in this registration period (limited to the chosen year)
+- Select which persons should receive registration invitations (active persons only)
+- Add remarks that are shown to invitees on the registration form
 - Add custom email text with registration instructions
+- Configure confirmation email templates (subject and text) for new and updated
+  registrations, with placeholders such as `%PERSON_NAMES%`, `%EVENTS%`, `%LINK%`,
+  `%OPEN_FROM%`, `%OPEN_UNTIL%`, and `%REMARKS%`
 - Track email creation and sending status
 
 ### 4. Email Invitation System (Magic Links)
@@ -44,12 +56,18 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
 - Email template includes custom text and the unique registration link
 - Track which emails have been sent and when
 - Resend capability for failed deliveries
+- Automatic confirmation emails after each registration: a "new registration"
+  template for the first submission, an "updated registration" template for later
+  changes — sent only when the submission actually changed something
 
 ### 5. Public Registration Interface
 - Recipients click their unique link and see their personal registration form
 - View all available events with descriptions, dates, and locations
-- Check/uncheck events they want to register for
+- Check/uncheck events they want to register for — per person, when one email
+  address covers several family members
+- Mandatory events are pre-selected and cannot be unchecked
 - Submit registrations (can be modified by clicking the link again)
+- After the closing date the form becomes read-only with a "registration closed" notice
 - Track registration timestamp
 
 ### 6. Registration Tracking & Reporting
@@ -70,8 +88,10 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
 ### Administrator Workflow
 
 1. **Setup Phase**
-   - Maintain list of persons (add/edit/deactivate members)
-   - Create events for the period (e.g., all training sessions for spring 2025)
+   - Maintain list of persons (add/edit/deactivate members), or import the
+     current membership list from Excel and review the detected changes
+   - Create events for the period (e.g., all training sessions for spring 2025),
+     marking events as mandatory where attendance is required
 
 2. **Registration Period Creation**
    - Create new registration (e.g., "Spring 2025")
@@ -79,6 +99,7 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
    - Select which events are available for registration
    - Select which persons should receive invitations
    - Write custom email text with instructions
+   - Optionally adjust the confirmation email templates
 
 3. **Email Campaign**
    - Click "Create Mailing" - generates unique links for each person
@@ -100,8 +121,9 @@ Instead of managing spreadsheets, phone calls, or paper forms, administrators us
 2. **Register for Events**
    - Click the link in email
    - See list of available events with all details
-   - Check boxes for events they want to attend
+   - Check boxes for events they want to attend (mandatory events are already checked)
    - Submit registration
+   - Receive a confirmation email summarizing the selections
 
 3. **Modify Registration**
    - Click the same link again to modify selections
@@ -138,11 +160,16 @@ This application is ideal for:
 
 ## Configuration
 
-The application is configured for a specific organization via `application.properties`:
+The application is configured for a specific organization via `application.properties`
+(or environment variables):
 
 ```properties
+# Base URL used in the magic links
 registration.public.address=https://anmeldungen.tverlach.ch
-registration.title=Jugi TV Erlach - Anmeldungen
+# Set to false on non-production systems to log emails instead of sending them
+registration.mail.enabled=${REGISTRATION_MAIL_ENABLED:true}
+# Renders an environment badge (e.g. TEST) in the UI when set
+registration.environment=${REGISTRATION_ENVIRONMENT:}
 ```
 
 This makes the system customizable for different organizations while using the same codebase.
@@ -150,6 +177,10 @@ This makes the system customizable for different organizations while using the s
 ## Development & Deployment
 
 See [CLAUDE.md](CLAUDE.md) for detailed technical documentation including build commands, architecture, and development guidelines.
+
+Functional documentation lives in [docs/](docs/): the use case diagram
+([use_cases.puml](docs/use_cases.puml)), one specification per use case in
+[docs/use_cases/](docs/use_cases/), and the [entity model](docs/entity_model.md).
 
 ## License
 
